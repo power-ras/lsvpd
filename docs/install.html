@@ -1,0 +1,268 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" /><title>Linux lsvpd installation notes</title><meta name="generator" content="DocBook XSL Stylesheets V1.68.1" /></head><body><div class="article" lang="en" xml:lang="en"><div class="titlepage"><div><div><h1 class="title"><a id="id2406438"></a>Linux lsvpd installation notes</h1></div><div><div class="author"><h3 class="author"><span class="firstname">Eric</span> <span class="surname">Munson</span></h3><code class="email">&lt;<a href="mailto:ebmunson@us.ibm.com">ebmunson@us.ibm.com</a>&gt;</code></div></div><div><p class="copyright">Copyright © 2003, 2004, 2005, 2006 IBM Corporation</p></div></div><hr /></div><div class="toc"><p><b>Table of Contents</b></p><dl><dt><span class="section"><a href="#id2489303">1. Introduction</a></span></dt><dt><span class="section"><a href="#basics">2. Basic Installation Instructions</a></span></dt><dd><dl><dt><span class="section"><a href="#id2451746">2.1. Basic Requirements</a></span></dt><dt><span class="section"><a href="#id2451787">2.2. Installing Binary Packages</a></span></dt><dt><span class="section"><a href="#id2451848">2.3. Installing From Source</a></span></dt><dd><dl><dt><span class="section"><a href="#id2451941">2.3.1. Compile-time software dependencies</a></span></dt></dl></dd></dl></dd><dt><span class="section"><a href="#id2452010">3. Runtime software dependencies</a></span></dt><dd><dl><dt><span class="section"><a href="#core">3.1. Core</a></span></dt><dt><span class="section"><a href="#id2451123">3.2. Recommended</a></span></dt><dd><dl><dt><span class="section"><a href="#id2451140">3.2.1. sg3_utils on Linux 2.4</a></span></dt></dl></dd><dt><span class="section"><a href="#id2498701">3.3. Suggested</a></span></dt><dd><dl><dt><span class="section"><a href="#id2498706">3.3.1. dmidecode</a></span></dt></dl></dd></dl></dd><dt><span class="section"><a href="#id2498728">4. Filesystem dependencies</a></span></dt><dd><dl><dt><span class="section"><a href="#id2498734">4.1. /var</a></span></dt><dt><span class="section"><a href="#id2498758">4.2. sysfs</a></span></dt></dl></dd><dt><span class="section"><a href="#id2498783">5. Kernel dependencies</a></span></dt><dd><dl><dt><span class="section"><a href="#id2498789">5.1. Adapter Matching</a></span></dt><dd><dl><dt><span class="section"><a href="#id2498795">5.1.1. Linux 2.6 and sysfs</a></span></dt><dt><span class="section"><a href="#id2498833">5.1.2. Linux 2.4</a></span></dt></dl></dd></dl></dd><dt><span class="section"><a href="#id2499036">6. Legal Statement</a></span></dt></dl></div><div class="section" lang="en" xml:lang="en"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a id="id2489303"></a>1. Introduction</h2></div></div></div><p>
+      The Linux <span><strong class="command">lsvpd</strong></span> package is a partial
+      reimplementation, for <span class="trademark">Linux</span>®, of some <span class="trademark">AIX</span>® hardware inventory and
+      configuration commands.  The focus is on providing some of the
+      same serviceability features when running Linux on <span class="trademark">IBM</span>® <span class="trademark">pSeries</span>® hardware as is provided
+	by AIX.  The main function is to list Vital Product Data (VPD)
+	about hardware components, including systems, adapters and
+	devices, in a variety of ways.
+    </p><p>
+      This documentation contains installations notes for the Linux
+      <span><strong class="command">lsvpd</strong></span> package.  The focus is on making
+      packagers and administrators aware of dependencies.
+    </p></div><div class="section" lang="en" xml:lang="en"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a id="basics"></a>2. Basic Installation Instructions</h2></div></div></div><div class="section" lang="en" xml:lang="en"><div class="titlepage"><div><div><h3 class="title"><a id="id2451746"></a>2.1. Basic Requirements</h3></div></div></div><p>
+	Linux <span><strong class="command">lsvpd</strong></span> was originally written for IBM
+	pSeries systems running the Linux 2.4 kernel (or newer).
+	However, recent versions provide almost full functionality on
+	other architectures by using features provided by the Linux
+	2.6 kernel.
+      </p><p>
+	Therefore, <span><strong class="command">lsvpd</strong></span> provides <span class="emphasis"><em>little
+	or no functionality</em></span> on
+	<span class="emphasis"><em>non-pSeries</em></span> systems when running
+	<span class="emphasis"><em>Linux &lt;= 2.4</em></span>.
+      </p></div><div class="section" lang="en" xml:lang="en"><div class="titlepage"><div><div><h3 class="title"><a id="id2451787"></a>2.2. Installing Binary Packages</h3></div></div></div><p>
+	RPM and DEB packages are built for systems where they can be
+	tested.
+      </p><p>
+	The RPM packages are designed to work with the Red Hat and
+	SUSE distributions, but might work with others.  The RPM
+	package does <span class="emphasis"><em>not</em></span> initialise the database
+	at installation time.  Database initialisation is done at the
+	next boot, or possibly by a <span><strong class="command">cron(8)</strong></span> job.
+	See <span><strong class="command">rpm(8)</strong></span> for details of how to install
+	RPM packages.
+      </p><p>
+	The DEB packages will hopefully run on Debian stable systems,
+	although this is not generally tested.  The database is
+	initialised by the post-install script in the DEB packages.
+	It is also rebuilt on reboot.  See <span><strong class="command">dpkg(8)</strong></span>
+	or <span><strong class="command">apt-get(8)</strong></span> for details of how to install
+	DEB packages.
+      </p><p>
+	In all cases, see the details below to find out what will and
+	won't work, depending on kernel version, architecture and
+	availability of other software.
+      </p></div><div class="section" lang="en" xml:lang="en"><div class="titlepage"><div><div><h3 class="title"><a id="id2451848"></a>2.3. Installing From Source</h3></div></div></div><p>
+	Binary executables, generated scripts, etc. can be built by
+	running:
+
+	</p><pre class="screen">
+	  make
+	</pre><p>
+
+	Most things can then be installed by running:
+
+	</p><pre class="screen">
+	  make install
+	</pre><p>
+
+	These things are <span class="emphasis"><em>not</em></span> installed include:
+
+	</p><div class="itemizedlist"><ul type="disc"><li>
+	      General documentation (although
+	      <span><strong class="command">man(1)</strong></span> pages are installed).
+	    </li><li>
+	      Init script(s).  This is done differently on different
+	      systems.  The recommended init script is in
+	      <code class="filename">debian/init.d</code>.
+	    </li><li>
+	      <span><strong class="command">cron(8)</strong></span> job(s).
+	      <code class="filename">lsvpd.cron.daily</code> is generated
+	      during the <code class="filename">make</code> process.
+	    </li></ul></div><p>
+      </p><p>
+	Note that there is no <code class="filename">configure</code> script.
+      </p><div class="section" lang="en" xml:lang="en"><div class="titlepage"><div><div><h4 class="title"><a id="id2451941"></a>2.3.1. Compile-time software dependencies</h4></div></div></div><div class="section" lang="en" xml:lang="en"><div class="titlepage"><div><div><h5 class="title"><a id="sg3"></a>2.3.1.1. libsgutils.a</h5></div></div></div><p>
+	    <code class="filename">libsgutils.a</code> has been part of the
+	    <span><strong class="command"><a href="http://www.torque.net/sg/" target="_top"><span><strong class="command">sg3_utils</strong></span></a></strong></span> 
+	    package since (about) version 1.09.  This library is used
+	    to retrieve VPD from SCSI devices.  Static linking is used
+	    to avoid a runtime dependency.
+	  </p><p>
+	    Currently none of the distributions' packages contain
+	    <code class="filename">libsgutils.a</code> (although SLES-10 may
+	    include it).  The <span><strong class="command">sg3_utils</strong></span> site has a
+	    source archive, a source RPM package, and a binary RPM
+	    package for <code class="filename">i386</code>.
+	  </p></div></div></div></div><div class="section" lang="en" xml:lang="en"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a id="id2452010"></a>3. Runtime software dependencies</h2></div></div></div><div class="section" lang="en" xml:lang="en"><div class="titlepage"><div><div><h3 class="title"><a id="core"></a>3.1. Core</h3></div></div></div><div class="itemizedlist"><ul type="disc"><li>
+	    Linux 2.4 kernel or more recent.
+	  </li><li>
+	    <code class="filename">/bin/bash</code> (version &gt;= 2)
+	  </li><li><p>
+	    Standard Linux commands:
+	  </p><div class="itemizedlist"><ul type="circle"><li><span><strong class="command">cat</strong></span></li><li><span><strong class="command">cp</strong></span></li><li><span><strong class="command">date</strong></span></li><li><span><strong class="command">dd</strong></span></li><li><span><strong class="command">find</strong></span></li><li><span><strong class="command">grep</strong></span></li><li><span><strong class="command">ls</strong></span></li><li><span><strong class="command">mkdir</strong></span></li><li><span><strong class="command">mv</strong></span></li><li><span><strong class="command">rm</strong></span></li><li><span><strong class="command">sed</strong></span></li><li><span><strong class="command">sort</strong></span></li><li><span><strong class="command">uname</strong></span></li></ul></div><p>
+	    Of these, the FHS (Filesystem Hierarchy Standard) requires
+	    all but <span><strong class="command">find</strong></span>, <span><strong class="command">grep</strong></span> and
+	    <span><strong class="command">sort</strong></span> to reside in
+	    <code class="filename">/bin</code>.  In practice, most distributions
+	    (including Red Hat and SuSE, but not Debian (for
+	    <span><strong class="command">sort</strong></span>)) also have <span><strong class="command">grep</strong></span>
+	    and <span><strong class="command">sort</strong></span> in <code class="filename">/bin</code>.
+	  </p><p>
+	    Therefore, given the requirement for
+	    <span><strong class="command">find</strong></span>, there are two possible scenarios:
+	    </p><div class="itemizedlist"><ul type="circle"><li>
+		  The <code class="filename">/usr</code> filesystem is available,
+		  so <code class="filename">/usr/bin/find</code> exists.
+		</li><li>
+		  A dependency on <span><strong class="command">busybox</strong></span> is added,
+		  and a link called <code class="filename">/lib/lsvpd/find</code>
+		  is made that points to <span><strong class="command">busybox</strong></span>.
+		</li></ul></div><p>
+
+	    Under Debian, similar requirements exist to ensure the
+	    availability of <span><strong class="command">sort</strong></span>.
+	  </p><p>
+	    In the long term, the best choice seems to be to depend on
+	    <span><strong class="command">busybox</strong></span>.  This involves monitoring the
+	    options available to the <span><strong class="command">busybox</strong></span>
+	    command implementations, since <span><strong class="command">busybox</strong></span>
+	    doesn't generally implement a full range of (either
+	    POSIX-compliant or GNU-compatible) options.  Commands
+	    should only use options that are available in
+	    <span><strong class="command">busybox</strong></span>'s <span><strong class="command">find</strong></span>
+	    command.
+	  </p></li></ul></div></div><div class="section" lang="en" xml:lang="en"><div class="titlepage"><div><div><h3 class="title"><a id="id2451123"></a>3.2. Recommended</h3></div></div></div><p>
+	This section lists and explains dependencies that help
+	<span><strong class="command">lsvpd</strong></span> provide useful functionality, and
+	therefore more information.
+      </p><div class="section" lang="en" xml:lang="en"><div class="titlepage"><div><div><h4 class="title"><a id="id2451140"></a>3.2.1. sg3_utils on Linux 2.4</h4></div></div></div><p>
+	  Under Linux 2.4 <span><strong class="command">lsvpd</strong></span> uses the
+	  <span><strong class="command">sg_map</strong></span> command from the
+	  <span><strong class="command">sg3_utils</strong></span> package to list SCSI devices.
+	  <span><strong class="command">lsvpd</strong></span> used to also use the
+	  <span><strong class="command">sg_inq</strong></span> command to retrieve VPD, but no
+	  longer does so.  Without the <span><strong class="command">sg_map</strong></span>, no
+	  SCSI devices will be listed by <span><strong class="command">lsvpd</strong></span>
+	  under Linux 2.4.
+	</p><p>
+	  The various distributions currently handle
+	  <span><strong class="command">sg3_utils</strong></span> in different ways:
+	  </p><div class="itemizedlist"><ul type="disc"><li>
+		SuSE integrate the commands from
+		<span><strong class="command">sg3_utils</strong></span> into their
+		<span><strong class="command">scsi</strong></span> package.
+	      </li><li>
+		Recent version of RHEL ship
+		<span><strong class="command">sg3_utils</strong></span>, but older version may
+		not.
+	      </li><li>
+		Debian has an <span><strong class="command">sg3-utils</strong></span> package.
+	      </li></ul></div><p>
+	</p><p>
+	  Note that the standard packages install
+	  <span><strong class="command">sg_map</strong></span> in <code class="filename">/usr/bin</code>,
+	  so the issues discussed in <a href="#core" title="3.1.&#xA0;Core">Section 3.1, “Core”</a> are
+	  relevant.  In this case, <span><strong class="command">sg_map</strong></span> may be
+	  copied into <code class="filename">/lib/lsvpd</code> at installation
+	  time if operation without a <code class="filename">/usr</code>
+	  filesystem is required.
+	</p><p>
+	  See <a href="#sg3" title="2.3.1.1.&#xA0;libsgutils.a">Section 2.3.1.1, “libsgutils.a”</a> for more details about
+	  <span><strong class="command">sg3_utils</strong></span>.
+	</p></div></div><div class="section" lang="en" xml:lang="en"><div class="titlepage"><div><div><h3 class="title"><a id="id2498701"></a>3.3. Suggested</h3></div></div></div><div class="section" lang="en" xml:lang="en"><div class="titlepage"><div><div><h4 class="title"><a id="id2498706"></a>3.3.1. dmidecode</h4></div></div></div><p>
+	  On x86 machines, the <span><strong class="command">dmidecode</strong></span> command, if
+	  available, is used to retrieve certain information about the
+	  system.  Currently this is only used to get machine type/model
+	  and serial number information.
+	</p></div></div></div><div class="section" lang="en" xml:lang="en"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a id="id2498728"></a>4. Filesystem dependencies</h2></div></div></div><div class="section" lang="en" xml:lang="en"><div class="titlepage"><div><div><h3 class="title"><a id="id2498734"></a>4.1. /var</h3></div></div></div><p>
+	The current implementation requires a writable
+	<code class="filename">/var</code>.  More exactly, it needs to be able
+	to work in a directory called
+	<code class="filename">/var/lib/lsvpd</code>.
+      </p></div><div class="section" lang="en" xml:lang="en"><div class="titlepage"><div><div><h3 class="title"><a id="id2498758"></a>4.2. sysfs</h3></div></div></div><p>
+	On Linux 2.6, <code class="filename">sysfs</code> provides improved
+	functionality.  On non-pSeries systems
+	<code class="filename">sysfs</code> is required to get useful
+	functionality.
+      </p></div></div><div class="section" lang="en" xml:lang="en"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a id="id2498783"></a>5. Kernel dependencies</h2></div></div></div><div class="section" lang="en" xml:lang="en"><div class="titlepage"><div><div><h3 class="title"><a id="id2498789"></a>5.1. Adapter Matching</h3></div></div></div><div class="section" lang="en" xml:lang="en"><div class="titlepage"><div><div><h4 class="title"><a id="id2498795"></a>5.1.1. Linux 2.6 and sysfs</h4></div></div></div><p>
+	  Under Linux 2.6 recent versions of <span><strong class="command">lsvpd</strong></span>
+	  use <code class="filename">sysfs</code> to get information about
+	  adapters that allows the operating system's name for the
+	  adapter to be matched with, say, a node in the device-tree.
+	  The current implementation uses the <code class="filename">sysfs</code>
+	  <code class="filename">devspec</code> property to link to device-tree
+	  nodes.
+	</p></div><div class="section" lang="en" xml:lang="en"><div class="titlepage"><div><div><h4 class="title"><a id="id2498833"></a>5.1.2. Linux 2.4</h4></div></div></div><p>
+	  Under Linux 2.4 things are more difficult.  Various
+	  techniques are used to get PCI address information for
+	  adapters and this information is used to locate device-tree
+	  nodes to get VPD information.  However, there are some
+	  serious limitations.
+	</p><div class="section" lang="en" xml:lang="en"><div class="titlepage"><div><div><h5 class="title"><a id="id2498846"></a>5.1.2.1. PCI bus numbers and PCI domains</h5></div></div></div><p>
+	    On `bignum' pSeries machines (those with multiple PCI host
+	    buses), the kernel needs to ensure the node for each bus
+	    contains a property that contains that PCI domain.  On
+	    pSeries machines the Linux 2.4 <span><strong class="command">ppc64</strong></span>
+	    kernel behaves as follows...
+	  </p><p>
+	    PCI bus numbers can contain more than 8-bits (although not
+	    necessarily consistently) and
+	    <code class="filename">linux,phbnum</code> properties are created
+	    in the device-tree containing the top 24 bits of the bus
+	    number (and this is essentially equivalent to the
+	    2.6 PCI domain).  Older versions may create
+	    <code class="filename">linux,global-number</code> properties, or
+	    may not have the associated functionality at all.
+	  </p></div><div class="section" lang="en" xml:lang="en"><div class="titlepage"><div><div><h5 class="title"><a id="id2498889"></a>5.1.2.2. SCSI host PCI information</h5></div></div></div><p>
+	    The Linux <span><strong class="command">lsvpd</strong></span> package needs PCI bus
+	    information about adapters.  This is done by parsing
+	    information in SCSI host adapter information files, such
+	    as <code class="filename">/proc/scsi/sym53c8xx/0</code>.
+	  </p><p>
+	    Therefore, under Linux, 2.4, if information about
+	    <span class="emphasis"><em>both</em></span> a SCSI host adapters
+	    <span class="emphasis"><em>and</em></span> its associated devices is
+	    missing, this may be due to a missing or incorrect
+	    template for the SCSI host adapter.
+	  </p><p>
+	    Another possibility, under Linux 2.4 and on `bignum'
+	    machines, is that SCSI host adapter information files may
+	    only contain the bottom 8 bits of the PCI bus number.  A
+	    workaround adds additional matching using the interrupt
+	    number - this works in many cases, but not all.
+	  </p><p>
+	    Unfortunately, it is impossible to implement full,
+	    reliable matching.
+	  </p></div><div class="section" lang="en" xml:lang="en"><div class="titlepage"><div><div><h5 class="title"><a id="id2498941"></a>5.1.2.3. Ethernet adapter PCI information</h5></div></div></div><p>
+	    PCI address information for Ethernet adapters is retrieved
+	    using the <span><strong class="command">ethtool</strong></span>
+	    <span><strong class="command">ioctl</strong></span> interface.  As with methods for
+	    retrieving PCI bus information from SCSI host adapters,
+	    this interface sometimes returns an incomplete bus number,
+	    so it is impossible to implement full, reliable matching.
+	  </p></div><div class="section" lang="en" xml:lang="en"><div class="titlepage"><div><div><h5 class="title"><a id="id2498968"></a>5.1.2.4. ServerWorks /sysfs/procfs strangeness</h5></div></div></div><p>
+	    On x86 systems that use the ServerWorks IDE chip-set,
+	    information about the IDE controller in
+	    <code class="filename">sysfs</code> and <code class="filename">procfs</code>
+	    is not useful (PCI bus information can not be determined)
+	    unless the ServerWorks driver is built-in to the kernel.
+	    If the driver is built as a module, inserting it makes the
+	    appropriate information appear in
+	    <code class="filename">procfs</code>, but doesn't sufficiently
+	    reorganise <code class="filename">sysfs</code> to be totally
+	    useful.  This means that programs in the
+	    <span><strong class="command">lsvpd</strong></span> package will be unable to find
+	    information about the IDE controller and will not be able
+	    to display some information about associated devices.
+	  </p></div><div class="section" lang="en" xml:lang="en"><div class="titlepage"><div><div><h5 class="title"><a id="id2499018"></a>5.1.2.5. Summary</h5></div></div></div><p>
+	    There are problems matching the operating system name for
+	    an adapter and it's VPD.  These problems can only be
+	    solved via extensive (and, therefore, unlikely)
+	    modifications to Linux 2.4, or by running Linux 2.6.
+	  </p></div></div></div></div><div class="section" lang="en" xml:lang="en"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a id="id2499036"></a>6. Legal Statement</h2></div></div></div><div class="itemizedlist"><ul type="disc"><li>
+	  This work represents the view of the author and does not necessarily
+	  represent the view of IBM.
+	</li><li>
+	  Linux is a registered trademark of Linus Torvalds.
+	</li><li>
+	  IBM, AIX and pSeries are trademarks or registered trademarks
+	  of International Business Machines Corporation in the United
+	  States and/or other countries.
+	</li><li>
+	  Other company, product, and service names may be trademarks
+	  or service marks of others.
+	</li></ul></div></div></div></body></html>

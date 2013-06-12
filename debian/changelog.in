@@ -1,0 +1,6 @@
+lsvpd (@VERSION@-1) unstable; urgency=low
+
+  * See NEWS.
+
+ -- Eric Munson <ebmunson@us.ibm.com>  @DATE@
+ -- Brad Peters <bpeters@us.ibm.com>  @DATE@

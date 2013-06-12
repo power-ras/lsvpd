@@ -1,0 +1,26 @@
+1.6.5
+Updated glibc C header includes to new C++ standard
+
+1.6.8: bpeters - 2/10/10
+Minor update: Changed default lsvpd output to use "Size" instead 
+of "SZ" for DIMM size output.  This was done to conform to the way 
+AIX/lsvpd outputs this VPD
+
+1.6.9: bpeters - 6/4/10
+Minor update: Fixed location code discovery for storage
+devices. Previously, a loc-code was generated simply using the device
+node within the /proc/device-tree/devices file-system.  This behavior
+caused usysident to get a listing of invalid loc-codes.  This patch
+is a short-term fix, causing each port device to use the adapters
+loc-code.  Longer-term fix will be to take this loc-code and add on
+port-specific modifiers queried from the device
+
+1.6.11: suzuki - 6/10/11
+Fixed the way we find devices in /sys.  Many non-device directories
+were being identified as devices.
+
+1.7.0: suzuki - 9/10/12
+Added new tool - invscout (written by Aravinda Prasad)
+Better support for SCSI enclosures and SCSI devices
+Dynamic system firmware level from RTAS for lsmcode.
+

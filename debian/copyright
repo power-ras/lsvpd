@@ -1,0 +1,26 @@
+This package was debianized by Eric Munson ebmunson@us.ibm.com on
+Wed, 26 Sept 2007 10:21:01 -0800
+
+It was downloaded from http://linux-diag.sourceforge.net/
+
+(C) Copyright IBM Corp. 2007
+
+Written by Eric Munson <ebmunson@us.ibm.com>, Brad Peters
+<bpeters@us.ibm.com>.
+
+   These programs are free software; you can redistribute and/or modify
+   them under the terms of the GNU General Public License as published
+   by the Free Software Foundation; either version 2, or (at your option)
+   any later version.
+
+   This program is distributed in the hope that it will be useful,
+   but WITHOUT ANY WARRANTY; without even the implied warranty of
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+   GNU General Public License for more details.
+ 
+   You should have received a copy of the along with this program;
+   if not, write to the Free Software Foundation, Inc., 59 Temple Place
+   - Suite 330, Boston, MA 02111-1307, USA.
+ 
+On Debian GNU/Linux systems, the complete text of the GNU General
+Public License can be found in `/usr/share/common-licenses/GPL'.

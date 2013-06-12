@@ -1,0 +1,42 @@
+lsvpd 2.0
+
+Installation (briefly, For more detailed instructions please see ./INSTALL) :
+	# ./bootstrap.sh
+	# ./configure [--prefix=/usr/]
+	# make
+	# make install
+
+Binary Dependencies
+	zlib
+	libvpd Development package
+	librtas (on POWER based systems only)
+
+Compilation Dependencies
+	SCSI Utils Library (libsgutils.a) found in sg[3]_utils-dev 
+	 or built from source.  Some versions of the binary package will not 
+	 install sg_cmds.h.  In that case, you must build from source.
+	   http://sg.danny.cz/sg/sg3_utils.html
+	 
+	sqlite2* Base:
+	  http://rpmfind.net/linux/rpm2html/search.php?query=sqlite2
+	  or http://rpm.pbone.net/index.php3?stat=3&search=sqlite2&srodzaj=3
+
+	sqlite2-devel*:
+	  http://rpmfind.net/linux/rpm2html/search.php?query=sqlite2-devel
+	
+* Note: Though sqlite2 can be used we strongly encourage sqlite3 because of 
+improved error handling and reporting.
+
+------------------
+BUILDING RPMS
+------------------
+
+To build a tarball to feed to rpmbuild, do
+	# make dist
+
+It is necessary to specify that the target architecture is 32 bit when 
+building the rpm for this package.  
+
+As an example, we use a command similar to the following:
+
+> rpmbuild -ba --prefix=/usr --target=ppc --nodeps [PATH TO SPEC FILE]

@@ -1,0 +1,20 @@
+Source: lsvpd
+Section: unknown
+Priority: optional
+Maintainer: Eric Munson <ebmunson@us.ibm.com>
+Build-Depends: debhelper (>= 5), libdb4.3++-dev, zlib1g-dev, libc6-dev, libstdc++-dev, libvpd-dev,
+Standards-Version: 3.7.2
+
+Package: lsvpd
+Architecture: any
+Depends: ${shlibs:Depends}, ${misc:Depends}, udev
+Provides: libvpd
+Description: VPD/hardware inventory utilities for Linux.
+ The lsvpd package contains both the lsvpd, lscfg and lsmcode
+ commands. These commands, along with a boot-time scanning program
+ called vpdupdate, constitute a simple hardware inventory
+ system. The lsvpd command provides Vital Product Data (VPD) about
+ hardware components to higher-level serviceability tools. The lscfg
+ command provides a more human-readable format of the VPD, as well as
+ some system-specific information.  lsmcode lists microcode and
+ firmware levels.
