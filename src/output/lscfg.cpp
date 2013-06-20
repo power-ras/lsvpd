@@ -66,7 +66,7 @@ static vector<model_conv *> cpu_models;
 extern char *optarg;
 extern int optind, opterr, optopt;
 
-bool verbose = false, specific = false, debug = false;
+bool verbose = false, specific = false, debug = false, devFound = false;
 string devName = "", path = "";
 
 /* Preferred AIX names.  Those names
@@ -261,6 +261,7 @@ void printVPD( Component* root )
 		    contains( root->getAIXNames( ), devName ) ||
 		    (islocation = (root->getPhysicalLocation() == devName)))
 		{
+			devFound = true;
 			if( verbose )
 			{
 				cout << "  ";
@@ -889,6 +890,11 @@ int main( int argc, char** argv )
 	if( root != NULL )
 	{
 		printVPD( root );
+		if (!devFound) {
+			cout << "Device " << devName << " not found." << endl;
+			delete root;
+			return 1;
+		}
 		if( specific )
 			printSpecific( root );
 		delete root;
