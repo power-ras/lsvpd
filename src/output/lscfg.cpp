@@ -98,6 +98,7 @@ string AIXNamePrefs[MAX_AIX_NAMES] =
 	"usb*",
 	"card*",
 	"acpi*",
+	"rsxx*",
 	""
 };
 
