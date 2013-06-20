@@ -715,7 +715,7 @@ void printVPD( System* root )
 int main( int argc, char** argv )
 {
 	char opts [] = "hvVDpl:d:z:";
-	bool done = false;
+	bool done = false, listdev = false, userdb = false;
 	bool compressed = false;
 	System * root = NULL;
 	VpdRetriever* vpd = NULL;
@@ -760,11 +760,13 @@ int main( int argc, char** argv )
 				break;
 
 			case 'l':
+				listdev = true;
 				if( optarg != NULL )
 					devName = optarg;
 				break;
 
 			case 'd':
+				userdb = true;
 				if( path == "" )
 					path = optarg;
 				break;
@@ -783,6 +785,12 @@ int main( int argc, char** argv )
 				printUsage( );
 				return 0;
 		}
+	}
+
+	if (specific && (listdev || userdb || compressed)) {
+		// Unsupported combination of flags: -lp not to be used together.
+		cout << "Unsupported combination of flags: -p not supported with -l, -d, -z" << endl;
+		return 1;
 	}
 
 	if( path != "" )
