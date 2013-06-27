@@ -71,7 +71,7 @@ of the IBMinvscout is re-written from scratch using libvpd APIs.
 %{__make} install DESTDIR=$RPM_BUILD_ROOT
 
 %post
-%{_sbindir}/vpdupdate
+%{_sbindir}/vpdupdate &
 # Ignore the vpdupdate failures and enforce a success
 exit 0
 
