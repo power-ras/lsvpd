@@ -72,6 +72,8 @@ of the IBMinvscout is re-written from scratch using libvpd APIs.
 
 %post
 %{_sbindir}/vpdupdate
+# Ignore the vpdupdate failures and enforce a success
+exit 0
 
 %pre -n IBMinvscout
 # Default place for the reports
