@@ -55,8 +55,10 @@ namespace lsvpd
 	{
 		private:
 			map<int,Manufacturer*> mManus;
+			static string idsPrefix;
 
 			void fillManus( ifstream& idFile );
+			static void findIdsPrefix( );
 
 		public:
 			DeviceLookup( ifstream& idFile );
@@ -99,8 +101,8 @@ namespace lsvpd
 			 */
 			const string& getName( int manID, int devID, int subID )const;
 
-			static const string PCI_ID_FILE;
-			static const string USB_ID_FILE;
+			static string getPciIds( );
+			static string getUsbIds( );
 	};
 }
 #endif

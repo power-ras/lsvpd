@@ -69,26 +69,6 @@ invscout_LDFLAGS = -Wall
 
 AM_CXXFLAGS = -DDEST_DIR='"${exec_prefix}"' -DVPD_VERSION='"@VERSION@"'
 
-if PCI_IDS_LOC
-AM_CXXFLAGS += -DPCI_IDS='"/usr/share/pci.ids"'
-else
-if PCI_IDS_LOC2
-AM_CXXFLAGS += -DPCI_IDS='"/usr/share/hwdata/pci.ids"'
-else
-AM_CXXFLAGS += -DPCI_IDS='"/usr/share/misc/pci.ids"'
-endif
-endif
-
-if USB_IDS_LOC
-AM_CXXFLAGS += -DUSB_IDS='"/usr/share/usb.ids"'
-else
-if USB_IDS_LOC2
-AM_CXXFLAGS += -DUSB_IDS='"/usr/share/hwdata/usb.ids"'
-else
-AM_CXXFLAGS += -DUSB_IDS='"/usr/share/misc/usb.ids"'
-endif
-endif
-
 SUBDIRS = docs
 
 install-exec-hook:

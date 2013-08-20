@@ -58,12 +58,6 @@ AC_FUNC_MALLOC
 AC_FUNC_STAT
 AC_CHECK_FUNCS([memmove memset mkdir socket strdup strerror strtol uname])
 
-#*.ids location conditional.
-AM_CONDITIONAL(PCI_IDS_LOC, [test -e /usr/share/pci.ids])
-AM_CONDITIONAL(USB_IDS_LOC, [test -e /usr/share/usb.ids])
-AM_CONDITIONAL(PCI_IDS_LOC2, [test -e /usr/share/hwdata/pci.ids])
-AM_CONDITIONAL(USB_IDS_LOC2, [test -e /usr/share/hwdata/usb.ids])
-
 #finished
 AC_CONFIG_FILES([Makefile lsvpd.spec debian/changelog])
 AC_OUTPUT

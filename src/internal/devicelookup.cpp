@@ -27,6 +27,8 @@
 #include <libvpd-2/vpdexception.hpp>
 #include <libvpd-2/lsvpd.hpp>
 
+#include <sys/stat.h>
+
 /**
  * The Manufacturer object will store the id and name of a single manufacturer
  * entry from the pci.ids file.  It will also store a hash_map of devices
@@ -34,8 +36,6 @@
  */
 namespace lsvpd
 {
-	const string DeviceLookup::PCI_ID_FILE( PCI_IDS );
-	const string DeviceLookup::USB_ID_FILE( USB_IDS );
 
 	DeviceLookup::DeviceLookup( ifstream& pciID )
 	{
@@ -119,4 +119,50 @@ namespace lsvpd
 		const Device* d = m->getDevice( devID );
 		return (d->getSubDevice( subID ))->getName( );
 	}
+
+	void DeviceLookup::findIdsPrefix( )
+	{
+		/*
+		 * There are 6 potential locations for the ids files:
+		 * /usr/share, /usr/local/share, /usr/share/misc,
+		 * /usr/local/share/misc, /usr/share/hwdata,
+		 * and /usr/local/share/hwdata
+		 */
+		struct stat buf;
+
+		if ( !stat( "/usr/share/pci.ids", &buf ) )
+			DeviceLookup::idsPrefix = "/usr/share";
+		else if ( !stat( "/usr/local/share/pci.ids", &buf ) )
+			DeviceLookup::idsPrefix = "/usr/local/share";
+		else if ( !stat( "/usr/share/misc/pci.ids", &buf ) )
+			DeviceLookup::idsPrefix = "/usr/share/misc";
+		else if ( !stat( "/usr/local/share/misc/pci.ids", &buf ) )
+			DeviceLookup::idsPrefix = "/usr/local/share/misc";
+		else if ( !stat( "/usr/share/hwdata/pci.ids", &buf ) )
+			DeviceLookup::idsPrefix = "/usr/share/hwdata";
+		else if ( !stat( "/usr/local/share/hwdata/pci.ids", &buf ) )
+			DeviceLookup::idsPrefix = "/usr/local/share/hwdata";
+		else
+			/*
+			 * If we don't find the files anywhere, store a non-empty
+			 * value to avoid repeating the lookup everytime.
+			 */
+			DeviceLookup::idsPrefix = "/";
+	}
+
+	string DeviceLookup::getPciIds( )
+	{
+		if ( DeviceLookup::idsPrefix == "" )
+			DeviceLookup::findIdsPrefix( );
+		return DeviceLookup::idsPrefix + "/pci.ids";
+	}
+
+	string DeviceLookup::getUsbIds( )
+	{
+		if ( DeviceLookup::idsPrefix == "" )
+			findIdsPrefix( );
+		return DeviceLookup::idsPrefix + "/usb.ids";
+	}
+
+	string DeviceLookup::idsPrefix = "";
 }

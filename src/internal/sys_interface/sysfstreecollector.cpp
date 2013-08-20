@@ -76,7 +76,7 @@ namespace lsvpd
 		mPciTable = NULL;
 		mUsbTable = NULL;
 
-		id.open( DeviceLookup::PCI_ID_FILE.c_str( ), ios::in );
+		id.open( DeviceLookup::getPciIds( ).c_str( ), ios::in );
 		if( id )
 		{
 			mPciTable = new DeviceLookup( id );
@@ -90,7 +90,7 @@ namespace lsvpd
 				LOG_ERR );
 		}
 
-		id.open( DeviceLookup::USB_ID_FILE.c_str( ), ios::in );
+		id.open( DeviceLookup::getUsbIds( ).c_str( ), ios::in );
 		if( id )
 		{
 			mUsbTable = new DeviceLookup( id );
