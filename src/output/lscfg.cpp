@@ -841,7 +841,14 @@ int main( int argc, char** argv )
 		}
 
 		index = path.rfind( "/" );
-		env = path.substr( 0, index + 1 );
+		if(index == -1)
+		{
+			env = "./";
+		}
+		else
+		{
+			env = path.substr( 0, index + 1 );
+		}
 		db = path.substr( index + 1 );
 		try
 		{
@@ -849,13 +856,7 @@ int main( int argc, char** argv )
 		}
 		catch( exception& e )
 		{
-			string prefix( DEST_DIR );
-			cout << "Please run " << prefix;
-			if( prefix[ prefix.length( ) - 1 ] != '/' )
-			{
-				cout << "/";
-			}
-			cout << "sbin/vpdupdate before running lscfg." << endl;
+			cout << "Unable to process vpd DB " << path << ". Possibly corrupted DB" <<endl;
 			return 1;
 		}
 	}
