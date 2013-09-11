@@ -421,6 +421,16 @@ ERROR:
 		bool ok = true;
 		int i;
 
+		/*
+		 * Filter out nodes which are known to be of no interest.
+		 *
+		 * ibm,bsr2@* -> Synchronization helper in hardware.
+		 *
+		 */
+		if ( str.find("ibm,bsr2@") != std::string::npos )
+		{
+			return false;
+		}
 		i = str.length();
 		while (ok) {
 			switch (str[i]) {
