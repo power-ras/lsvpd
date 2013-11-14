@@ -1,6 +1,5 @@
 %define name lsvpd
 %define version @VERSION@
-%define invscout_version 3.0.1
 
 # Change the release number here
 %define relver	0
@@ -44,17 +43,6 @@ some system-specific information.  lsmcode lists microcode and
 firmware levels.  lsvio lists virtual devices, usually only found
 on POWER PC based systems.
 
-%package -n IBMinvscout
-Summary:	Hardware Inventory for Linux on System-P
-Version:	%{invscout_version}
-Release:	%{relver}%{?dist}
-Obsoletes:	IBMinvscout < 3.0.0
-Group:		System Environment/Base
-
-%description -n IBMinvscout
-IBMinvscout provides hardware inventory management. This version
-of the IBMinvscout is re-written from scratch using libvpd APIs.
-
 %prep
 %setup -q
 ./bootstrap.sh
@@ -75,10 +63,6 @@ of the IBMinvscout is re-written from scratch using libvpd APIs.
 # Ignore the vpdupdate failures and enforce a success
 exit 0
 
-%pre -n IBMinvscout
-# Default place for the reports
-mkdir -p /var/adm/invscout/
-
 
 %files 
 %defattr(-,root,root,-)
@@ -97,10 +81,6 @@ mkdir -p /var/adm/invscout/
 %config %{_sysconfdir}/lsvpd/cpu_mod_conv.conf
 %dir %{_sysconfdir}/lsvpd
 
-%files -n IBMinvscout
-%defattr(-,root,root,-)
-%{_sbindir}/invscout 
-%{_mandir}/man8/invscout.8.gz
 
 %changelog
 

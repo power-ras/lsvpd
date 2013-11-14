@@ -3,7 +3,7 @@ MAN_STYLE = $(STYLE_PATH)/manpages/docbook.xsl
 XHTML_STYLE = $(STYLE_PATH)/xhtml/docbook.xsl
 FOP_STYLE = $(STYLE_PATH)/fo/docbook.xsl
 
-MANPAGES = lsvpd.8 lscfg.8 lsmcode.8 lsvio.8 vpdupdate.8 invscout.8
+MANPAGES = lsvpd.8 lscfg.8 lsmcode.8 lsvio.8 vpdupdate.8
 HTMLS = install.html
 
 INSTALL = /usr/bin/install -c

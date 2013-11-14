@@ -12,7 +12,7 @@ update_h_files = src/include/device.hpp \
 
 INCLUDES = -I./src/include
 
-sbin_PROGRAMS = vpdupdate lsvpd lscfg lsvio lsmcode invscout
+sbin_PROGRAMS = vpdupdate lsvpd lscfg lsvio lsmcode
 
 vpdupdate_SOURCES = src/internal/sys_interface/devicetreecollector.cpp \
 		src/internal/sys_interface/fswalk.cpp \
@@ -43,8 +43,6 @@ lsmcode_SOURCES = src/output/lsmcode.cpp \
 		  src/internal/sys_interface/rtascollector.cpp \
 		$(update_h_files)
 
-invscout_SOURCES = src/output/invscout.cpp \
-		$(update_h_files)
 
 vpdupdate_LDADD = -lz -lstdc++ -lvpd_cxx
 if SGUTIL1
@@ -64,8 +62,6 @@ lsvio_LDADD = -lz -lstdc++ -lvpd_cxx
 lsvio_LDFLAGS = -Wall
 lsmcode_LDADD = -lz -lstdc++ -lvpd_cxx
 lsmcode_LDFLAGS = -Wall
-invscout_LDADD = -lz -lstdc++ -lvpd_cxx
-invscout_LDFLAGS = -Wall
 
 AM_CXXFLAGS = -DDEST_DIR='"${exec_prefix}"' -DVPD_VERSION='"@VERSION@"'
 
@@ -77,6 +73,6 @@ install-exec-hook:
 	install -D --mode=644 cpu_mod_conv.conf \
 		${DESTDIR}/etc/lsvpd/cpu_mod_conv.conf
 
-EXTRA_DIST = docs/lsvpd.8 docs/lscfg.8 docs/lsvio.8 docs/lsmcode.8 docs/invscout.8 \
+EXTRA_DIST = docs/lsvpd.8 docs/lscfg.8 docs/lsvio.8 docs/lsmcode.8 \
 		docs/vpdupdate.8 docs/Makefile docs/install.html \
 		bootstrap.sh scsi_templates.conf cpu_mod_conv.conf
