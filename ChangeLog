@@ -1,3 +1,7 @@
+1.7.3: Suzuki <suzuki@in.ibm.com> - 14 November 2013
+IBMinvscout: Removed from lsvpd package. Moving to a new package.
+vpdupdate: Filter ibm,bsr entries from VPD db.
+
 1.7.2: suzuki - 22/08/2013
 vpdupdate: Find the PCI/USB ids files at runtime
 lscfg: allow -z, -d with -p
