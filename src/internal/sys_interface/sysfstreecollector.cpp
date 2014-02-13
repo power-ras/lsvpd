@@ -789,6 +789,9 @@ namespace lsvpd
 	 * We don't need this in our database, as we are interested only in the default
 	 * access for the device(like, sdX, srN etc.)
 	 *
+	 * 2) Following dirs under /sys/devices/
+	 *	virtual, system, cpu, breakpoint, tracepoint, software
+	 *
 	 */
 	int SysFSTreeCollector::filterDevicePath(vector<Component*>& devs,
 					const string& parentDir, const string& devName)
@@ -797,8 +800,19 @@ namespace lsvpd
 		Component *parentDev;
 
 
-		if (parentDir == "")
-			return 1;
+		if (parentDir == "") {
+			/* Dirs under /sys/devices/ */
+			if (devName == "virtual" ||
+			    devName == "system" ||
+			    devName == "cpu" ||
+			    devName == "breakpoint" ||
+			    devName == "tracepoint" ||
+			    devName == "software")
+				return 0;
+			else
+				return 1;
+		}
+
 		parentDev = findComponent(devs, parentDir);
 
 		if (parentDev == NULL) {
@@ -897,8 +911,8 @@ namespace lsvpd
 		{
 			devPath = fullList.back();
 			fullList.pop_back();
-			/* Skip the virtual devices */
-			if (devPath == "virtual")
+
+			if (!filterDevicePath(devs, "", devPath))
 				continue;
 			curPath = "/sys/devices/" + devPath;
 			if (FSWalk::fs_isDir(curPath)) {
