@@ -26,6 +26,7 @@
 #include <libvpd-2/dataitem.hpp>
 #include <libvpd-2/system.hpp>
 #include <libvpd-2/vpdexception.hpp>
+#include <platformcollector.hpp>
 
 #include <iostream>
 #include <string>
@@ -408,6 +409,15 @@ int main( int argc, char** argv )
 	System * root = NULL;
 	VpdRetriever* vpd = NULL;
 	int index;
+
+	string platform = PlatformCollector::get_platform_name();
+
+	switch (PlatformCollector::platform_type) {
+	case PF_POWERKVM_PSERIES_GUEST:
+	case PF_ERROR:
+		cout<< "lsvpd is not supported on the " << platform << " platform" << endl;
+		return 1;
+	}
 
 	struct option longOpts [] =
 	{
