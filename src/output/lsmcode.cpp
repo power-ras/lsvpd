@@ -360,6 +360,9 @@ bool printSystem( const vector<Component*>& leaves )
 
 void printVPD( Component* root )
 {
+	string fwVersion;
+	string fwLevel;
+
 	if( debug )
 	{
 		cout << "-----------------------------" << endl;
@@ -386,16 +389,15 @@ void printVPD( Component* root )
 		}
 	}
 
-	string fwVersion = "";
-	if( root->getFirmwareVersion( ) != "" )
-		fwVersion = root->getFirmwareVersion( );
-	else if( root->getFirmwareLevel() != "" )
-		fwVersion = root->getFirmwareLevel( );
-	if( fwVersion != "" )
+	fwVersion = root->getFirmwareVersion( );
+	fwLevel = root->getFirmwareLevel( );
+	if (fwVersion != "" || fwLevel != "")
 	{
 		const vector<DataItem*> aixNames = root->getAIXNames( );
 		vector<DataItem*>::const_iterator j, stop = aixNames.end( );
 		bool report = true;
+		string fwString = "";
+
 		if (device != "")
 		{
 			/* Report only the specified device. */
@@ -415,9 +417,14 @@ void printVPD( Component* root )
 			{
 				cout << (*j)->getValue( ) << " ";
 			}
-
+			/* Construct fw string */
+			if (fwLevel != "")
+				fwString = fwLevel + " (";
+			fwString += fwVersion;
+			if (fwLevel != "")
+				fwString += ")";
 			cout << "!" << root->getModel( );
-			cout << "." << fwVersion << endl;
+			cout << "." << fwString << endl;
 		}
 	}
 
