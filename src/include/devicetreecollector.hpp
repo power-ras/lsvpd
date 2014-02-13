@@ -28,6 +28,7 @@
 #include <fswalk.hpp>
 #include <libvpd-2/component.hpp>
 #include <libvpd-2/system.hpp>
+#include <platformcollector.hpp>
 
 #include <vector>
 
@@ -36,7 +37,10 @@ namespace lsvpd
 
 
 	#define DEVTREEPATH		"/proc/device-tree"
-
+	#define DT_SYS_ML_VERSION       "/proc/device-tree/ibm,opal/firmware/ml-version"
+	#define DT_SYS_MI_VERSION       "/proc/device-tree/ibm,opal/firmware/mi-version"
+	#define DT_SYS_CL_VERSION       "/proc/device-tree/ibm,opal/firmware/git-id"
+	#define BUF_SZ                  80
 
 	/**
 	 * DeviceTreeCollector contains the logic for device discovery and VPD
@@ -53,7 +57,7 @@ namespace lsvpd
 	{
 		public:
 			string rootDir;
-
+			PlatformCollector *platform_collector;
 			DeviceTreeCollector( );
 			~DeviceTreeCollector( );
 
@@ -126,7 +130,40 @@ namespace lsvpd
 
 			string resolveClassPath( const string& path );
 
+                        /* Interface to parse platform VPD data defined in RtasCollector
+                         * and OpalCollector.
+                        */
+			void parseVPD( vector<Component*>& devs, char *Data,
+					int DataSize);
+
+                        /**
+                         * Parse a provided vpd buffer into distinct key/value pairs and
+                         * fill specified Component with these pairs.
+                         *
+                         * @param fillMe
+                         *   The Component to fill
+                         * @param buf
+                         *   The VPD buffer to parse
+                         * @return
+                         *   The number of bytes consumed from the buffer
+                         */
+			unsigned int parseVPDBuffer( Component* fillMe, char * buf);
+			void parseSysVPD( char * data, System* sys) ;
+
 		private:
+
+			void parseOpalVPD( vector<Component*>& devs, char *opalData,
+                                int opalDataSize);
+
+			unsigned int parseOpalVPDBuffer( Component* fillMe, char * buf);
+			void parseOpalSysVPD( char * data, System* sys) ;
+
+			void parseRtasVPD( vector<Component*>& devs, char *rtasData,
+                                int rtasDataSize);
+
+			unsigned int parseRtasVPDBuffer( Component* fillMe, char * buf);
+			void parseRtasSysVPD( char * data, System* sys) ;
+
 			void addSystemParms(Component *c);
 			void cpyinto(Component *dest, Component *src);
 
@@ -183,45 +220,6 @@ namespace lsvpd
 			 *   The Component to fill
 			 */
 			void fillDS( Component* fillMe );
-
-			/**
-			 * Parse a provided vpd buffer into distinct key/value pairs and
-			 * fill specified Component with these pairs.
-			 *
-			 * @param fillMe
-			 *   The Component to fill
-			 * @param buf
-			 *   The VPD buffer to parse
-			 * @return
-			 *   The number of bytes consumed from the buffer
-			 */
-			unsigned int parseVPDBuffer( Component* fillMe, char * buf );
-
-			/**
-			 * Parse the Rtas Vpd Buffer into key value pairs and set the
-			 * values in a Component.
-			 *
-			 * @param devs
-			 *   The vector of devices discovered so far.
-			 * @param rtasData
-			 *   The buffer containing the information returned by the RTAS
-			 * call
-			 * @param rtasDataSize
-			 *   The size of the rtasData buffer.
-			 */
-			void parseRtasVpd( vector<Component*>& devs, char *rtasData,
-				int rtasDataSize);
-
-			/**
-			 * Pares the System VPD RTAS entry and add the information to the
-			 * System object.
-			 *
-			 * @param data
-			 *   The RTAS VPD buffer for the System.
-			 * @param sys
-			 *   The System object.
-			 */
-			void parseSysRtas( char * data, System* sys );
 
 			FSWalk fsw;
 	};
