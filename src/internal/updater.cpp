@@ -51,7 +51,7 @@
 #include <libvpd-2/vpddbenv.hpp>
 #include <gatherer.hpp>
 #include <devicetreecollector.hpp>
-
+#include <platformcollector.hpp>
 
 using namespace lsvpd;
 using namespace std;
@@ -84,6 +84,14 @@ int main( int argc, char** argv )
 	int index = 0;
 	int rc;
 	bool limitSCSISize = false;
+	string platform = PlatformCollector::get_platform_name();
+
+	switch (PlatformCollector::platform_type) {
+	case PF_POWERKVM_PSERIES_GUEST:
+	case PF_ERROR:
+		cout<< "vpdupdate is not supported on the " << platform << endl;
+		return 1;
+	}
 
 	struct option longOpts [] =
 	{
