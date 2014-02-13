@@ -26,6 +26,7 @@
 #include <libvpd-2/dataitem.hpp>
 #include <libvpd-2/system.hpp>
 #include <libvpd-2/helper_functions.hpp>
+#include <platformcollector.hpp>
 
 #include <iostream>
 #include <cerrno>
@@ -733,6 +734,16 @@ int main( int argc, char** argv )
 		{ "zip", 1, 0, 'z' },
 		{ 0, 0, 0, 0 }
 	};
+
+	string platform = PlatformCollector::get_platform_name();
+
+	switch (PlatformCollector::platform_type) {
+	case PF_POWERKVM_PSERIES_GUEST:
+	case PF_ERROR:
+		cout<< argv[0] << " is not supported on the "
+			<< platform << endl;
+		return 1;
+	}
 
 	if (geteuid() != 0) {
 		cout << "Must be run as root!" << endl;
