@@ -5,9 +5,12 @@ update_h_files = src/include/device.hpp \
 		src/include/icollector.hpp \
 		src/include/manufacturer.hpp \
 		src/include/proccollector.hpp \
+		src/include/platformcollector.hpp \
+		src/include/opalcollector.hpp \
 		src/include/devicetreecollector.hpp \
 		src/include/subdevice.hpp \
 		src/include/rtascollector.hpp \
+		src/include/opalcollector.hpp \
 		src/include/sysfstreecollector.hpp
 
 INCLUDES = -I./src/include
@@ -15,6 +18,7 @@ INCLUDES = -I./src/include
 sbin_PROGRAMS = vpdupdate lsvpd lscfg lsvio lsmcode
 
 vpdupdate_SOURCES = src/internal/sys_interface/devicetreecollector.cpp \
+		src/internal/sys_interface/platformcollector.cpp \
 		src/internal/sys_interface/fswalk.cpp \
 		src/internal/updater.cpp \
 		src/common/lsvpd_error_handler.cpp \
@@ -28,19 +32,35 @@ vpdupdate_SOURCES = src/internal/sys_interface/devicetreecollector.cpp \
 		src/internal/sys_interface/icollector.cpp \
 		src/internal/sys_interface/sysfs_SCSI_Fill.cpp \
 		src/internal/sys_interface/rtascollector.cpp \
+		src/internal/sys_interface/opalcollector.cpp \
 		$(update_h_files)
 		
 lsvpd_SOURCES = src/output/lsvpd.cpp \
+		src/internal/sys_interface/fswalk.cpp \
+		src/internal/sys_interface/platformcollector.cpp \
+		src/internal/sys_interface/rtascollector.cpp \
+		src/internal/sys_interface/opalcollector.cpp \
 		$(update_h_files)
 		
 lscfg_SOURCES = src/output/lscfg.cpp \
+		src/internal/sys_interface/fswalk.cpp \
+		src/internal/sys_interface/platformcollector.cpp \
+		src/internal/sys_interface/rtascollector.cpp \
+		src/internal/sys_interface/opalcollector.cpp \
 		$(update_h_files)
 
 lsvio_SOURCES = src/output/lsvio.cpp \
+		src/internal/sys_interface/fswalk.cpp \
+		src/internal/sys_interface/platformcollector.cpp \
+		src/internal/sys_interface/rtascollector.cpp \
+		src/internal/sys_interface/opalcollector.cpp \
 		$(update_h_files)
 		
 lsmcode_SOURCES = src/output/lsmcode.cpp \
+		  src/internal/sys_interface/fswalk.cpp \
+		  src/internal/sys_interface/platformcollector.cpp \
 		  src/internal/sys_interface/rtascollector.cpp \
+		  src/internal/sys_interface/opalcollector.cpp \
 		$(update_h_files)
 
 
