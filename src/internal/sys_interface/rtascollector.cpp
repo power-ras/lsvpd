@@ -124,6 +124,11 @@ namespace lsvpd {
 		}
 	}
 
+	int RtasCollector::addPlatformVPD(const string& yl, char ** data)
+	{
+		rtasGetVPD(yl, data);
+	}
+
 	/**
 	 * Calls into librtas, available only on Power64 systems, and generates
 	 * a string of all available vpd data
