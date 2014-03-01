@@ -465,8 +465,11 @@ namespace lsvpd
 			return "";
 
 		i = 0;
-		while (pattern[i] != ':')
+		while ((i < pattern.length()) && (pattern[i] != ':'))
 			i++;
+
+		if (i >= pattern.length())
+			return "";
 
 		eon = i;
 		while (pattern[eon] == ',')
@@ -489,8 +492,11 @@ namespace lsvpd
 			return -1;
 
 		i = 0;
-		while (pattern[i] != ':')
+		while ((i < pattern.length()) && (pattern[i] != ':'))
 			i++;
+
+		if (i >= pattern.length())
+			return -1;
 
 		eon = i + 1;
 		while (pattern[eon] == ',')
