@@ -305,6 +305,59 @@ namespace lsvpd
 	}
 
 	/**
+	 * Parse the VPD Header in @buf
+	 *
+	 * Returns the total size of the buffer.
+	 * @fruName : Ptr to the name of the section if available.
+	 * @recordStart : Ptr in buf, where the records start.
+	 */
+	static unsigned int parseRtasVPDHeader( char *buf,
+					char **fruName, char **recordStart )
+	{
+		char *ptr, *dataEnd;
+		u32 size;
+		unsigned char type;
+		unsigned dlen;
+
+		ptr = buf;
+		memcpy(&size, ptr, 4);
+		ptr += 4;
+		dataEnd = ptr + size;
+
+		type = *(ptr++);
+
+		if (type != RTAS_VPD_TYPE)
+			goto error;
+
+		dlen = *(ptr++);
+		dlen += (*(ptr++) << 8);
+
+		if (ptr + dlen > dataEnd)
+			goto error;
+		*fruName = new char [ dlen + 1 ];
+		memset(*fruName, 0, dlen + 1);
+		memcpy(*fruName, ptr, dlen);
+
+		ptr += dlen + 3;
+
+		*recordStart = ptr;
+		return size + 4;
+error:
+		Logger log;
+		log.log("Attempting to parse unsupported/corrupted VPD header",
+						LOG_WARNING);
+		return 0;
+	}
+
+
+	unsigned int DeviceTreeCollector::parseVPDHeader( char *buf,
+								char **fruName, char **recordStart )
+	{
+		if (isPlatformRTAS())
+			return parseRtasVPDHeader(buf, fruName, recordStart);
+	}
+
+	/**
 	 * Parse VPD out of the VPD buffer and pass key/value pairs into
 	 * setVPDField
 	 */
@@ -315,51 +368,32 @@ namespace lsvpd
 		char key[ 3 ] = { '\0' };
 		char val[ 256 ]; // Each VPD field will be at most 255 bytes long
 		unsigned char length;
-		unsigned char type;
-		char * recordStart;
+		char *ptr, *end;
+		char *fruName = NULL;
 
-		memcpy( &size, buf, 4 );
-		buf += 4;
-		recordStart = buf;
+		size = parseVPDHeader(buf, &fruName, &ptr);
+		if (size == 0)
+			return size;
 
-		type = *buf;
-		buf++;
-
-		if( type == RTAS_VPD_TYPE )
-		{
-			unsigned int i;
-			/*
-			 * VPD with FRU namename, Large Resource type VPD keywords tag
-			 * The length is 4 bytes big endian...
-			 */
-			i = *buf;
-			buf++;
-			i += ((*buf) << 8);
-			buf++;
-			if( buf > recordStart + size )
-			{
-				goto ERROR;
-			}
-
-			memset( val, '\0', 256 );
-			memcpy( val, buf, i );
-			buf += i;
-
-			fillMe->mDescription.setValue( string( val ), 80, __FILE__, __LINE__ );
-
-			buf += 3;
+		if (fruName) {
+			fillMe->mDescription.setValue(string(fruName), 80,
+							__FILE__, __LINE__);
+			delete [] fruName;
 		}
+
+		end = buf + size;
+		buf = ptr;
 
 		/*
 		 * Parsing the vpd file is the same from here on out regardless of the
 		 * flag checked earlier.
 		 */
-		while( buf < recordStart + size && *buf != 0x78 && *buf != 0x79 )
+		while( buf < end && *buf != 0x78 && *buf != 0x79 )
 		{
 			memset( val, '\0', 256 );
 			memset( key, '\0', 3 );
 
-			if( buf + 3 > recordStart + size )
+			if( buf + 3 > end )
 			{
 				goto ERROR;
 			}
@@ -369,7 +403,7 @@ namespace lsvpd
 			length = buf[ 2 ];
 			buf += 3;
 
-			if( buf + length > recordStart + size )
+			if( buf + length > end )
 			{
 				goto ERROR;
 			}
@@ -379,7 +413,7 @@ namespace lsvpd
 
 			setVPDField( fillMe, key, val, __FILE__, __LINE__ );
 		}
-		return size + 4;
+		return size;
 ERROR:
 		Logger logger;
 		logger.log( "Attempting to parse corrupt VPD buffer.", LOG_WARNING );
@@ -1010,29 +1044,25 @@ ERROR:
 	void DeviceTreeCollector::parseSysRtas( char * data, System* sys )
 	{
 		u32 size = 0;
-		unsigned char type = 0, recordSize = 0;
+		unsigned char recordSize = 0;
 		char key[ 3 ] = { '\0' };
 		char val[ 256 ] = { '\0' };
-		char* recordStart;
+		char *recordStart, *end;
+		char *name = NULL;
 
-		memcpy( &size, data, 4 );
-		data += 4;
-		recordStart = data;
+		size = parseVPDHeader(data, &name, &recordStart);
+		if (size == 0)
+			return;
 
-		type = data[ 0 ];
-		data++;
-		recordSize = data[ 0 ];
-		data += 2;
-
-		if( type == RTAS_VPD_TYPE )
+		if(name)
 		{
-			memcpy( val, data, recordSize );
-			data += recordSize;
-			sys->mDescription.setValue( val, 60, __FILE__, __LINE__ );
-			memset( val, 0, 256 );
+			sys->mDescription.setValue( string(name), 60, __FILE__, __LINE__ );
+			delete [] name;
 		}
+		end = data + size;
+		data = recordStart;
 
-		while( data[ 0 ] != 0x78 && data < recordStart + size )
+		while( data < end && data[ 0 ] != 0x78 )
 		{
 			key[ 0 ] = data[ 0 ];
 			key[ 1 ] = data[ 1 ];

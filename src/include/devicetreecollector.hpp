@@ -218,6 +218,14 @@ namespace lsvpd
 			void fillDS( Component* fillMe );
 
 			/**
+			 * Parse VPD Header for the platform.
+			 * Fills *fruName with the description.
+			 * Fills *recordStart with the ptr to the beginning of
+			 * record.
+			 */ 
+			unsigned int parseVPDHeader( char *buf,
+								char **fruName, char **recordStart );
+			/**
 			 * Parse a provided vpd buffer into distinct key/value pairs and
 			 * fill specified Component with these pairs.
 			 *
