@@ -77,14 +77,14 @@ namespace lsvpd
 		if( attrIn )
 		{
 			char * strBuf;
-			strBuf = new char [ info.st_size];
+			strBuf = new char [ info.st_size + 1 ];
 			if( strBuf == NULL )
 			{
 				logger.log( string( "Out of memory." ), LOG_ERR );
 				return ret;
 			}
 
-			memset( strBuf, '\0', info.st_size);
+			memset( strBuf, '\0', info.st_size + 1 );
 
 			attrIn.read( strBuf, info.st_size );
 			ret = strBuf;
