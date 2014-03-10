@@ -31,6 +31,7 @@
 #include <sstream>
 #include <fstream>
 #include <cstring>
+#include <bitset>
 
 using namespace std;
 
@@ -143,6 +144,61 @@ out:
 		}
 
 		return size;
+	}
+	/* Convert a string to its hexDump */
+	static string hexDump(char *arr, int len)
+	{
+		stringstream ss;
+		int i = 0;
+
+		ss << "0x";
+		while(i < len)
+		{
+			unsigned long int var = arr[i];
+			i++;
+			bitset<8> set(var);
+			ss << hex << set.to_ulong();
+		}
+
+		return ss.str();
+	}
+
+	/* Check if a char array contains printable symbols */
+	static bool isPrintable(char *val, int len)
+	{
+		int i, j;
+		bool nonSpace = false;
+
+		for (i = 0; i < len;i++)
+		{
+			if (!isprint(val[i]))
+				return false;
+			if (!isspace(val[i]))
+				nonSpace = true;
+			/* Check if we have trailing 0's */
+			j = i;
+			while(++j < len && val[j] == '\0');
+			/* After index i, we have all 0s' */
+				if (j == len)
+					break;
+		}
+		return nonSpace;
+	}
+
+	/**
+	 * Sanitize a VPD value
+	 * Some records have binary data that may not be captured
+	 * as string. Convert such binary data to a string of its
+	 * hexadecimal dump.
+	 * Returns the original string it if can be represented as
+	 * a string.
+	 */
+	string ICollector::sanitizeVPDField( char *val, int len )
+	{
+		if (isPrintable(val, len))
+			return string(val);
+		else
+			return hexDump(val, len);
 	}
 
 	/* Generic field setter, allow field name to be passed in

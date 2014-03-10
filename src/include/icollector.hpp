@@ -128,6 +128,16 @@ namespace lsvpd
 				int getBinaryData( const string& path, char **data );
 
 				/**
+				 * Sanitize a VPD value
+				 * Some records have binary data that may not be captured
+				 * as string. Convert such binary data to a string of its
+				 * hexadecimal dump.
+				 * Returns the original string it if can be represented as
+				 * a string.
+				 */
+				string sanitizeVPDField( char *val, int len );
+
+				/**
 				 * Set a specific DataItem in specified Component with the
 				 * given key/value pair.
 				 *

@@ -410,6 +410,7 @@ error:
 		unsigned char length;
 		char *ptr, *end;
 		char *fruName = NULL;
+		string field;
 
 		size = parseVPDHeader(buf, &fruName, &ptr);
 		if (size == 0)
@@ -451,7 +452,8 @@ error:
 			memcpy( val, buf, length );
 			buf += length;
 
-			setVPDField( fillMe, key, val, __FILE__, __LINE__ );
+			field = sanitizeVPDField(val, length);
+			setVPDField( fillMe, key, field, __FILE__, __LINE__ );
 		}
 		return size;
 ERROR:
@@ -1156,6 +1158,7 @@ ERROR:
 		char val[ 256 ] = { '\0' };
 		char *recordStart, *end;
 		char *name = NULL;
+		string field;
 
 		size = parseVPDHeader(data, &name, &recordStart);
 		if (size == 0)
@@ -1177,7 +1180,9 @@ ERROR:
 			data += 3;
 			memset( val, 0, 256 );
 			memcpy( val, data, recordSize );
-			setVPDField( sys, key, val, __FILE__, __LINE__ );
+
+			field = sanitizeVPDField(val, recordSize);
+			setVPDField( sys, key, field, __FILE__, __LINE__ );
 			data += recordSize;
 		}
 	}
