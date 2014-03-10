@@ -7,17 +7,13 @@
  *                                                                         *
  *   See 'COPYING' for License of this code.                               *
  ***************************************************************************/
-#ifndef LSVPDRTASCOLLECTOR_H_
-#define LSVPDRTASCOLLECTOR_H_
-
 #include <libvpd-2/component.hpp>		/* For Component */
-#include <libvpd-2/system.hpp>
-#include <libvpd-2/logger.hpp>
-#include <platformcollector.hpp>
 
 #include <string>
 #include <vector>
 #include <errno.h>
+
+
 
 using namespace std;
 
@@ -46,7 +42,7 @@ namespace lsvpd
 	        unsigned int size; 		/* amount of the buffer filled in by rtas_get_vpd() */
 	};
 
-	class RtasCollector: public PlatformCollector {
+	class RtasCollector {
 
 		public:
 
@@ -62,10 +58,5 @@ namespace lsvpd
 			 *   A pointer to the address of the buffer to hold requested VPD
 			 */
 			static int rtasGetVPD(const string& yl, char** data);
-
-			int addPlatformVPD(const string& yl, char** data);
-
 	};
 }
-
-#endif /*LSVPDRTASCOLLECTOR_H_ */
