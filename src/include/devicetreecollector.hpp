@@ -46,6 +46,11 @@ namespace lsvpd
 
 	/* Location for OPAL system VPD data */
 	#define OPAL_SYS_VPD_DIR	"/proc/device-tree/vpd/"
+	/* OPAL Firmware version data */
+	#define OPAL_SYS_FW_DIR		"/proc/device-tree/ibm,opal/firmware/"
+	#define OPAL_SYS_FW_ML_FILE	"ml-version"
+	#define OPAL_SYS_FW_MI_FILE	"mi-version"
+	#define OPAL_SYS_FW_CL_FILE	"git-id"
 
 	/**
 	 * DeviceTreeCollector contains the logic for device discovery and VPD
@@ -162,6 +167,8 @@ namespace lsvpd
 			/**
 			 * OPAL Platform Handlers.
 			 */
+			void getOpalFirmwareVPD(vector<Component*>& devs);
+			void getOpalVPD(vector<Component*>& devs);
 			void getOpalSystemLocationCode( System *sys );
 			void getOpalSystemVPD( System *sys );
 

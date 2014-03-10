@@ -790,10 +790,43 @@ ERROR:
 		getRtasSystemParams( devs );
 	}
 
+	void DeviceTreeCollector::getOpalFirmwareVPD(vector<Component*>& devs)
+	{
+		ostringstream os;
+		Component *c = new Component();
+		string val;
+
+		os << OPAL_SYS_FW_DIR;
+		c->idNode.setValue( os.str( ), 100, __FILE__, __LINE__ );
+		c->deviceTreeNode.setValue( os.str( ), 100, __FILE__, __LINE__ );
+		c->mParent.setValue( "/sys/devices", 1, __FILE__, __LINE__ );
+		c->mDescription.setValue( "System Firmware", 100, __FILE__, __LINE__ );
+
+		val = getAttrValue( os.str( ), OPAL_SYS_FW_ML_FILE );
+		if (val.length() > 0)
+			setVPDField( c, string("ML"), val.substr(3), __FILE__, __LINE__ );
+
+		val = getAttrValue( os.str( ), OPAL_SYS_FW_MI_FILE );
+		if (val.length() > 0)
+			setVPDField( c, string("MI"), val.substr(3), __FILE__, __LINE__ );
+
+		val = getAttrValue( os.str( ), OPAL_SYS_FW_CL_FILE );
+		if (val.length() > 0)
+			setVPDField( c, string("CL"), val, __FILE__, __LINE__ );
+		devs.push_back( c );
+	}
+
+	void DeviceTreeCollector::getOpalVPD(vector<Component*>& devs)
+	{
+		getOpalFirmwareVPD(devs);
+	}
+
 	void DeviceTreeCollector::getPlatformVPD(vector<Component*>& devs)
 	{
 		if (isPlatformRTAS())
 			getRtasVPD( devs );
+		else if (isPlatformOPAL())
+			getOpalVPD( devs );
 	}
 
 	/**
