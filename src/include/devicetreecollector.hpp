@@ -38,6 +38,8 @@ namespace lsvpd
 
 	#define DEVTREEPATH		"/proc/device-tree"
 
+	/* RTAS Specific definitions */
+	#define RTAS_VPD_TYPE	0x82
 
 	/**
 	 * DeviceTreeCollector contains the logic for device discovery and VPD
@@ -118,6 +120,12 @@ namespace lsvpd
 			void readSources( DataItem& di, const string& devTreeNode );
 
 			/* Handlers for collecting Platform Specific Data */
+
+			/* Check whether we are on RTAS based system */
+			inline bool isPlatformRTAS()
+			{
+				return (platForm == PF_POWERVM_LPAR);
+			}
 
 			/**
 			 * Collect the platform VPD.

@@ -324,7 +324,7 @@ namespace lsvpd
 		type = *buf;
 		buf++;
 
-		if( type == 0x82 )
+		if( type == RTAS_VPD_TYPE )
 		{
 			unsigned int i;
 			/*
@@ -717,7 +717,8 @@ ERROR:
 
 	void DeviceTreeCollector::getPlatformVPD(vector<Component*>& devs)
 	{
-		getRtasVPD( devs );
+		if (isPlatformRTAS())
+			getRtasVPD( devs );
 	}
 
 	/**
@@ -967,7 +968,8 @@ ERROR:
 	 */
 	void DeviceTreeCollector::getSystemVPD( System *sys )
 	{
-		getRtasSystemVPD(sys);
+		if (isPlatformRTAS())
+			getRtasSystemVPD(sys);
 	}
 
 	/* Parses rtas and various system files for system level VPD
@@ -1021,7 +1023,7 @@ ERROR:
 		recordSize = data[ 0 ];
 		data += 2;
 
-		if( type == 0x82 )
+		if( type == RTAS_VPD_TYPE )
 		{
 			memcpy( val, data, recordSize );
 			data += recordSize;
