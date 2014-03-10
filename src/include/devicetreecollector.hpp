@@ -25,6 +25,7 @@
 #define LSVPDDEVICETREECOLLECTOR_H_
 
 #include <icollector.hpp>
+#include <platformcollector.hpp>
 #include <fswalk.hpp>
 #include <libvpd-2/component.hpp>
 #include <libvpd-2/system.hpp>
@@ -53,6 +54,8 @@ namespace lsvpd
 	{
 		public:
 			string rootDir;
+			/* Platform value */
+			platform platForm;
 
 			DeviceTreeCollector( );
 			~DeviceTreeCollector( );

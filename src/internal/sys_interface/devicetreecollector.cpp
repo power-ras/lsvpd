@@ -27,6 +27,7 @@
 
 #include <devicetreecollector.hpp>
 #include <rtascollector.hpp>
+#include <platformcollector.hpp>
 
 #include <libvpd-2/logger.hpp>
 #include <libvpd-2/lsvpd_error_codes.hpp>
@@ -51,6 +52,8 @@ namespace lsvpd
 {
 	DeviceTreeCollector::DeviceTreeCollector( )
 	{
+		PlatformCollector::get_platform();
+		platForm = PlatformCollector::platform_type;
 	}
 
 	DeviceTreeCollector::~DeviceTreeCollector( )
