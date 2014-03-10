@@ -166,38 +166,39 @@ namespace lsvpd
 		unsigned int size = 0;
 		unsigned int ret = 1;
 
-		if( rtasData != NULL && rtasDataSize > 0 ) {
-			while( size < rtasDataSize && ret > 0 )
+		if( rtasData == NULL || rtasDataSize <= 0 )
+			return;
+		while( size < rtasDataSize && ret > 0 )
+		{
+			Component* c = new Component( );
+			ret = parseVPDBuffer( c, rtasData );
+			if( ret == 0 )
 			{
-				Component* c = new Component( );
-				ret = parseVPDBuffer( c, rtasData );
-				if( ret == 0 )
-				{
-					delete c;
-					return;
-				}
-
-				rtasData += ret;
-				size += ret;
-
-				if( c->getDescription( ) == "System VPD" )
-				{
-					delete c;
-					continue;
-				}
-
-				/*
-				 * Build a uniquie device ID and deviceTreeNode
-				 */
-				ostringstream os;
-				os << "/proc/device-tree/rtas/"  << c->getPhysicalLocation( );
-
-				c->idNode.setValue( os.str( ), 100, __FILE__, __LINE__ );
-				c->deviceTreeNode.setValue( os.str( ), 100, __FILE__, __LINE__ );
-				c->mParent.setValue( "/sys/devices", 1, __FILE__, __LINE__ );
-
-				devs.push_back( c );
+				delete c;
+				return;
 			}
+
+			rtasData += ret;
+			size += ret;
+
+			/* Ignore System VPD, as it should go as System, not Component */
+			if( c->getDescription( ) == "System VPD" )
+			{
+				delete c;
+				continue;
+			}
+
+			/*
+			 * Build a uniquie device ID and deviceTreeNode
+			 */
+			ostringstream os;
+			os << "/proc/device-tree/rtas/"  << c->getPhysicalLocation( );
+
+			c->idNode.setValue( os.str( ), 100, __FILE__, __LINE__ );
+			c->deviceTreeNode.setValue( os.str( ), 100, __FILE__, __LINE__ );
+			c->mParent.setValue( "/sys/devices", 1, __FILE__, __LINE__ );
+
+			devs.push_back( c );
 		}
 	}
 
