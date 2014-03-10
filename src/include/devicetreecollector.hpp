@@ -44,6 +44,9 @@ namespace lsvpd
 	/* Opal Specific defintion */
 	#define OPAL_VPD_TYPE 0x84
 
+	/* Location for OPAL system VPD data */
+	#define OPAL_SYS_VPD_DIR	"/proc/device-tree/vpd/"
+
 	/**
 	 * DeviceTreeCollector contains the logic for device discovery and VPD
 	 * retrieval from /proc/device-tree and librtas if it is available.
@@ -155,6 +158,13 @@ namespace lsvpd
 			void getRtasVPD(vector<Component*>& devs);
 			void getRtasSystemLocationCode( System *sys );
 			void getRtasSystemVPD( System *sys );
+
+			/**
+			 * OPAL Platform Handlers.
+			 */
+			void getOpalSystemLocationCode( System *sys );
+			void getOpalSystemVPD( System *sys );
+
 
 			/**
 			 * Populate system VPD.

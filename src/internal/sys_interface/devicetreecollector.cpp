@@ -1038,6 +1038,38 @@ ERROR:
 		}
 	}
 
+	void DeviceTreeCollector::getOpalSystemLocationCode( System *sys )
+	{
+		string loc;
+		string sysPath = string (OPAL_SYS_VPD_DIR);
+
+		loc = getAttrValue(sysPath, "ibm,loc-code");
+		if (loc.length() > 0)
+			sys->mLocationCode.setValue( loc, 100, __FILE__, __LINE__ );
+	}
+
+	/**
+	 * OPAL System VPD
+	 * Opal system vpd is present in
+	 *  /proc/device-tree/vpd/ibm,vpd
+	 *
+	 * So, simply process the same
+	 */
+	void DeviceTreeCollector::getOpalSystemVPD( System *sys )
+	{
+		char *vpdData;
+		unsigned int size;
+		string sysVpd = string(OPAL_SYS_VPD_DIR) + string("/ibm,vpd");
+
+		getOpalSystemLocationCode( sys );
+
+		size = getBinaryData(sysVpd, &vpdData);
+		if (size == 0)
+			return;
+
+		parseSysVPD(vpdData, sys);
+		delete [] vpdData;
+	}
 	/**
 	 * Collect the System VPD from Platform
 	 */
@@ -1045,6 +1077,8 @@ ERROR:
 	{
 		if (isPlatformRTAS())
 			getRtasSystemVPD(sys);
+		else if (isPlatformOPAL())
+			getOpalSystemVPD(sys);
 	}
 
 	/* Parses rtas and various system files for system level VPD
