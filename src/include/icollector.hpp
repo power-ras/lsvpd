@@ -29,6 +29,11 @@
 #include <libvpd-2/component.hpp>
 #include <libvpd-2/system.hpp>
 
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <fcntl.h>
+#include <unistd.h>
+
 using namespace std;
 
 namespace lsvpd
@@ -113,6 +118,14 @@ namespace lsvpd
 			protected:
 				string getAttrValue( const string& path,
 					const string& attrName );
+
+				/**
+				 * Read a binary blob from given @path and store it in *data.
+				 * Allocates enough memory @*data, which has to be freed by the
+				 * caller.
+				 * @return : Size of the blob read.
+				 */
+				int getBinaryData( const string& path, char **data );
 
 				/**
 				 * Set a specific DataItem in specified Component with the
