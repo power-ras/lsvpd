@@ -27,7 +27,6 @@
 
 #include <devicetreecollector.hpp>
 #include <rtascollector.hpp>
-#include <opalcollector.hpp>
 
 #include <libvpd-2/logger.hpp>
 #include <libvpd-2/lsvpd_error_codes.hpp>
@@ -36,18 +35,11 @@
 #include <libvpd-2/Source.hpp>
 #include <libvpd-2/vpdexception.hpp>
 
-#include <stdio.h>
-#include <sys/types.h>
 #include <sys/stat.h>
+#include <sys/types.h>
 #include <fcntl.h>
-#include <string.h>
-#include <stdlib.h>
-#include <stdint.h>
+#include <string>
 #include <unistd.h>
-#include <vector>
-#include <fstream>
-#include <dirent.h>
-#include <errno.h>
 #include <cstdlib>
 #include <cstring>
 #include <cerrno>
@@ -75,11 +67,6 @@ namespace lsvpd
 		struct stat statbuf;
 		bool ret;
 
-		/* Assign the right platform collector*/
-		PlatformCollector::get_collector(&platform_collector);
-		if(!platform_collector)
-			ret = false;
-
 		if (stat(path_t.c_str(), &statbuf) != 0)
 			ret = false;
 		else {
@@ -87,6 +74,7 @@ namespace lsvpd
 			fsw = FSWalk(rootDir);
 			ret = true;
 		}
+
 		return ret;
 	}
 
@@ -95,176 +83,11 @@ namespace lsvpd
 		return setup("/proc/device-tree");
 	}
 
-	void DeviceTreeCollector::parseVPD( vector<Component*>& devs, char *Data,
-				int DataSize)
-	{
-
-		if( PlatformCollector::platform_type == PF_POWERVM_LPAR )
-			parseRtasVPD(devs, Data, DataSize);
-		else if ( PlatformCollector::platform_type == PF_POWERKVM_HOST )
-			parseOpalVPD(devs, Data, DataSize);
-	}
-
-	unsigned int DeviceTreeCollector::parseVPDBuffer( Component* fillMe, char * buf)
-	{
-
-		if( PlatformCollector::platform_type == PF_POWERVM_LPAR )
-			return parseRtasVPDBuffer( fillMe, buf );
-		else if ( PlatformCollector::platform_type == PF_POWERKVM_HOST )
-			return parseOpalVPDBuffer( fillMe, buf );
-
-	}
-
-	void DeviceTreeCollector::parseSysVPD( char * data, System* sys)
-	{
-		if( PlatformCollector::platform_type == PF_POWERVM_LPAR )
-			parseRtasSysVPD( data, sys );
-		else if ( PlatformCollector::platform_type == PF_POWERKVM_HOST)
-			parseOpalSysVPD( data, sys);
-	}
-
-	/**
-	 * Parse VPD out of the VPD buffer and pass key/value pairs into
-	 * ICollector::setVPDField
-	 */
-
-	void DeviceTreeCollector::parseOpalVPD(vector<Component*>& devs,
-					       char *opalData, int opalDataSize)
-	{
-		unsigned int size = 0;
-		unsigned int ret = 1;
-		ostringstream os;
-		string buf,line;
-		ifstream sys_ml_file (DT_SYS_ML_VERSION);
-		ifstream sys_mi_file (DT_SYS_MI_VERSION);
-		ifstream sys_cl_file (DT_SYS_CL_VERSION);
-
-		os <<"/proc/device-tree/ibm,opal/firmware";
-		Component *c = new Component( );
-		c->idNode.setValue( os.str( ), 100, __FILE__, __LINE__ );
-		c->deviceTreeNode.setValue( os.str( ), 100, __FILE__, __LINE__ );
-		c->mParent.setValue( "/sys/devices", 1, __FILE__, __LINE__ );
-		c->mDescription.setValue("System Firmware", 80, __FILE__, __LINE__ );
-		if (sys_ml_file.is_open()) {
-			while (getline(sys_ml_file, line))
-				buf.append(line);
-			sys_ml_file.close();
-			setVPDField( c, "ML", buf.substr(3, buf.length()), __FILE__, __LINE__ );
-		}
-		buf.clear();
-		line.clear();
-
-		if (sys_mi_file.is_open()) {
-			while (getline(sys_mi_file, line))
-				buf.append(line);
-			sys_mi_file.close();
-			setVPDField( c, "MI", buf.substr(3,buf.length()), __FILE__, __LINE__ );
-		}
-		buf.clear();
-		line.clear();
-
-		if (sys_cl_file.is_open()) {
-			while (getline(sys_cl_file, line))
-				buf.append(line);
-			sys_cl_file.close();
-			setVPDField( c, "CL", buf, __FILE__, __LINE__ );
-		}
-
-
-		devs.push_back( c );
-
-		if( opalData != NULL && opalDataSize > 0 ) {
-			while( size < opalDataSize && ret > 0 )
-			{
-			       while ((*opalData) != '#' && *(opalData + 1) != 0x84 && size < opalDataSize ) {
-					size++;
-					opalData++;
-				}
-				Component* c = new Component( );
-
-				ret = parseOpalVPDBuffer( c, opalData );
-				if( ret == 0 )
-				{
-					delete c;
-					return;
-				}
-
-				opalData += ret;
-				size += ret;
-
-				if( c->getDescription( ) == "System VPD" )
-				{
-					delete c;
-					continue;
-				}
-
-				/*
-				 * Build a uniquie device ID and deviceTreeNode
-				 */
-				ostringstream os;
-				os << "/proc/device-tree/vpd/"  << c->getPhysicalLocation( );
-				c->idNode.setValue( os.str( ), 100, __FILE__, __LINE__ );
-				c->deviceTreeNode.setValue( os.str( ), 100, __FILE__, __LINE__ );
-				c->mParent.setValue( "/sys/devices", 1, __FILE__, __LINE__ );
-
-				devs.push_back( c );
-
-			}
-		}
-	}
-
-	/**
-	 * Take the RTAS VPD collected from the rtasGetVPD call, parse the
-	 * output for new Components, fill the new Components with the VPD
-	 * provided and add the new Components to the Component vector.
-	 */
-	void DeviceTreeCollector::parseRtasVPD( vector<Component*>& devs,
-						char *rtasData, int rtasDataSize)
-	{
-		unsigned int size = 0;
-		unsigned int ret = 1;
-
-		if( rtasData != NULL && rtasDataSize > 0 ) {
-			while( size < rtasDataSize && ret > 0 )
-			{
-				Component* c = new Component( );
-				ret = parseRtasVPDBuffer( c, rtasData );
-
-				if( ret == 0 )
-				{
-					delete c;
-					return;
-				}
-
-				rtasData += ret;
-				size += ret;
-
-				if( c->getDescription( ) == "System VPD" )
-				{
-					delete c;
-					continue;
-				}
-
-				/*
-				 * Build a uniquie device ID and deviceTreeNode
-				 */
-				ostringstream os;
-				os << "/proc/device-tree/rtas/"  << c->getPhysicalLocation( );
-
-				c->idNode.setValue( os.str( ), 100, __FILE__, __LINE__ );
-				c->deviceTreeNode.setValue( os.str( ), 100, __FILE__, __LINE__ );
-				c->mParent.setValue( "/sys/devices", 1, __FILE__, __LINE__ );
-
-				devs.push_back( c );
-			}
-		}
-	}
-
 	/**
 	 * Uses the highest preference Source to fill this DataItem
 	 */
 	void DeviceTreeCollector::readSources( DataItem& di,
-					       const string& devTreeNode )
+		const string& devTreeNode )
 	{
 		const Source * s = di.getFirstSource( );
 		if( s != NULL && s ->getType( ) == SRC_DEVICETREE )
@@ -318,8 +141,6 @@ namespace lsvpd
 
 	void DeviceTreeCollector::addSystemParms(Component *c)
 	{
-		if( PlatformCollector::platform_type != PF_POWERVM_LPAR )
-			return;
 		string s = collectEitherSystemParm(37, 18);
 		if (!s.empty()) {
 			c->n5.setValue(s, INIT_PREF_LEVEL, __FILE__, __LINE__);
@@ -328,6 +149,52 @@ namespace lsvpd
 		s = collectEitherSystemParm(38, 19);
 		if (!s.empty()) {
 			c->n6.setValue(s, INIT_PREF_LEVEL, __FILE__, __LINE__);
+		}
+	}
+
+	/**
+	 * Take the RTAS VPD collected from the rtasGetVPD call, parse the
+	 * output for new Components, fill the new Components with the VPD
+	 * provided and add the new Components to the Component vector.
+	 */
+	void DeviceTreeCollector::parseRtasVpd( vector<Component*>& devs,
+		char *rtasData, int rtasDataSize)
+	{
+		unsigned int size = 0;
+		unsigned int ret = 1;
+
+		if( rtasData != NULL && rtasDataSize > 0 ) {
+			while( size < rtasDataSize && ret > 0 )
+			{
+				Component* c = new Component( );
+				ret = parseVPDBuffer( c, rtasData );
+				if( ret == 0 )
+				{
+					delete c;
+					return;
+				}
+
+				rtasData += ret;
+				size += ret;
+
+				if( c->getDescription( ) == "System VPD" )
+				{
+					delete c;
+					continue;
+				}
+
+				/*
+				 * Build a uniquie device ID and deviceTreeNode
+				 */
+				ostringstream os;
+				os << "/proc/device-tree/rtas/"  << c->getPhysicalLocation( );
+
+				c->idNode.setValue( os.str( ), 100, __FILE__, __LINE__ );
+				c->deviceTreeNode.setValue( os.str( ), 100, __FILE__, __LINE__ );
+				c->mParent.setValue( "/sys/devices", 1, __FILE__, __LINE__ );
+
+				devs.push_back( c );
+			}
 		}
 	}
 
@@ -424,8 +291,7 @@ namespace lsvpd
 		struct stat info;
 		ostringstream os;
 		int fd, input = 0;
-		if( PlatformCollector::platform_type == PF_POWERKVM_HOST )
-			return;
+
 		os << fillMe->deviceTreeNode.dataValue << "/ibm,vpd";
 		fd = open( os.str( ).c_str( ), O_RDONLY );
 		if( fd < 0 )
@@ -462,79 +328,17 @@ namespace lsvpd
 			msg << info.st_size << " reported size = " << ( *((int*)buf) + 4 );
 			logger.log( msg.str( ), LOG_WARNING );
 		}
-		ret = parseVPDBuffer( fillMe, buf );
+
+		parseVPDBuffer( fillMe, buf );
 
 		delete [] start;
 	}
 
-
 	/**
-	 * Parse VPD out of the OpalVPD buffer and pass key/value pairs into
+	 * Parse VPD out of the VPD buffer and pass key/value pairs into
 	 * setVPDField
 	 */
-
-	unsigned int DeviceTreeCollector::parseOpalVPDBuffer( Component* fillMe,
-		char * buf)
-	{
-		static int record_index;
-		uint16_t size = 0;
-		char key[ 3 ] = { '\0' };
-		char val[ 256 ]; // Each VPD field will be at most 255 bytes long
-		uint8_t length;
-		unsigned char type;
-		const char *recordStart = buf;
-
-		type = *(++buf);
-		buf++;
-		if( type == 0x84 )
-		{
-		       if(record_index >= OpalCollector::desc.size()) {
-				record_index = 0;
-				return 0;
-			}
-
-			size = (*buf++);
-			size |= (*buf++) << 8;
-			fillMe->mDescription.setValue(OpalCollector::desc.at(record_index), 80, __FILE__, __LINE__ );
-			fillMe->mPhysicalLocation.setValue( OpalCollector::location.at(record_index), 80, __FILE__, __LINE__ );
-			record_index++;
-			if (buf > recordStart + size + 1) {
-				goto ERROR;
-			}
-
-			/*
-			 * Parsing the vpd file is the same from here on out regardless of the
-			 * flag checked earlier.
-			 */
-			while( buf < recordStart + size && *buf != 0x78 )
-			{
-				memset( val, '\0', 256 );
-				memset( key, '\0', 3 );
-
-				key[ 0 ] = (*buf++);
-				key[ 1 ] = (*buf++);
-				length = (*buf++);
-
-				memcpy( val, buf, length );
-
-				buf += length;
-				setVPDField( fillMe, key, val, __FILE__, __LINE__ );
-			}
-		}
-		return size;
-ERROR:
-		Logger logger;
-		logger.log( "Attempting to parse corrupt VPD buffer.", LOG_WARNING );
-		return 0;
-	}
-
-
-
-	/**
-	 * Parse VPD out of the RtasVPD buffer and pass key/value pairs into
-	 * setVPDField
-	 */
-	unsigned int DeviceTreeCollector::parseRtasVPDBuffer( Component* fillMe,
+	unsigned int DeviceTreeCollector::parseVPDBuffer( Component* fillMe,
 		char * buf )
 	{
 		u32 size;
@@ -610,77 +414,6 @@ ERROR:
 		Logger logger;
 		logger.log( "Attempting to parse corrupt VPD buffer.", LOG_WARNING );
 		return 0;
-	}
-
-
-	void DeviceTreeCollector::parseOpalSysVPD( char * data, System* sys)
-	{
-		static int record_index = 0;
-		uint16_t size = 0;
-		unsigned char type = 0, recordSize = 0;
-		char key[ 3 ] = { '\0' };
-		char val[ 256 ] = { '\0' };
-		char* recordStart;
-		recordStart = data;
-		type = *(++data);
-		data++;
-		if( type == 0x84 )
-		{
-			size = (*data++);
-			size |= (*data++) << 8;
-			sys->mDescription.setValue(OpalCollector::desc.at(0), 80, __FILE__, __LINE__ );
-		}
-
-		while( data[ 0 ] != 0x78 && data < recordStart + size + 1)
-		{
-			key[ 0 ] = data[ 0 ];
-			key[ 1 ] = data[ 1 ];
-			recordSize = data[ 2 ];
-			data += 3;
-			memset( val, 0, 256 );
-			memcpy( val, data, recordSize );
-			setVPDField( sys, key, val, __FILE__, __LINE__ );
-			data += recordSize;
-		}
-
-	}
-
-	void DeviceTreeCollector::parseRtasSysVPD( char * data, System* sys )
-	{
-		u32 size = 0;
-		unsigned char type = 0, recordSize = 0;
-		char key[ 3 ] = { '\0' };
-		char val[ 256 ] = { '\0' };
-		char* recordStart;
-
-		memcpy( &size, data, 4 );
-		data += 4;
-		recordStart = data;
-
-		type = data[ 0 ];
-		data++;
-		recordSize = data[ 0 ];
-		data += 2;
-
-		if( type == 0x82 )
-		{
-			memcpy( val, data, recordSize );
-			data += recordSize;
-			sys->mDescription.setValue( val, 60, __FILE__, __LINE__ );
-			memset( val, 0, 256 );
-		}
-
-		while( data[ 0 ] != 0x78 && data < recordStart + size )
-		{
-			key[ 0 ] = data[ 0 ];
-			key[ 1 ] = data[ 1 ];
-			recordSize = data[ 2 ];
-			data += 3;
-			memset( val, 0, 256 );
-			memcpy( val, data, recordSize );
-			setVPDField( sys, key, val, __FILE__, __LINE__ );
-			data += recordSize;
-		}
 	}
 
 	bool isDevice(string str)
@@ -978,14 +711,14 @@ ERROR:
 	}
 
 	/**
-	 * Creates a vector of components, representing all devices this
-	 * collector is aware of,(vector should be output from getComponents),
+	 * Creates a vector of components, representing all devices this collector
+	 * is aware of,	(vector should be output from getComponents),
 	 * and back-walks tree to determine inheritance
 	 *
 	 * @arg sysdevs: Devices discovered through sysfstreecollector
 	 * @return: A fully merged tree of devices, with a single
-	 *          root device and some path of inheritance to all
-	 *          children
+	 * 		root device and some path of inheritance to all
+	 * 		children
 	 */
 	vector<Component*> DeviceTreeCollector::getComponents(
 		vector<Component*>& sysdevs )
@@ -1002,7 +735,7 @@ ERROR:
 		getComponentsVector( devs );
 
 
-		bufSize = platform_collector->addPlatformVPD("", &rtasData);
+		bufSize = RtasCollector::rtasGetVPD("", &rtasData);
 
 		if( bufSize < 0 )
 		{
@@ -1010,7 +743,7 @@ ERROR:
 			logger.log( interp_err_code(bufSize), LOG_WARNING );
 		}
 
-		parseVPD(devs, rtasData, bufSize);
+		parseRtasVpd( devs, rtasData, bufSize);
 		delete rtasData;
 
 		/* Grab system params from rtas, N5 and N6 */
@@ -1019,10 +752,7 @@ ERROR:
 		 * Build a unique device ID and deviceTreeNode for the system params
 		 */
 		ostringstream os;
-		if( PlatformCollector::platform_type == PF_POWERVM_LPAR )
-			os << "/proc/device-tree/rtas/";
-		else if ( PlatformCollector::platform_type == PF_POWERKVM_HOST )
-			os << "/proc/device-tree/vpd/";
+		os << "/proc/device-tree/rtas/";
 		c->idNode.setValue( os.str( ), 100, __FILE__, __LINE__ );
 		c->deviceTreeNode.setValue( os.str( ), 100, __FILE__, __LINE__ );
 		c->mParent.setValue( "/sys/devices", 1, __FILE__, __LINE__ );
@@ -1122,10 +852,8 @@ ERROR:
 			while (curList.size() > 0) {
 				tmpDirName = curList.back();
 				dev = false;
-				/* Filter out /vpd files as we are parsing and filling the nodes from
-				 * OpalCollector.
-				 */
-				if (isDevice(tmpDirName) && (curPath.find("/vpd") == string::npos)) {
+
+				if (isDevice(tmpDirName)) {
 					// Create new component
 					tmp = new Component();
 					/*
@@ -1220,7 +948,8 @@ ERROR:
 
 		string val = "";
 
-		sys->deviceTreeNode.setValue( "/proc/device-tree", 100, __FILE__, __LINE__);
+		sys->deviceTreeNode.setValue( "/proc/device-tree", 100
+												, __FILE__, __LINE__);
 
 		sys->mKeywordVersion.setValue( "ipzSeries", 10, __FILE__, __LINE__ );
 
@@ -1228,58 +957,80 @@ ERROR:
 		if( val != "" )
 			sys->mArch.setValue( val, 100, __FILE__, __LINE__ );
 
-		if ( PlatformCollector::platform_type == PF_POWERKVM_HOST ) {
-			val = getAttrValue( "/proc/device-tree", "model" );
-			if( val != "" )	{
-				sys->mMachineType.setValue( val, 80, __FILE__, __LINE__ );
-				sys->mMachineModel.setValue( val, 80, __FILE__, __LINE__);
-			}
-
-			val = getAttrValue("/proc/device-tree", "system-id" );
-			if( val != "" )
-			{
-				sys->mSerialNum1.setValue( val, 80, __FILE__, __LINE__ );
-				sys->mProcessorID.setValue( val, 80, __FILE__, __LINE__ );
-				sys->mSerialNum2.setValue( val, 80, __FILE__, __LINE__ );
-			}
-			sys->mLocationCode.setValue(OpalCollector::location.at(0) , 100, __FILE__, __LINE__ );
-			size = platform_collector->addPlatformVPD( OpalCollector::location.at(0), &rtasVPD );
-		} else if ( PlatformCollector::platform_type == PF_POWERVM_LPAR ) {
-			val = getAttrValue( "/proc/device-tree", "model" );
-			if( val != "" ) {
-				sys->mMachineType.setValue( val, 80, __FILE__, __LINE__ );
-				sys->mMachineModel.setValue( val.substr( 4 ), 80, __FILE__, __LINE__);
-			}
-			val = getAttrValue("/proc/device-tree", "system-id" );
-			if( val != "" )
-			{
-				sys->mSerialNum1.setValue( val, 80, __FILE__, __LINE__ );
-				sys->mProcessorID.setValue( val, 80, __FILE__, __LINE__ );
-				if( val.length( ) > 6 )
-					sys->mSerialNum2.setValue( val.substr( 6 ), 80, __FILE__, __LINE__ );
-			}
-
-			int pos;
-			val = sys->mMachineModel.dataValue;
-			if( val == "" )
-				return;
-			ostringstream os;
-			os << "U";
-			while( ( pos = val.find( "-" ) ) != string::npos )
-			{
-				val[ pos ] = '.';
-			}
-
-			os << val << "." << sys->getSerial2( );
-			sys->mLocationCode.setValue( os.str( ), 100, __FILE__, __LINE__ );
-			size = platform_collector->addPlatformVPD( os.str( ), &rtasVPD );
+		val = getAttrValue( "/proc/device-tree", "model" );
+		if( val != "" )
+		{
+			sys->mMachineType.setValue( val, 80, __FILE__, __LINE__ );
+			sys->mMachineModel.setValue( val.substr( 4 ), 80, __FILE__, __LINE__);
 		}
 
+		val = getAttrValue("/proc/device-tree", "system-id" );
+		if( val != "" )
+		{
+			sys->mSerialNum1.setValue( val, 80, __FILE__, __LINE__ );
+			sys->mProcessorID.setValue( val, 80, __FILE__, __LINE__ );
+			if( val.length( ) > 6 )
+				sys->mSerialNum2.setValue( val.substr( 6 ), 80, __FILE__, __LINE__ );
+		}
+
+		int pos;
+		val = sys->mMachineModel.dataValue;
+		if( val == "" )
+			return;
+		ostringstream os;
+		os << "U";
+		while( ( pos = val.find( "-" ) ) != string::npos )
+		{
+			val[ pos ] = '.';
+		}
+
+		os << val << "." << sys->getSerial2( );
+		sys->mLocationCode.setValue( os.str( ), 100, __FILE__, __LINE__ );
+
+		size = RtasCollector::rtasGetVPD( os.str( ), &rtasVPD );
 		if( rtasVPD != NULL && size > 0 )
 		{
-				parseSysVPD( rtasVPD, sys );
+			parseSysRtas( rtasVPD, sys );
 		}
 
+	}
+
+	void DeviceTreeCollector::parseSysRtas( char * data, System* sys )
+	{
+		u32 size = 0;
+		unsigned char type = 0, recordSize = 0;
+		char key[ 3 ] = { '\0' };
+		char val[ 256 ] = { '\0' };
+		char* recordStart;
+
+		memcpy( &size, data, 4 );
+		data += 4;
+		recordStart = data;
+
+		type = data[ 0 ];
+		data++;
+		recordSize = data[ 0 ];
+		data += 2;
+
+		if( type == 0x82 )
+		{
+			memcpy( val, data, recordSize );
+			data += recordSize;
+			sys->mDescription.setValue( val, 60, __FILE__, __LINE__ );
+			memset( val, 0, 256 );
+		}
+
+		while( data[ 0 ] != 0x78 && data < recordStart + size )
+		{
+			key[ 0 ] = data[ 0 ];
+			key[ 1 ] = data[ 1 ];
+			recordSize = data[ 2 ];
+			data += 3;
+			memset( val, 0, 256 );
+			memcpy( val, data, recordSize );
+			setVPDField( sys, key, val, __FILE__, __LINE__ );
+			data += recordSize;
+		}
 	}
 
 	void DeviceTreeCollector::parseMajorMinor( Component* comp, string& major,
