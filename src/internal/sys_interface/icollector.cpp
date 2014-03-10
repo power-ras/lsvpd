@@ -244,4 +244,290 @@ out:
 		else if( key == "VK" )
 			sys->mKeywordVersion.setValue( val, 70, file, lineNum );
 	}
+
+	string ICollector::getFruDescription(string &key)
+	{
+		const char *fru_type = key.c_str();
+		char *desc = NULL;
+
+		switch (fru_type[0]) {
+		case 'A':
+			switch (fru_type[1]) {
+			case 'B':
+				return string( "Combined AC  bulk power supply" );
+			case 'M':
+				return string( "Air mover" );
+			case 'V':
+				return string( "Anchor VPD" );
+			}
+			break;
+		case 'B':
+			switch (fru_type[1]) {
+			case 'A':
+				return string( "Bus adapter card" );
+			case 'C':
+				return string( "Battery charger" );
+			case 'D':
+				return string( "Bus/Daughter card" );
+			case 'E':
+				return string( "Bus expansion card" );
+			case 'P':
+				return string( "Backplane" );
+			case 'R':
+				return string( "Backplane riser" );
+			case 'X':
+				return string( "Backplane extender" );
+			}
+			break;
+		case 'C':
+			switch (fru_type[1]) {
+			case 'A':
+				return string( "Calgary bridge" );
+			case 'B':
+				return string( "Connector - Infiniband" );
+			case 'C':
+				return string( "Clock card" );
+			case 'D':
+				return string( "Card connector" );
+			case 'E':
+				return string( "Connector - Ethernet interface" );
+			case 'L':
+				return string( "Calgary PHB VPD" );
+			case 'I':
+				return string( "Interactive capacity card" );
+			case 'O':
+				return string( "Connector - SMA interface" );
+			case 'P':
+				return string( "Processor capacity card" );
+			case 'R':
+				return string( "Connector - RIO interface" );
+			case 'S':
+				return string( "Connector - Serial interface" );
+			case 'U':
+				return string( "Connector - USB interface" );
+			}
+			break;
+		case 'D':
+			switch (fru_type[1]) {
+			case 'B':
+				return string( "DASD Backplane" );
+			case 'C':
+				return string( "Drawer connector card" );
+			case 'E':
+				return string( "Drawer etension" );
+			case 'I':
+				return string( "Drawer interposer" );
+			case 'L':
+				return string( "P7 IH D-link connector" );
+			case 'T':
+				return string( "Legacy PCI daughter card" );
+			case 'V':
+				return string( "Media drawer LED" );
+			}
+			break;
+		case 'E':
+			switch (fru_type[1]) {
+			case 'I':
+				return string( "Enclosure LED" );
+			case 'F':
+				return string( "Enclosure fault LED" );
+			case 'S':
+				return string( "Embedded SAS" );
+			case 'T':
+				return string( "Ethernet riser card (no GX bus)" );
+			case 'V':
+				return string( "Enclosure VPD" );
+			}
+			break;
+		case 'F':
+			switch (fru_type[1]) {
+			case 'M':
+				return string( "Frame" );
+			}
+			break;
+		case 'H':
+			switch (fru_type[1]) {
+			case 'B':
+				return string( "Host bridge RIO to PCI card" );
+			case 'D':
+				return string( "High speed daughter card" );
+			case 'M':
+				return string( "HMC connector" );
+			}
+			break;
+		case 'I':
+			switch (fru_type[1]) {
+			case 'B':
+				return string( "IO backplane" );
+			case 'C':
+				return string( "IO card" );
+			case 'D':
+				return string( "IDE connector" );
+			case 'I':
+				return string( "IO drawer enclosure LEDs" );
+			case 'P':
+				return string( "Interplane card" );
+			case 'S':
+				return string( "SMP V-Bus interconnection cable" );
+			case 'T':
+				return string( "Enclosure interconnection cable" );
+			case 'V':
+				return string( "IO drawer enclosure VPD" );
+			}
+			break;
+		case 'K':
+			switch (fru_type[1]) {
+			case 'V':
+				return string( "Keyboard video mouse LED" );
+			}
+			break;
+		case 'L':
+			switch (fru_type[1]) {
+			case '2':
+				return string( "Level 2 cache module/card" );
+			case '3':
+				return string( "Level 3 cache module/card" );
+			case 'C':
+				return string( "Squadrons H llight strip connector" );
+			case 'R':
+				return string( "P7 IH L-link connector" );
+			case 'O':
+				return string( "System locate LED" );
+			case 'T':
+				return string( "Squadrons H light strip" );
+			}
+			break;
+		case 'M':
+			switch (fru_type[1]) {
+			case 'B':
+				return string( "Media backplane" );
+			case 'E':
+				return string( "Map extension" );
+			case 'M':
+				return string( "MIP meter" );
+			case 'S':
+				return string( "Main store card or DIMM" );
+			}
+			break;
+		case 'N':
+			switch (fru_type[1]) {
+			case 'B':
+				return string( "NVRAM battery" );
+			case 'C':
+				return string( "Service processor node controller" );
+			case 'D':
+				return string( "NUMA DIMM" );
+			}
+			break;
+		case 'O':
+			switch (fru_type[1]) {
+			case 'D':
+				return string( "CUoD card" );
+			case 'P':
+				return string( "Operator panel" );
+			case 'S':
+				return string( "Oscillator" );
+			}
+			break;
+		case 'P':
+			switch (fru_type[1]) {
+			case '2':
+				return string( "IOC chip and its devices" );
+			case '5':
+				return string( "IOC/IOC2 PCI bridge" );
+			case 'B':
+				return string( "IO drawer main backplane" );
+			case 'C':
+				return string( "Power capacitor" );
+			case 'D':
+				return string( "Processor card" );
+			case 'F':
+				return string( "Processor FRU" );
+			case 'I':
+				return string( "IOC/IOC2 PHB" );
+			case 'O':
+				return string( "SPCN" );
+			case 'N':
+				return string( "SPCN connector" );
+			case 'R':
+				return string( "PCI riser card" );
+			case 'S':
+				return string( "Power supply" );
+			case 'T':
+				return string( "Pass-through card" );
+			case 'X':
+				return string( "PSC power sync card" );
+			case 'W':
+				return string( "Power connector" );
+			}
+			break;
+		case 'R':
+			switch (fru_type[1]) {
+			case 'G':
+				return string( "Regulator" );
+			case 'I':
+				return string( "Riser" );
+			case 'K':
+				return string( "Rack indicator connector" );
+			case 'W':
+				return string( "RiscWatch connector" );
+			}
+			break;
+		case 'S':
+			switch (fru_type[1]) {
+			case 'A':
+				return string( "System attention LED" );
+			case 'B':
+				return string( "Backup system VPD" );
+			case 'C':
+				return string( "SCSI connector" );
+			case 'D':
+				return string( "SAS connector" );
+			case 'I':
+				return string( "SCSI to IDE converter" );
+			case 'L':
+				return string( "PHB slot - PHB child" );
+			case 'P':
+				return string( "Service processor" );
+			case 'R':
+				return string( "Service interconnection card" );
+			case 'S':
+				return string( "Soft switch" );
+			case 'V':
+				return string( "System VPD" );
+			case 'Y':
+				return string( "Legacy system VPD FRU type" );
+			}
+			break;
+		case 'T':
+			switch (fru_type[1]) {
+			case 'D':
+				return string( "Time of Day clock" );
+			case 'I':
+				return string( "Torrent PCIE PHB" );
+			case 'L':
+				return string( "Torrent riser PCIE PHB slot" );
+			case 'M':
+				return string( "Thermal sensor" );
+			case 'P':
+				return string( "TPMD adapter" );
+			case 'R':
+				return string( "Torrent octant PCIE bridge" );
+			}
+			break;
+		case 'V':
+			switch (fru_type[1]) {
+			case 'V':
+				return string( "Root node VPD" );
+			}
+			break;
+		case 'W':
+			switch (fru_type[1]) {
+			case 'D':
+				return string( "Water device" );
+			}
+			break;
+		}
+		return string( "Unknown" );
+	}
 }

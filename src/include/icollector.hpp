@@ -153,6 +153,10 @@ namespace lsvpd
 				 */
 				void setVPDField( System* sys, const string& key,
 					const string& val , char *file, int lineNum);
+				/**
+				 * Convert the fru-type key to description.
+				 */
+				string getFruDescription(string &key);
 	};
 
 }

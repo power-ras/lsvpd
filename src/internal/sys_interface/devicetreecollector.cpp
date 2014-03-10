@@ -221,6 +221,10 @@ namespace lsvpd
 		if (val.length() > 0)
 			fillMe->mModel.setValue( val, 21, __FILE__, __LINE__ );
 
+		val = getAttrValue( fillMe->deviceTreeNode.dataValue, "fru-type" );
+		if (val.length() > 0)
+			fillMe->mDescription.setValue( getFruDescription(val), 90, __FILE__, __LINE__ );
+
 		/* Loc code */
 		/* bpeters: Many storage devices sit on a port of an adapter, and are not
 		 * themselves given loc-code files by firmware.  Thus, the general rule to
