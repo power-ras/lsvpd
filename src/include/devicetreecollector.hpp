@@ -41,6 +41,9 @@ namespace lsvpd
 	/* RTAS Specific definitions */
 	#define RTAS_VPD_TYPE	0x82
 
+	/* Opal Specific defintion */
+	#define OPAL_VPD_TYPE 0x84
+
 	/**
 	 * DeviceTreeCollector contains the logic for device discovery and VPD
 	 * retrieval from /proc/device-tree and librtas if it is available.

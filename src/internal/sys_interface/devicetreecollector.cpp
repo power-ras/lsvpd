@@ -353,12 +353,48 @@ error:
 		return 0;
 	}
 
+	/**
+	 * Parse the OPAL VPD Header @buf
+	 * Returns the total size of the buffer as read from buffer.
+	 * @fruName : This field is ignored by OPAL as there is no description
+	 * 		in the OPAL VPD
+	 * @recordStart : Pointer to the area where the records start.
+	 */
+	static unsigned int parseOpalVPDHeader( char *buf,
+					char **fruName, char **recordStart)
+	{
+		char type;
+		unsigned int size = 0;
+
+		*fruName = NULL;
+
+		type = *buf++;
+		if (type != OPAL_VPD_TYPE)
+			goto error;
+		/* Read the size of the buffer */
+		size = *buf++;
+		size |= (*buf++) << 8;
+
+		/* Records start here */
+		*recordStart = buf;
+
+		/* Total size of the buffer */
+		return size + 3;
+error:
+		Logger log;
+		ostringstream os;
+		os << "Attempting to parse VPD buffer of unsupported type " << (int)type;
+		log.log(os.str(), LOG_WARNING);
+		return 0;
+	}
 
 	unsigned int DeviceTreeCollector::parseVPDHeader( char *buf,
 								char **fruName, char **recordStart )
 	{
 		if (isPlatformRTAS())
 			return parseRtasVPDHeader(buf, fruName, recordStart);
+		else if (isPlatformOPAL())
+			return parseOpalVPDHeader(buf, fruName, recordStart);
 	}
 
 	/**
