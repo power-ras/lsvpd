@@ -1135,7 +1135,10 @@ ERROR:
 		if( val != "" )
 		{
 			sys->mMachineType.setValue( val, 80, __FILE__, __LINE__ );
-			sys->mMachineModel.setValue( val.substr( 4 ), 80, __FILE__, __LINE__);
+			if ( !val.compare (0, 4, "IBM,") )
+				sys->mMachineModel.setValue( val.substr( 4 ), 80, __FILE__, __LINE__ );
+			else
+				sys->mMachineModel.setValue( val, 80, __FILE__, __LINE__ );
 		}
 
 		val = getAttrValue("/proc/device-tree", "system-id" );
@@ -1143,8 +1146,10 @@ ERROR:
 		{
 			sys->mSerialNum1.setValue( val, 80, __FILE__, __LINE__ );
 			sys->mProcessorID.setValue( val, 80, __FILE__, __LINE__ );
-			if( val.length( ) > 6 )
+			if( !val.compare(0, 4, "IBM,") )
 				sys->mSerialNum2.setValue( val.substr( 6 ), 80, __FILE__, __LINE__ );
+			else
+				 sys->mSerialNum2.setValue( val, 80 , __FILE__, __LINE__ );
 		}
 
 		getSystemVPD(sys);
