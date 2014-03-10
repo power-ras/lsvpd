@@ -127,6 +127,12 @@ namespace lsvpd
 				return (platForm == PF_POWERVM_LPAR);
 			}
 
+			/* Check whether we are on Opal based system */
+			inline bool isPlatformOPAL()
+			{
+				return (platForm == PF_POWERKVM_HOST);
+			}
+
 			/**
 			 * Collect the platform VPD.
 			 *
