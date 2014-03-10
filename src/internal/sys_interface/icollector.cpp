@@ -243,6 +243,12 @@ out:
 			sys->mSUID.setValue( val, 70, file, lineNum );
 		else if( key == "VK" )
 			sys->mKeywordVersion.setValue( val, 70, file, lineNum );
+		else if( key == "SE" ) {
+			sys->mSerialNum1.setValue( val, 70, file, lineNum );
+			sys->mProcessorID.setValue( val, 70, file, lineNum );
+		} else
+			/* XXX: Un-recognized key */
+			sys->addDeviceSpecific( key, "System Specific", val, 90 );
 	}
 
 	string ICollector::getFruDescription(string &key)
