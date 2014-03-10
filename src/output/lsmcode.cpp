@@ -22,6 +22,7 @@
  ***************************************************************************/
 
 #include <rtascollector.hpp>
+#include <platformcollector.hpp>
 #include <libvpd-2/vpdretriever.hpp>
 #include <libvpd-2/component.hpp>
 #include <libvpd-2/dataitem.hpp>
