@@ -9,8 +9,6 @@
 
 #include <libvpd-2/logger.hpp>
 #include <platformcollector.hpp>
-#include <rtascollector.hpp>
-#include <opalcollector.hpp>
 
 using namespace std;
 
@@ -54,25 +52,4 @@ namespace lsvpd {
 		return "";
 	}
 
-	/**
-	 * Returns dynamic object pointing to RtasCollector if
-	 * it is running on pSeries or OpalCollector if it is
-	 * running on PowerNV.
-	 */
-	void PlatformCollector::get_collector(PlatformCollector **p)
-	{
-		get_platform();
-		switch(platform_type) {
-		case PF_POWERVM_LPAR:
-		case PF_POWERKVM_PSERIES_GUEST:
-			*p = new RtasCollector();
-			break;
-		case PF_POWERKVM_HOST:
-			*p = new OpalCollector();
-			break;
-		case PF_ERROR:
-			*p = 0;
-			break;
-		}
-	}
 }

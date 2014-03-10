@@ -33,20 +33,6 @@ namespace lsvpd {
 	                static platform platform_type;
 		        static void get_platform();
 			static string get_platform_name();
-
-			/**
-			 * Returns dynamic object pointing to RtasCollector if
-			 * it is running on pSeries or OpalCollector if it is
-			 * running on PowerNV.
-			 */
-		        static void get_collector(PlatformCollector **p);
-
-			/**
-			 * Interface to add platform VPD data defined in RtasCollector
-		         * and OpalCollector.
-			 */
-
-			virtual int addPlatformVPD(const string& yl, char** data){};
 	};
 }
 

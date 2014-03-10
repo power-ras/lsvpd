@@ -38,29 +38,22 @@ vpdupdate_SOURCES = src/internal/sys_interface/devicetreecollector.cpp \
 lsvpd_SOURCES = src/output/lsvpd.cpp \
 		src/internal/sys_interface/fswalk.cpp \
 		src/internal/sys_interface/platformcollector.cpp \
-		src/internal/sys_interface/rtascollector.cpp \
-		src/internal/sys_interface/opalcollector.cpp \
 		$(update_h_files)
 		
 lscfg_SOURCES = src/output/lscfg.cpp \
 		src/internal/sys_interface/fswalk.cpp \
 		src/internal/sys_interface/platformcollector.cpp \
-		src/internal/sys_interface/rtascollector.cpp \
-		src/internal/sys_interface/opalcollector.cpp \
 		$(update_h_files)
 
 lsvio_SOURCES = src/output/lsvio.cpp \
 		src/internal/sys_interface/fswalk.cpp \
 		src/internal/sys_interface/platformcollector.cpp \
-		src/internal/sys_interface/rtascollector.cpp \
-		src/internal/sys_interface/opalcollector.cpp \
 		$(update_h_files)
 		
 lsmcode_SOURCES = src/output/lsmcode.cpp \
 		  src/internal/sys_interface/fswalk.cpp \
 		  src/internal/sys_interface/platformcollector.cpp \
 		  src/internal/sys_interface/rtascollector.cpp \
-		  src/internal/sys_interface/opalcollector.cpp \
 		$(update_h_files)
 
 
