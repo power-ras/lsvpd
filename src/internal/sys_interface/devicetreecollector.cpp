@@ -287,51 +287,17 @@ namespace lsvpd
 	 */
 	void DeviceTreeCollector::fillIBMVpd( Component* fillMe )
 	{
-		char* buf, *start;
-		struct stat info;
-		ostringstream os;
-		int fd, input = 0;
+		string path;
+		char *vpdData;
+		int size;
 
-		os << fillMe->deviceTreeNode.dataValue << "/ibm,vpd";
-		fd = open( os.str( ).c_str( ), O_RDONLY );
-		if( fd < 0 )
-		{
+		path = fillMe->deviceTreeNode.dataValue + "/ibm,vpd";
+		size = getBinaryData(path, &vpdData);
+		if (size == 0)
 			return;
-		}
+		parseVPDBuffer( fillMe, vpdData );
 
-		fstat( fd, &info );
-		buf = new char[ info.st_size + 1 ];
-		if( buf == NULL )
-		{
-			close( fd );
-			return;
-		}
-		start = buf;
-
-		memset( buf, '\0', info.st_size + 1 );
-
-		int ret;
-		while( input < info.st_size &&
-				( ret = read( fd, buf + input, info.st_size - input ) >= 0 ) )
-		{
-			input += ret;
-		}
-		close( fd );
-
-		if( info.st_size != ( *((int*)buf) + 4 ) )
-		{
-			Logger logger;
-			ostringstream msg;
-			msg << "VPD file size different from reported size, VPD ";
-			msg << "retireval will continue but the values maybe corrupted.  ";
-			msg << "Filesystem size = ";
-			msg << info.st_size << " reported size = " << ( *((int*)buf) + 4 );
-			logger.log( msg.str( ), LOG_WARNING );
-		}
-
-		parseVPDBuffer( fillMe, buf );
-
-		delete [] start;
+		delete [] vpdData;
 	}
 
 	/**
