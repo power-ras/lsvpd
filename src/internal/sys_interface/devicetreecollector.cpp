@@ -993,7 +993,7 @@ ERROR:
 		size = RtasCollector::rtasGetVPD( loc, &rtasVPD );
 		if( rtasVPD != NULL && size > 0 )
 		{
-			parseSysRtas( rtasVPD, sys );
+			parseSysVPD( rtasVPD, sys );
 			delete rtasVPD;
 		}
 	}
@@ -1041,7 +1041,7 @@ ERROR:
 		getSystemVPD(sys);
 	}
 
-	void DeviceTreeCollector::parseSysRtas( char * data, System* sys )
+	void DeviceTreeCollector::parseSysVPD( char * data, System* sys )
 	{
 		u32 size = 0;
 		unsigned char recordSize = 0;

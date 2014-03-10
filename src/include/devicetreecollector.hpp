@@ -254,15 +254,15 @@ namespace lsvpd
 				int rtasDataSize);
 
 			/**
-			 * Pares the System VPD RTAS entry and add the information to the
+			 * Pares the System VPD  and add the information to the
 			 * System object.
 			 *
 			 * @param data
-			 *   The RTAS VPD buffer for the System.
+			 *   The VPD buffer for the System.
 			 * @param sys
 			 *   The System object.
 			 */
-			void parseSysRtas( char * data, System* sys );
+			void parseSysVPD( char * data, System* sys );
 
 			FSWalk fsw;
 	};
