@@ -6,11 +6,9 @@ update_h_files = src/include/device.hpp \
 		src/include/manufacturer.hpp \
 		src/include/proccollector.hpp \
 		src/include/platformcollector.hpp \
-		src/include/opalcollector.hpp \
 		src/include/devicetreecollector.hpp \
 		src/include/subdevice.hpp \
 		src/include/rtascollector.hpp \
-		src/include/opalcollector.hpp \
 		src/include/sysfstreecollector.hpp
 
 INCLUDES = -I./src/include
@@ -32,7 +30,6 @@ vpdupdate_SOURCES = src/internal/sys_interface/devicetreecollector.cpp \
 		src/internal/sys_interface/icollector.cpp \
 		src/internal/sys_interface/sysfs_SCSI_Fill.cpp \
 		src/internal/sys_interface/rtascollector.cpp \
-		src/internal/sys_interface/opalcollector.cpp \
 		$(update_h_files)
 		
 lsvpd_SOURCES = src/output/lsvpd.cpp \
