@@ -710,6 +710,47 @@ ERROR:
 		}
 	}
 
+	void DeviceTreeCollector::getRtasSystemParams(vector<Component*>& devs)
+	{
+		/* Grab system params from rtas, N5 and N6 */
+		Component* c = new Component( );
+		/*
+		 * Build a unique device ID and deviceTreeNode for the system params
+		 */
+		ostringstream os;
+		os << "/proc/device-tree/rtas/";
+		c->idNode.setValue( os.str( ), 100, __FILE__, __LINE__ );
+		c->deviceTreeNode.setValue( os.str( ), 100, __FILE__, __LINE__ );
+		c->mParent.setValue( "/sys/devices", 1, __FILE__, __LINE__ );
+		addSystemParms( c );
+
+		devs.push_back( c );
+	}
+
+	void DeviceTreeCollector::getRtasVPD(vector<Component*>& devs)
+	{
+		int bufSize;
+		char *rtasData = NULL;
+
+		bufSize = RtasCollector::rtasGetVPD("", &rtasData);
+		if( bufSize < 0 )
+		{
+			Logger logger;
+			logger.log( interp_err_code(bufSize), LOG_WARNING );
+			return;
+		}
+		parseRtasVpd(devs, rtasData, bufSize);
+		delete rtasData;
+
+		/* Grab System parameters, N5 & N6 */
+		getRtasSystemParams( devs );
+	}
+
+	void DeviceTreeCollector::getPlatformVPD(vector<Component*>& devs)
+	{
+		getRtasVPD( devs );
+	}
+
 	/**
 	 * Creates a vector of components, representing all devices this collector
 	 * is aware of,	(vector should be output from getComponents),
@@ -728,41 +769,14 @@ ERROR:
 		Component *child, *parent, *devC, *sysRoot;
 		Component devRoot;
 		string devPath;
-		int bufSize;
-		char *rtasData = NULL;
 
 		// Discover all devices
 		getComponentsVector( devs );
 
+		/* Collect VPD from Platform */
+		getPlatformVPD( devs );
 
-		bufSize = RtasCollector::rtasGetVPD("", &rtasData);
-
-		if( bufSize < 0 )
-		{
-			Logger logger;
-			logger.log( interp_err_code(bufSize), LOG_WARNING );
-		}
-
-		parseRtasVpd( devs, rtasData, bufSize);
-		delete rtasData;
-
-		/* Grab system params from rtas, N5 and N6 */
-		Component* c = new Component( );
-		/*
-		 * Build a unique device ID and deviceTreeNode for the system params
-		 */
-		ostringstream os;
-		os << "/proc/device-tree/rtas/";
-		c->idNode.setValue( os.str( ), 100, __FILE__, __LINE__ );
-		c->deviceTreeNode.setValue( os.str( ), 100, __FILE__, __LINE__ );
-		c->mParent.setValue( "/sys/devices", 1, __FILE__, __LINE__ );
-		addSystemParms( c );
-
-		devs.push_back( c );
-
-
-		 devRoot.idNode.setValue(DEVTREEPATH, 100,
-													__FILE__, __LINE__);
+		devRoot.idNode.setValue(DEVTREEPATH, 100, __FILE__, __LINE__);
 		// Determine tree structure
 		for( i = devs.begin( ), end = devs.end( ); i != end; ++i ) {
 			child = *i;
@@ -939,17 +953,62 @@ ERROR:
 		return string("DeviceTreeCollector");
 	}
 
+	/* Fill the SystemLocationCode */
+	void DeviceTreeCollector::getRtasSystemLocationCode( System * sys )
+	{
+		int pos;
+		ostringstream os;
+		string val = sys->mMachineModel.dataValue;
+
+		if( val == "" )
+			return;
+		os << "U";
+		while( ( pos = val.find( "-" ) ) != string::npos )
+		{
+			val[ pos ] = '.';
+		}
+
+		os << val << "." << sys->getSerial2( );
+		sys->mLocationCode.setValue( os.str( ), 100, __FILE__, __LINE__ );
+	}
+
+	void DeviceTreeCollector::getRtasSystemVPD( System *sys )
+	{
+		int size;
+		char *rtasVPD = NULL;
+		string loc;
+
+		/* Construct System Location Code */
+		getRtasSystemLocationCode ( sys );
+		loc = sys->getLocation();
+
+		if (loc == "")
+			return;
+
+		size = RtasCollector::rtasGetVPD( loc, &rtasVPD );
+		if( rtasVPD != NULL && size > 0 )
+		{
+			parseSysRtas( rtasVPD, sys );
+			delete rtasVPD;
+		}
+	}
+
+	/**
+	 * Collect the System VPD from Platform
+	 */
+	void DeviceTreeCollector::getSystemVPD( System *sys )
+	{
+		getRtasSystemVPD(sys);
+	}
+
 	/* Parses rtas and various system files for system level VPD
 	 */
 	void DeviceTreeCollector::fillSystem( System* sys )
 	{
-		char* rtasVPD = NULL;
-		int size;
-
 		string val = "";
 
-		sys->deviceTreeNode.setValue( "/proc/device-tree", 100
-												, __FILE__, __LINE__);
+		sys->deviceTreeNode.setValue( "/proc/device-tree", 100,
+							__FILE__, __LINE__);
 
 		sys->mKeywordVersion.setValue( "ipzSeries", 10, __FILE__, __LINE__ );
 
@@ -973,26 +1032,7 @@ ERROR:
 				sys->mSerialNum2.setValue( val.substr( 6 ), 80, __FILE__, __LINE__ );
 		}
 
-		int pos;
-		val = sys->mMachineModel.dataValue;
-		if( val == "" )
-			return;
-		ostringstream os;
-		os << "U";
-		while( ( pos = val.find( "-" ) ) != string::npos )
-		{
-			val[ pos ] = '.';
-		}
-
-		os << val << "." << sys->getSerial2( );
-		sys->mLocationCode.setValue( os.str( ), 100, __FILE__, __LINE__ );
-
-		size = RtasCollector::rtasGetVPD( os.str( ), &rtasVPD );
-		if( rtasVPD != NULL && size > 0 )
-		{
-			parseSysRtas( rtasVPD, sys );
-		}
-
+		getSystemVPD(sys);
 	}
 
 	void DeviceTreeCollector::parseSysRtas( char * data, System* sys )

@@ -114,6 +114,28 @@ namespace lsvpd
 			 */
 			void readSources( DataItem& di, const string& devTreeNode );
 
+			/* Handlers for collecting Platform Specific Data */
+
+			/**
+			 * Collect the platform VPD.
+			 *
+			 * This really depends on the underlying
+			 * platform. i.e, RTAS or OPAL. Calls the platform specific routine.
+			 */
+			void getPlatformVPD(vector<Component*>& devs);
+			/**
+			 * Populate platform specific VPD for System.
+			 */
+			void getSystemVPD( System *sys );
+
+			/**
+			 * RTAS Platform Handlers.
+			 */
+			void getRtasSystemParams(vector<Component*>& devs);
+			void getRtasVPD(vector<Component*>& devs);
+			void getRtasSystemLocationCode( System *sys );
+			void getRtasSystemVPD( System *sys );
+
 			/**
 			 * Populate system VPD.
 			 *
