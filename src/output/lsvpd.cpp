@@ -156,15 +156,10 @@ void printVPD( Component* root )
 		if ( devName == "" || (devName != "" && devFound == true ) )
 		{
 			cout << "*" << root->getFeatureCodeAC( ) << " ";
-			if( root->getFeatureCode( ) != "" )
-				cout << root->getFeatureCode( );
+			if( markedVpd && root->getFeatureCode( ) == "")
+				cout << "********";
 			else
-			{
-				if( markedVpd )
-					cout << "********";
-				else
-					cout << "????????";
-			}
+				cout << root->getFeatureCode( );
 			cout << endl;
 
 			if( root->getDescription( ) != "" )
@@ -355,15 +350,10 @@ void printVPD( System* root )
 		if( root->getSerial2( ) != "" )
 		{
 			cout << "*" << root->getFeatureCodeAC( ) << " ";
-			if( root->getFeatureCode( ) != "" )
-				cout << root->getFeatureCode( );
+			if( markedVpd && root->getFeatureCode( ) == "" )
+				cout << "********";
 			else
-			{
-				if( markedVpd )
-					cout << "********";
-				else
-					cout << "????????";
-			}
+				cout << root->getFeatureCode( );
 			cout << endl;
 
 			cout << "*" << root->getDescriptionAC( ) << " " <<
