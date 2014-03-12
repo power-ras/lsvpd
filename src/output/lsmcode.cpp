@@ -56,17 +56,10 @@ extern int optind, opterr, optopt;
 bool tabular = false, all = false, debug = false;
 string device = "", path = "";
 
-/* Firmware version information from the RTAS */
-string rtas_pfw;
-/* Firmware version in MicroCodeImage ('MI') record */
-string rtas_fw_t, rtas_fw_p, rtas_fw_b;
-/* Firmware version in new MicroCodeLevel ('ML') record */
-string rtas_fwl_t, rtas_fwl_p, rtas_fwl_b;
-
 /* Firmware version information from the VPD db */
-string db_pfw;
-string db_fw_t, db_fw_p, db_fw_b;
-string db_fwl_t, db_fwl_p, db_fwl_b;
+string pfw;
+string fw_t, fw_p, fw_b;
+string fwl_t, fwl_p, fwl_b;
 
 void printUsage( )
 {
@@ -91,149 +84,6 @@ void printVersion( )
 {
 	cout << "lsmcode " << VPD_VERSION << endl;
 }
-
-static void getRtasFirmwareLevel()
-{
-	char name[256];
-	char key[3];
-	char value[256];
-	char firmware[256],  pfw[256];
-	char *rtasData, *buf, *section;
-	char *end;
-	string fw;
-	int pos1, pos2;
-	unsigned char type;
-	int rtasDataSize, rlen, res = 0, size;
-	int len;
-
-	rtasDataSize = RtasCollector::rtasGetVPD("", &rtasData);
-	if (rtasDataSize < 0)
-		goto error;
-
-	end = rtasData + rtasDataSize;
-	section = rtasData;
-	/*
-	 * The format of the VPD Data is a series of 
-	 * sections, with each section containing a header
-	 * followed by one or more records as shown below:
-	 *
-	 *   _ section(1) start
-	 *  |
-	 *  v
-	 *  ---------------------------------------------------------------
-	 *  | size(4) |type(1)|name_len(2)| section name(name_len)| pad(3) |
-	 *  ---------------------------------------------------------------
-	 *  |key(2) |record_len(1)|record (record_len) | key(2) |..........|
-	 *  ---------------------------------------------------------------
-	 *  |....|size(4)|type(1)|name_len(2)| section name(name_len) |pad(|
-	 *  ---------------------------------------------------------------
-	 *       ^
-	 *       |
-	 *       - section (2) start.
-	 */
-
-	while (section < end)
-	{
-		/* Read the section size */
-		memcpy(&size, section, 4);
-		section += 4;
-		buf = section;
-
-		if (section + size > end)
-			goto error;
-
-		section += size;		/* Move to next section */
-		type = *buf;
-		buf++;
-		if (type == 0x82)
-		{
-			/* length is 2 bytes big endian */
-			len = *buf;
-			buf++;
-			len += ((*buf) << 8);
-			buf++;
-
-			memset(name, 0, 256);
-			memcpy(name, buf, len);
-			buf += len;
-
-
-			/* Ignore the other section */
-			if (strcmp(name, "System Firmware"))
-				continue;
-
-			buf += 3;		/* Skip 3 bytes  padding */
-		} else	{
-			cerr << "Found unknown section (type 0x" << hex << (unsigned int)type << ") in RTAS VPD\n";
-			continue;
-		}
-
-		while (buf < section &&  *buf != 0x78 && *buf != 0x79)
-		{
-			memset(name, 0, 256);
-			memset(key, 0, 3);
-
-			if (buf + 3 > section)
-				goto error;
-
-			key[0] = buf[0];
-			key[1] = buf[1];
-			key[2] = '\0';
-
-			rlen = buf[2];
-			buf += 3;
-
-			if (buf + rlen  > section)
-				goto error;
-
-			if (!strcmp(key, "MI")) {
-
-				memset(firmware, 0, rlen + 1);
-				memcpy(firmware, buf, rlen);
-				fw = string(firmware);
-
-				pos1 = fw.find( ' ' );
-				pos2 = fw.rfind( ' ' );
-
-				rtas_fw_t = fw.substr(0, pos1);
-				rtas_fw_p = fw.substr(pos1 + 1, (pos2 - pos1) - 1);
-				rtas_fw_b = fw.substr(pos2 + 1);
-			} else if (!strcmp(key, "ML")) {
-
-				memset(firmware, 0, rlen + 1);
-				memcpy(firmware, buf, rlen);
-				fw = string(firmware);
-
-				pos1 = fw.find( ' ' );
-				pos2 = fw.rfind( ' ' );
-
-				rtas_fwl_t = fw.substr(0, pos1);
-				rtas_fwl_p = fw.substr(pos1 + 1, (pos2 - pos1) - 1);
-				rtas_fwl_b = fw.substr(pos2 + 1);
-			}
-
-
-			if (!strcmp(key, "CL") && !strncmp(buf, "PFW", 3)) {
-				memset(pfw, 0, rlen);
-				memcpy(pfw, buf +  4, rlen - 4);
-				rtas_pfw = string(pfw);
-			}
-
-			buf += rlen;
-		}
-
-		/* 
-		 * When we reach here we have gone through the 'System Firmware'
-		 * section.
-		 */
-		break;
-	}
-
-	return;	
-error:
-	cerr << "Error in parsing the RTAS VPD\n";
-}
-
 
 bool printSystem( const vector<Component*>& leaves )
 {
@@ -261,16 +111,9 @@ bool printSystem( const vector<Component*>& leaves )
 				int pos1 = mi.find( ' ' );
 				int pos2 = mi.rfind( ' ' );
 
-				db_fw_t = mi.substr(0, pos1);
-				db_fw_p = mi.substr(pos1 + 1, (pos2 - pos1) - 1);
-				db_fw_b = mi.substr(pos2 + 1);
-
-				if (rtas_fw_t.empty())
-					rtas_fw_t = db_fw_t;
-				if (rtas_fw_p.empty())
-					rtas_fw_p = db_fw_p;
-				if (rtas_fw_b.empty())
-					rtas_fw_b = db_fw_b;
+				fw_t = mi.substr(0, pos1);
+				fw_p = mi.substr(pos1 + 1, (pos2 - pos1) - 1);
+				fw_b = mi.substr(pos2 + 1);
 
 			}
 
@@ -279,41 +122,33 @@ bool printSystem( const vector<Component*>& leaves )
 				int pos1 = ml.find( ' ' );
 				int pos2 = ml.rfind( ' ' );
 
-				db_fwl_t = ml.substr(0, pos1);
-				db_fwl_p = ml.substr(pos1 + 1, (pos2 - pos1) - 1);
-				db_fwl_b = ml.substr(pos2 + 1);
-
-				if (rtas_fwl_t.empty())
-					rtas_fwl_t = db_fwl_t;
-				if (rtas_fwl_p.empty())
-					rtas_fwl_p = db_fwl_p;
-				if (rtas_fwl_b.empty())
-					rtas_fwl_b = db_fwl_b;
-
+				fwl_t = ml.substr(0, pos1);
+				fwl_p = ml.substr(pos1 + 1, (pos2 - pos1) - 1);
+				fwl_b = ml.substr(pos2 + 1);
 			}
 
-			if (rtas_fwl_t != "" )
+			if (fwl_t != "" )
 			{
 				/* 
 				 * When we have both ML and MI records, the output
 				 * is in the following format.
 				 * ML_t (MI_t) (t) ML_p (MI_p) (p) ML_b (MI_b) (b)
 				 */
-				fw = rtas_fwl_t;
-				if (rtas_fw_t != "")
-					fw +=  " (" + rtas_fw_t + ") "; 
-				fw += "(t) " + rtas_fwl_p;
-				if (rtas_fw_p != "")
-					fw += " (" + rtas_fw_p + ") ";
-				fw += "(p) " + rtas_fwl_b;
-				if (rtas_fw_t != "")
-					fw += " (" + rtas_fw_b + ") ";
+				fw = fwl_t;
+				if (fw_t != "")
+					fw +=  " (" + fw_t + ") ";
+				fw += "(t) " + fwl_p;
+				if (fw_p != "")
+					fw += " (" + fw_p + ") ";
+				fw += "(p) " + fwl_b;
+				if (fw_t != "")
+					fw += " (" + fw_b + ") ";
 				fw += "(b)";
 			} else {
 
 				/* Old style */
-				fw = rtas_fw_t + " (t) " + rtas_fw_p + " (p) " +
-					rtas_fw_b + " (b)";
+				fw = fw_t + " (t) " + fw_p + " (p) " +
+					fw_b + " (b)";
 			}
 
 
@@ -324,11 +159,6 @@ bool printSystem( const vector<Component*>& leaves )
 
 			cout << fw ;
 
-			if( all )
-				cout << "|";
-			else
-				cout << endl;
-
 			vector<DataItem*>::const_iterator j, stop;
 			for( j = c->getDeviceSpecific( ).begin( ),
 				stop = c->getDeviceSpecific( ).end( ); j != stop; ++j )
@@ -336,19 +166,22 @@ bool printSystem( const vector<Component*>& leaves )
 				string val = (*j)->getValue( );
 				if( val.find( "PFW" ) != string::npos )
 				{
-					db_pfw = val.substr( 4 );
-					if (rtas_pfw.empty())
-						rtas_pfw = db_pfw;
+					pfw = val.substr( 4 );
+					if (pfw.empty())
+						pfw = pfw;
 					break;
 				}
 			}
 
-			if( all )
-				cout << "service:";
-			else if( rtas_pfw != "" )
-				cout << "Version of PFW is ";
+			if( pfw != "" ) {
+				if ( all )
+					cout << "|service:";
+				else
+					cout << endl << "Version of PFW is ";
+				cout << pfw;
+			}
+			cout << endl;
 
-			cout << rtas_pfw << endl;
 			return true;
 		}
 
@@ -659,8 +492,6 @@ int main( int argc, char** argv )
 
 		delete vpd;
 	}
-	if (PlatformCollector::platform_type != PF_POWERKVM_HOST)
-		getRtasFirmwareLevel();
 
 	if( root != NULL )
 	{
