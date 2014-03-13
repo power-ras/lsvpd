@@ -33,6 +33,7 @@ namespace lsvpd {
 	                static platform platform_type;
 		        static void get_platform();
 			static string get_platform_name();
+			static string getFirmwareName();
 	};
 }
 

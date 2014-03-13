@@ -86,4 +86,8 @@ error:
 		return "";
 	}
 
+	string PlatformCollector::getFirmwareName()
+	{
+		return getCpuInfoTag("firmware");
+	}
 }
