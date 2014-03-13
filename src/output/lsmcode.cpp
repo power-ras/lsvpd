@@ -153,7 +153,7 @@ bool printSystem( const vector<Component*>& leaves )
 
 
 			if( all )
-				cout << "sys0!system:";
+				cout << "sys0!system: ";
 			else
 				cout << "Version of System Firmware is ";
 
@@ -175,7 +175,7 @@ bool printSystem( const vector<Component*>& leaves )
 
 			if( pfw != "" ) {
 				if ( all )
-					cout << "|service:";
+					cout << "|service: ";
 				else
 					cout << endl << "Version of PFW is ";
 				cout << pfw;
