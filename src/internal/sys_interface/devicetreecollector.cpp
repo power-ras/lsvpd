@@ -462,21 +462,38 @@ ERROR:
 		return 0;
 	}
 
+	/*
+	 * List of Paths which are filtered out.
+	 *
+	 * Each entry is treated as a prefix and is searched
+	 * at the beginning only.
+	 *
+	 */
+
+	static const string ignorePath[] = {
+		"ibm,bsr2@",
+		"interrupt-controller@",
+		"memory@",
+		"xscom@",
+		"psi@",
+		/* Add new patterns above this comment */
+		"",
+	};
+
 	bool isDevice(string str)
 	{
 		bool ok = true;
-		int i;
+		int i = 0;
 
 		/*
 		 * Filter out nodes which are known to be of no interest.
-		 *
-		 * ibm,bsr2@* -> Synchronization helper in hardware.
-		 *
 		 */
-		if ( str.find("ibm,bsr2@") != std::string::npos )
-		{
-			return false;
-		}
+		while ( ignorePath[i] != "" )
+			if ( !str.compare(0, ignorePath[i].size(), ignorePath[i]) )
+				return false;
+			else
+				i++;
+
 		i = str.length();
 		while (ok) {
 			switch (str[i]) {
@@ -942,6 +959,10 @@ ERROR:
 
 		fullList.push_back(rootDir); //Start at top of device tree
 
+		/* Include OPAL VPD dir */
+		if (isPlatformOPAL())
+			fullList.push_back(OPAL_SYS_VPD_DIR);
+
 		while ((fullList.size() - fullListFrontNode) > 0 ) {
 
 			curPath = fullList[fullListFrontNode];
@@ -989,9 +1010,9 @@ ERROR:
 						 INIT_PREF_LEVEL, __FILE__, __LINE__);
 
 					dev = true;
+					// Push all dirs into fullList for future walking
+					fullList.push_back(curPath + "/" + tmpDirName);
 				}
-				// Push all dirs into fullList for future walking
-				fullList.push_back(curPath + "/" + tmpDirName);
 
 				curList.pop_back();
 			}
