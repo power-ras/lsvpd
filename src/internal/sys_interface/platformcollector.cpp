@@ -14,26 +14,60 @@ using namespace std;
 
 namespace lsvpd {
 	platform PlatformCollector::platform_type = PF_NULL;
+
+	static string extractTagValue(char *buf)
+	{
+		buf = strchr(buf, ':');
+		if (!buf)
+			return string();
+		/* skip : */
+		buf++;
+		/* skip spaces */
+		while (isspace(*buf)) buf++;
+		return string(buf);
+	}
+
+	static string getCpuInfoTag(const char *tag)
+	{
+		char buf[1024];
+		int len = strlen(tag);
+		string value = string();
+
+		ifstream ifs(PLATFORM_FILE);
+		Logger log;
+
+		if (!ifs.is_open()) {
+			log.log("Unable to open file /proc/cpuinfo", LOG_WARNING);
+			goto error;
+		}
+
+		buf[0] = '\0';
+
+		do  {
+			ifs.getline(buf, 1024);
+			/* Found the tag */
+			if (!strncmp(buf, tag, len)) {
+				value = extractTagValue(buf);
+				break;
+			}
+		} while (!ifs.eof());
+		ifs.close();
+error:
+		return value;
+	}
+
 	void PlatformCollector::get_platform()
 	{
-		string pf_file = PLATFORM_FILE;
-		ifstream platform_info(pf_file.c_str());
-		if (platform_info.is_open()) {
-			string buffer((istreambuf_iterator<char>(platform_info)), istreambuf_iterator<char>());
-			if (buffer.find("PowerNV") != -1)
-				platform_type = PF_POWERKVM_HOST;
-			else if (buffer.find("pSeries (emulated by qemu)") != -1 )
-				platform_type = PF_POWERKVM_PSERIES_GUEST;
-			else if ( buffer.find("pSeries") != -1 )
-				platform_type = PF_POWERVM_LPAR;
-			else
-				platform_type = PF_ERROR;
-			platform_info.close();
-		}
-		else {
-			Logger logger;
-			logger.log("Unable to open /proc/cpuinfo file", LOG_WARNING);
-		}
+		string platform = getCpuInfoTag("platform");
+
+		if ( platform == "PowerNV" )
+			platform_type = PF_POWERKVM_HOST;
+		else if ( platform == "pSeries (emulated by qemu)" )
+			platform_type = PF_POWERKVM_PSERIES_GUEST;
+		else if ( platform == "pSeries" )
+			platform_type = PF_POWERVM_LPAR;
+		else
+			platform_type = PF_ERROR;
 	}
 
 	string PlatformCollector::get_platform_name()
