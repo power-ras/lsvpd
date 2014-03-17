@@ -83,6 +83,18 @@ exit 0
 
 
 %changelog
+* Mon Mar 17 2014 - Vasant Hegde <hegdevasant@linux.vnet.ibm.com> - 1.7.4
+- Added support to parse VPD on PowerNV platform
+- Filter out known paths from device-tree scan
+- Minor fix in lsmcode output
+- Added platform check to VPD tools
+- Filter directories from device scan
+- Fix possible out of range issue in substr operation
+- Display FirmwareVersion and FirmwareLevel
+
+* Thu Nov 14 2013 -  Suzuki Poulose <suzuki@in.ibm.com> - 1.7.3
+- IBMinvscout: Removed from lsvpd package. Moving to a new package.
+- vpdupdate: Filter ibm,bsr entries from VPD db.
 
 * Thu Aug 22 2013 - Vasant Hegde <hegdevasant@linux.vnet.ibm.com> - 1.7.2
 - vpdupdate: Find the PCI/USB ids files at runtime

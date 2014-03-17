@@ -1,3 +1,12 @@
+1.7.3: Vasant Hegde <hegdevasant@linux.vnet.ibm.com> - 17 March 2014
+Added support to parse VPD on PowerNV platform
+Filter out known paths from device-tree scan
+Minor fix in lsmcode output
+Added platform check to VPD tools
+Filter directories from device scan
+Fix possible out of range issue in substr operation
+Display FirmwareVersion and FirmwareLevel
+
 1.7.3: Suzuki <suzuki@in.ibm.com> - 14 November 2013
 IBMinvscout: Removed from lsvpd package. Moving to a new package.
 vpdupdate: Filter ibm,bsr entries from VPD db.
