@@ -800,10 +800,10 @@ ERROR:
 		{
 			Logger logger;
 			logger.log( interp_err_code(bufSize), LOG_WARNING );
-			return;
+		} else {
+			parseRtasVpd(devs, rtasData, bufSize);
+			delete rtasData;
 		}
-		parseRtasVpd(devs, rtasData, bufSize);
-		delete rtasData;
 
 		/* Grab System parameters, N5 & N6 */
 		getRtasSystemParams( devs );
