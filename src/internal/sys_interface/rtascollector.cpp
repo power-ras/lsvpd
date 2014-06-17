@@ -141,6 +141,7 @@ namespace lsvpd {
 		char err_buf[RTAS_ERR_BUF_SIZE];
 		unsigned int seq = 1, nextSeq;
 		int num = 0, rc;
+		int vpd_changed = 0;
 		char *locCode, *buf;
 
 		list = new rtas_buf_element;
@@ -168,6 +169,7 @@ namespace lsvpd {
 
 			switch (rc) {
 			case CONTINUE:
+				vpd_changed = 0;
 				seq = nextSeq;
 				current->next = new rtas_buf_element;
 
@@ -183,8 +185,16 @@ namespace lsvpd {
 			case SUCCESS:
 				break;
 			case VPD_CHANGED:
-				seq = 1;
 				deleteList(list);
+				vpd_changed ++;
+				/*
+				 * If we keep getting the VPD_CHANGED rc
+				 * for more than a threshold, we quit, than
+				 * looping forever.
+				 */
+				if (vpd_changed > VPD_CHANGED_THRESHOLD)
+					return -RTAS_ERROR;
+				seq = 1;
 				list = new rtas_buf_element;
 				if (!list)
 					return -ENOMEM;

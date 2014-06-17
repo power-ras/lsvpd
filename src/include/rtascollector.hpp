@@ -26,6 +26,9 @@ namespace lsvpd
 	#define PARAMETER_ERROR -3
 	#define VPD_CHANGED     -4
 
+	// Threshold count for number of VPD_CHANGED rc
+	#define VPD_CHANGED_THRESHOLD 5
+
 	// rtas
 	#define PROC_FILE_RTAS_CALL "/proc/device-tree/rtas/ibm,get-vpd"
 	#define RTAS_BUF_SIZE        4096
