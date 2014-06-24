@@ -13,45 +13,34 @@ Group:		Applications/System
 License:	GPLv2+
 Vendor:		IBM Corp.
 URL:		http://linux-diag.sf.net/Lsvpd.html
-Source:		http://downloads.sourceforge.net/linux-diag/%{name}-%{version}.tar.gz
+Source:		http://downloads.sourceforge.net/linux-diag/files/%{name}-new/%{version}/%{name}-%{version}.tar.gz
 
 Requires:	iprutils >= 2.3.12
 Requires(pre):	iprutils >= 2.3.12
 Requires(postun): iprutils >= 2.3.12
 
-BuildRoot:	%{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
-BuildRequires:	zlib-devel librtas-devel
-
-# By default, build without librtas because it does not yet exist in Fedora
-%{!?_with_librtas: %{!?_without_librtas: %define _without_librtas --without-librtas }}
-
-%ifarch ppc
-%{?_with_librtas:BuildRequires: librtas-devel }
-%endif
-%ifarch ppc64
-%{?_with_librtas:BuildRequires: librtas-devel }
-%endif
+BuildRequires:	libvpd-devel librtas-devel
+BuildRequires:	zlib-devel sg3_utils-devel automake libtool
 
 %description
-The lsvpd package contains all of the lsvpd, lscfg and lsmcode
-commands. These commands, along with a scanning program
-called vpdupdate, constitute a hardware inventory
-system. The lsvpd command provides Vital Product Data (VPD) about
-hardware components to higher-level serviceability tools. The lscfg
-command provides a more human-readable format of the VPD, as well as
-some system-specific information.  lsmcode lists microcode and
-firmware levels.  lsvio lists virtual devices, usually only found
-on POWER PC based systems.
+The lsvpd package contains all of the lsvpd, lscfg and lsmcode commands.
+These commands, along with a scanning program called vpdupdate, constitute
+a hardware inventory system. The lsvpd command provides Vital Product Data
+(VPD) about hardware components to higher-level serviceability tools. The
+lscfg command provides a more human-readable format of the VPD, as well as
+some system-specific information. lsmcode lists microcode and firmware
+levels. lsvio lists virtual devices, usually only found on POWER PC based
+systems.
 
 %prep
 %setup -q
-./bootstrap.sh
 
 %build
+./bootstrap.sh
 %configure
 %{__make} %{?_smp_mflags}
 
-%clean 
+%clean
 %{__rm} -rf $RPM_BUILD_ROOT
 
 %install
@@ -63,10 +52,9 @@ on POWER PC based systems.
 # Ignore the vpdupdate failures and enforce a success
 exit 0
 
-
-%files 
+%files
 %defattr(-,root,root,-)
-%doc COPYING INSTALL NEWS README
+%doc COPYING README
 %{_sbindir}/lsvpd
 %{_sbindir}/lscfg
 %{_sbindir}/lsmcode
