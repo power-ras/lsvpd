@@ -12,6 +12,7 @@ update_h_files = src/include/device.hpp \
 		src/include/sysfstreecollector.hpp
 
 AM_CPPFLAGS = -I./src/include
+ACLOCAL_AMFLAGS = -I m4
 
 sbin_PROGRAMS = vpdupdate lsvpd lscfg lsvio lsmcode
 

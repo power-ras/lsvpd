@@ -3,6 +3,7 @@ AC_INIT([lsvpd],[1.7.4],[hegdevasant@in.ibm.com,suzuki@in.ibm.com])
 AC_CONFIG_HEADER(src/include/config.h)
 AM_INIT_AUTOMAKE
 AC_SUBST(DATE, [`date`])
+AC_CONFIG_MACRO_DIR([m4])
 
 LT_INIT
 
