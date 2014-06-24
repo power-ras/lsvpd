@@ -57,7 +57,7 @@ AC_FUNC_LSTAT_FOLLOWS_SLASHED_SYMLINK
 AC_HEADER_MAJOR
 AC_FUNC_MALLOC
 AC_FUNC_STAT
-AC_CHECK_FUNCS([memmove memset mkdir socket strdup strerror strtol uname])
+AC_CHECK_FUNCS([memmove memset mkdir socket strdup strerror strtol uname strchr strndup])
 
 #finished
 AC_CONFIG_FILES([Makefile lsvpd.spec])
