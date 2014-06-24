@@ -31,7 +31,7 @@ AC_CHECK_HEADER([libvpd-2/lsvpd.hpp],,[AC_MSG_ERROR([libvpd header files require
 AC_CHECK_LIB(rtas, rtas_get_vpd, [], [
 			echo "rtas library is required for lsvpd"
 			exit 1 ])
-AC_CHECK_LIB(sqlite3, sqlite3_libversion_number, [], [ 
+AC_CHECK_LIB(sqlite3, sqlite3_libversion_number, [], [
 			echo "sqlite3 library is required for lsvpd"
 			exit 1 ])
 
