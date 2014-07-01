@@ -1,10 +1,14 @@
+#			-*- Autoconf -*-
+# Process this file with autoconf to produce a configure script.
+AC_PREREQ([2.69])
+
 #base
 AC_INIT([lsvpd],[1.7.4],[hegdevasant@in.ibm.com,suzuki@in.ibm.com])
-AC_CONFIG_HEADER(src/include/config.h)
-AM_INIT_AUTOMAKE
+AC_CONFIG_HEADER([config/config.h])
 AC_SUBST(DATE, [`date`])
 AC_CONFIG_MACRO_DIR([m4])
-
+AC_CONFIG_AUX_DIR([config])
+AM_INIT_AUTOMAKE
 LT_INIT
 
 #programs
