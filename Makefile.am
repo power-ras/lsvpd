@@ -54,6 +54,11 @@ lsmcode_SOURCES = src/output/lsmcode.cpp \
 		  src/internal/sys_interface/rtascollector.cpp \
 		$(update_h_files)
 
+man8_MANS = docs/lscfg.8 \
+	docs/lsmcode.8 \
+	docs/lsvio.8 \
+	docs/lsvpd.8 \
+	docs/vpdupdate.8
 
 vpdupdate_LDADD = -lz -lstdc++ -lvpd_cxx
 if SGUTIL1
@@ -76,14 +81,10 @@ lsmcode_LDFLAGS = -Wall
 
 AM_CXXFLAGS = -DDEST_DIR='"${exec_prefix}"' -DVPD_VERSION='"@VERSION@"'
 
-SUBDIRS = docs
-
 install-exec-hook:
 	install -D --mode=644 scsi_templates.conf \
 		${DESTDIR}/etc/lsvpd/scsi_templates.conf
 	install -D --mode=644 cpu_mod_conv.conf \
 		${DESTDIR}/etc/lsvpd/cpu_mod_conv.conf
 
-EXTRA_DIST = docs/lsvpd.8 docs/lscfg.8 docs/lsvio.8 docs/lsmcode.8 \
-		docs/vpdupdate.8 docs/Makefile docs/install.html \
-		bootstrap.sh scsi_templates.conf cpu_mod_conv.conf
+EXTRA_DIST = $(man8_MANS) bootstrap.sh scsi_templates.conf cpu_mod_conv.conf
