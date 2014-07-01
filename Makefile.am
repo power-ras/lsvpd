@@ -54,11 +54,11 @@ lsmcode_SOURCES = src/output/lsmcode.cpp \
 		  src/internal/sys_interface/rtascollector.cpp \
 		$(update_h_files)
 
-man8_MANS = docs/lscfg.8 \
-	docs/lsmcode.8 \
-	docs/lsvio.8 \
-	docs/lsvpd.8 \
-	docs/vpdupdate.8
+man8_MANS = man/lscfg.8 \
+	man/lsmcode.8 \
+	man/lsvio.8 \
+	man/lsvpd.8 \
+	man/vpdupdate.8
 
 vpdupdate_LDADD = -lz -lstdc++ -lvpd_cxx
 if SGUTIL1
