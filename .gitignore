@@ -1,0 +1,90 @@
+#
+# NOTE! Don't add files that are generated in specific
+# subdirectories here. Add them in the ".gitignore" file
+# in that subdirectory instead.
+#
+# NOTE! Please use 'git ls-files -i --exclude-standard'
+# command after changing this file, to see if there are
+# any tracked files which get ignored after the change.
+#
+# Normal rules
+#
+.*
+*.o
+*.o.*
+*.a
+*.s
+*.so
+*.so.dbg
+*.mod.c
+*.i
+*.order
+*.gz
+*.bz2
+*.lzma
+*.zip
+*.lzo
+*.patch
+*.gcno
+
+#
+# Build files
+#
+
+/aclocal.m4
+/autom4te.cache/
+/config.guess
+/config.log
+/config.status
+/config.sub
+/configure
+/depcomp
+/install-sh
+/libtool
+/missing
+/lt-main.sh
+/src/include/config.h
+/src/include/config.h.in
+/Makefile
+/Makefile.in
+/lsvpd.spec
+
+#
+# git files that we don't want to ignore even it they are dot-files
+#
+!.gitignore
+
+# stgit generated dirs
+patches-*
+
+# quilt's files
+patches
+series
+
+# cscope files
+cscope.*
+ncscope.*
+
+# ctags
+tags
+TAGS
+
+# gnu global files
+GPATH
+GRTAGS
+GSYMS
+GTAGS
+
+# Executables
+/lsvpd
+/lsmcode
+/lsvio
+/lscfg
+/vpdupdate
+
+# Man pages
+/docs/*.gz
+
+*.orig
+*~
+\#*#
