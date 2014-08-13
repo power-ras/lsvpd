@@ -1,4 +1,9 @@
-1.7.3: Vasant Hegde <hegdevasant@linux.vnet.ibm.com> - 17 March 2014
+1.7.5: Vasant Hegde <hegdevasant@linux.vnet.ibm.com> - 13 Aug 2014
+Added LE support
+Fixed couple of issues in build tools
+Removed outdated debian build code
+
+1.7.4: Vasant Hegde <hegdevasant@linux.vnet.ibm.com> - 17 March 2014
 Added support to parse VPD on PowerNV platform
 Filter out known paths from device-tree scan
 Minor fix in lsmcode output

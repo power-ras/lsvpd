@@ -2,7 +2,7 @@
 %define version @VERSION@
 
 # Change the release number here
-%define relver	0
+%define relver	1
 
 Name:		%{name}
 Version:	%{version}
@@ -71,6 +71,11 @@ exit 0
 
 
 %changelog
+* Wed Aug 13 2014 - Vasant Hegde <hegdevasant@linux.vnet.ibm.com> - 1.7.5
+- Added LE support
+- Fixed couple of issues in build tools
+- Removed outdated debian build code
+
 * Mon Mar 17 2014 - Vasant Hegde <hegdevasant@linux.vnet.ibm.com> - 1.7.4
 - Added support to parse VPD on PowerNV platform
 - Filter out known paths from device-tree scan
