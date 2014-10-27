@@ -312,9 +312,12 @@ int main( int argc, char** argv )
 
 	switch (PlatformCollector::platform_type) {
 	case PF_POWERKVM_PSERIES_GUEST:
+	case PF_NULL:
 	case PF_ERROR:
 		cout<< "lsmcode is not supported on the " << platform << endl;
 		return 1;
+	default:
+		;
 	}
 
 	struct option longOpts [] =

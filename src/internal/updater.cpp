@@ -91,6 +91,8 @@ int main( int argc, char** argv )
 	case PF_ERROR:
 		cout<< "vpdupdate is not supported on the " << platform << endl;
 		return 1;
+	default:
+		;
 	}
 
 	struct option longOpts [] =

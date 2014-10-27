@@ -395,6 +395,14 @@ error:
 			return parseRtasVPDHeader(buf, fruName, recordStart);
 		else if (isPlatformOPAL())
 			return parseOpalVPDHeader(buf, fruName, recordStart);
+		else {
+			Logger log;
+			ostringstream os;
+			os << "Unsupported platform ";
+			log.log(os.str(), LOG_WARNING);
+
+			return -1;
+		}
 	}
 
 	/**

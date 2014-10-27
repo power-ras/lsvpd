@@ -743,6 +743,8 @@ int main( int argc, char** argv )
 		cout<< argv[0] << " is not supported on the "
 			<< platform << endl;
 		return 1;
+	default:
+		;
 	}
 
 	if (geteuid() != 0) {

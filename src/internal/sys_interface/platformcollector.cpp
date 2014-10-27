@@ -80,6 +80,7 @@ error:
 			return "PowerVM pSeries LPAR";
 		case PF_POWERKVM_PSERIES_GUEST:
 			return "PowerKVM pSeries Guest";
+		case PF_NULL:
 		case PF_ERROR:
 			return "Unknown";
 		}

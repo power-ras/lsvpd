@@ -407,6 +407,8 @@ int main( int argc, char** argv )
 	case PF_ERROR:
 		cout<< "lsvpd is not supported on the " << platform << " platform" << endl;
 		return 1;
+	default:
+		;
 	}
 
 	struct option longOpts [] =
