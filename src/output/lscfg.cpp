@@ -190,10 +190,10 @@ void printSpecific( Component* root )
 		loc = node.rfind( '/' );
 		node = node.substr( loc +1 );
 		loc = node.find( '@' );
-		if( loc != string::npos )
+		if( loc != (int) string::npos )
 		{
 			cout << "  Name:  ";
-			if( loc == string::npos )
+			if( loc == (int) string::npos )
 				cout << node;
 			else
 				cout << node.substr( 0, loc );
@@ -609,7 +609,7 @@ int getCPUModelName(System *root, string &name)
 		string model_tmp = HelperFunctions::readMatchFromFile("/proc/cpuinfo", "model name");
 		if (model_tmp.length() > 0) {
 			int beg = model_tmp.find(": ");
-			if (beg != string::npos) 
+			if (beg != (int) string::npos)
 				name = model_tmp.substr(beg + 1, model_tmp.length() - beg + 1);
 				return 0;
 		} 

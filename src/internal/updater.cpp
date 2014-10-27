@@ -356,7 +356,7 @@ int ensureEnv( const string& env )
 	}
 
 	int idx;
-	if( ( idx = env.rfind( '/' ) ) == string::npos )
+	if( ( idx = env.rfind( '/' ) ) == (int) string::npos )
 	{
 		return ret;
 	}

@@ -587,7 +587,7 @@ namespace lsvpd
 	Component *Gatherer::findComponent( const vector<Component*> devs,
 		string idNode )
 	{
-		for (int i = 0; i < devs.size(); i++)
+		for (int i = 0; i < (int) devs.size(); i++)
 			if(devs[i]->idNode.getValue() == idNode)
 				return devs[i];
 

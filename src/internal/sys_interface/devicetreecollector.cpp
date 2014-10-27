@@ -168,7 +168,7 @@ namespace lsvpd
 
 		if( rtasData == NULL || rtasDataSize <= 0 )
 			return;
-		while( size < rtasDataSize && ret > 0 )
+		while( (int) size < rtasDataSize && (int) ret > 0 )
 		{
 			Component* c = new Component( );
 			ret = parseVPDBuffer( c, rtasData );
@@ -556,7 +556,7 @@ ERROR:
 	Component *DeviceTreeCollector::findComponent(
 		const vector<Component*> devs, string devPath )
 	{
-		for (int i = 0; i < devs.size(); i++)
+		for (int i = 0; i < (int) devs.size(); i++)
 			if (devs[i]->deviceTreeNode.getValue() == devPath)
 				return devs[i];
 
@@ -715,7 +715,7 @@ ERROR:
 
 			sysDev = fillMe->sysFsLinkTarget.dataValue;
 			while (sysDev.length() > 1) {
-				if ((loc = sysDev.rfind("/", sysDev.length())) != string::npos )
+				if ((loc = sysDev.rfind("/", sysDev.length())) != (int) string::npos )
 					sysDev = sysDev.substr(0, loc);
 
 				for( i = devs.begin( ), end = devs.end( ); i != end; ++i ) {
@@ -1065,7 +1065,7 @@ ERROR:
 		if( val == "" )
 			return;
 		os << "U";
-		while( ( pos = val.find( "-" ) ) != string::npos )
+		while( ( pos = val.find( "-" ) ) != (int) string::npos )
 		{
 			val[ pos ] = '.';
 		}
@@ -1223,7 +1223,7 @@ ERROR:
 		if( comp->devBus.dataValue == "scsi" )
 		{
 			index = addr.find( ':' );
-			if (index == string::npos)
+			if (index == (int) string::npos)
 				return;
 			major = addr.substr( 0, index );
 			index = addr.rfind( ':' );
@@ -1232,13 +1232,13 @@ ERROR:
 		else if( comp->devBus.dataValue == "ide" )
 		{
 			index = addr.find( '.' );
-			if (index == string::npos)
+			if (index == (int) string::npos)
 				return;
 			major = addr.substr( 0, index );
 			minor = addr.substr( index + 1 );
 		}
 		else if( comp->devBus.dataValue == "usb" &&
-			( index = addr.find( ':' ) ) != string::npos )
+			( index = addr.find( ':' ) ) != (int) string::npos )
 		{
 			major = addr.substr( 0, index );
 			minor = addr.substr( index + 1 );

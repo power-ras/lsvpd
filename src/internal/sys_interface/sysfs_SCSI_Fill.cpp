@@ -368,9 +368,9 @@ namespace lsvpd
 			beg = 1;
 			end = s1.length();
 
-			if ( string::npos == (end = s1.find("*", beg))) {
+			if ( (int) string::npos == (end = s1.find("*", beg))) {
 				//No more stars - base case
-				if (string::npos != (z = s2.find(s1.substr(beg, end), 0))) {
+				if ((int) string::npos != (z = s2.find(s1.substr(beg, end), 0))) {
 					return true;
 				}
 			}
@@ -422,7 +422,7 @@ namespace lsvpd
 	        string tmp;
 
 	        char * ret = new char[ len*2+1 ];
-	        for (i = 0; i < len ; i++) {
+	        for (i = 0; i < (int) len ; i++) {
 	                snprintf(&ret[i*2], 3, "%.2X", str[i]);
 	        }
 
@@ -443,7 +443,7 @@ namespace lsvpd
         if (str_t.length() == 0)
         	return str_t;
 
-        for (i = 0; i < str_t.length(); i++) {
+        for (i = 0; i < (int) str_t.length(); i++) {
                 snprintf(&ret[i*2], 3, "%.2X", str[i]);
         }
 
@@ -465,10 +465,10 @@ namespace lsvpd
 			return "";
 
 		i = 0;
-		while ((i < pattern.length()) && (pattern[i] != ':'))
+		while ((i < (int) pattern.length()) && (pattern[i] != ':'))
 			i++;
 
-		if (i >= pattern.length())
+		if (i >= (int) pattern.length())
 			return "";
 
 		eon = i;
@@ -488,14 +488,14 @@ namespace lsvpd
 		string str;
 		char **endptr = NULL;
 
-		if 	(pattern.length() <= 0)
+		if 	((int) pattern.length() <= 0)
 			return -1;
 
 		i = 0;
-		while ((i < pattern.length()) && (pattern[i] != ':'))
+		while ((i < (int) pattern.length()) && (pattern[i] != ':'))
 			i++;
 
-		if (i >= pattern.length())
+		if (i >= (int) pattern.length())
 			return -1;
 
 		eon = i + 1;
@@ -545,7 +545,7 @@ namespace lsvpd
 		if (beg >= end)
 			return "";
 
-		while ((str[beg] == 2) && (beg < strlen(data)) && (beg < end))
+		while ((str[beg] == 2) && (beg < (int) strlen(data)) && (beg < end))
 			beg++;
 
 		str = str.substr(beg, end - beg);
@@ -566,7 +566,7 @@ namespace lsvpd
 		if (templ.length() == 0)
 			return 0;
 
-		while (i < templ.length())
+		while (i < (int) templ.length())
 			if (templ[i++] == '?') {
 				count++;
 			}
@@ -590,7 +590,7 @@ namespace lsvpd
 		if (num >= numPageTemplates(templ))
 			return "";
 
-		while (i < templ.length() && end == templ.length()) {
+		while (i < (int) templ.length() && end == (int) templ.length()) {
 			if (templ[i] == '?' && beg != -1) {
 				end = i;
 			}
@@ -626,20 +626,20 @@ namespace lsvpd
 		/* Get page code */
 		while (page_spec_template[i-1] != '0'
 				&& page_spec_template[i] != 'x'
-				&& i < page_spec_template.length())
+				&& i < (int) page_spec_template.length())
 			i++;
 		beg = i + 1;
-		while (page_spec_template[i] != '=' && i < page_spec_template.length())
+		while (page_spec_template[i] != '=' && i < (int) page_spec_template.length())
 			i++;
 		end = i;
-		if ((beg >= page_spec_template.length())
-			|| (end >= page_spec_template.length()))
+		if ((beg >= (int) page_spec_template.length())
+			|| (end >= (int) page_spec_template.length()))
 			return -1;
 		page_code = page_spec_template.substr(beg, end - beg);
 
 		/* Get format string */
 		beg = end + 1;
-		while (page_spec_template[i] != ';' && i < page_spec_template.length())
+		while (page_spec_template[i] != ';' && i < (int) page_spec_template.length())
 			i++;
 		end = i;
 		format = page_spec_template.substr(beg, end - beg);return 0;
@@ -693,7 +693,7 @@ namespace lsvpd
 		else
 			dataCurLoc = 0;
 
-		for (int i = 0; i < (*format).length(); i++)
+		for (int i = 0; i < (int) (*format).length(); i++)
 			if ((*format)[i] == ',') {
 				eof[fieldTotal] = i;
 				fieldTotal++;
@@ -951,7 +951,7 @@ namespace lsvpd
 	        i = 4;
 	        last = device_sg_read_buffer[i];
 	        i++;
-	        while (ret && (i < (size_t) device_sg_read_buffer[3])) {
+	        while (ret && (i < (int) device_sg_read_buffer[3])) {
 	                ret = (device_sg_read_buffer[i] > last);
 	                last = device_sg_read_buffer[i];
 	                i++;
@@ -1336,7 +1336,7 @@ namespace lsvpd
 			return -FILE_NOT_FOUND;
 
 		beg = end = 0;
-		while (end < str.length() && str[end] != ':')
+		while (end < (int) str.length() && str[end] != ':')
 			end++;
 
 		tmp = atoi(str.substr(beg, end).c_str());
@@ -1344,7 +1344,7 @@ namespace lsvpd
 
 		beg = end + 1;
 		end = beg;
-		while (end < str.length() && str[end] != ':') {
+		while (end < (int) str.length() && str[end] != ':') {
 			end++;
 		}
 
@@ -1376,17 +1376,17 @@ namespace lsvpd
 
 		start = output.find(field);
 
-		if (start == string::npos)
+		if (start == (int) string::npos)
 			return "";
 
 		start = output.find(':', start);
-		if (start == string::npos)
+		if (start == (int) string::npos)
 			return "";
 
 		/* Skip the space */
 		start++;
 		end = output.find('\n', start);
-		if (end == string::npos)
+		if (end == (int) string::npos)
 			end = output.length();
 		return string(output.substr(start, end - start));
 	}

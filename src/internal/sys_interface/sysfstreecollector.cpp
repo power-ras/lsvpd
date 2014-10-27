@@ -119,18 +119,18 @@ namespace lsvpd
 		string tmp = fillMe->sysFsNode.getValue();
 		int loc, ploc;
 
-		if ( (loc = tmp.rfind("/",tmp.length())) != string::npos ) {
+		if ( (loc = tmp.rfind("/",tmp.length())) != (int) string::npos ) {
 			tmp = tmp.substr(loc + 1, tmp.length());
 
-			if ( (loc = tmp.find(":", 0)) != string::npos)
+			if ( (loc = tmp.find(":", 0)) != (int) string::npos)
 				fillMe->addDeviceSpecific("XH", "SCSI Host", tmp.substr(0, loc), 60);
 
 			ploc = loc + 1;
-			if ( (loc = tmp.find(":", ploc)) != string::npos)
+			if ( (loc = tmp.find(":", ploc)) != (int) string::npos)
 				fillMe->addDeviceSpecific("XB", "SCSI Bus",
 													tmp.substr(ploc, loc - ploc), 60);
 			ploc = loc + 1;
-			if ( (loc = tmp.find(":", ploc)) != string::npos)
+			if ( (loc = tmp.find(":", ploc)) != (int) string::npos)
 				fillMe->addDeviceSpecific("XT", "SCSI Target",
 											tmp.substr(ploc, loc - ploc), 60);
 			ploc = loc + 1;
@@ -144,7 +144,7 @@ namespace lsvpd
 		string tmp = fillMe->sysFsNode.getValue();
 		int loc;
 
-		if ( (loc = tmp.rfind("/",tmp.length())) != string::npos )
+		if ( (loc = tmp.rfind("/",tmp.length())) != (int) string::npos )
 			fillMe->addDeviceSpecific("XI", "IDE Device Identifier",
 					tmp.substr(loc + 1, tmp.length()), 60);
 
@@ -308,7 +308,7 @@ namespace lsvpd
 	Component *SysFSTreeCollector::findComponent(const vector<Component*> devs,
 		string sysPath )
 	{
-		for (int i = 0; i < devs.size(); i++) {
+		for (int i = 0; i < (int) devs.size(); i++) {
 			if (devs[i]->sysFsNode.getValue() == sysPath) {
 				return devs[i];
 			}
@@ -1453,7 +1453,7 @@ namespace lsvpd
 		string val = getAttrValue( classDir, "address" );
 		val = val.substr( 0, 17 );
 		int pos;
-		while( ( pos = val.find( ':' ) ) != string::npos )
+		while( ( pos = val.find( ':' ) ) != (int) string::npos )
 		{
 			val.erase( pos, 1 );
 		}
