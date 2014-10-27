@@ -149,7 +149,7 @@ namespace lsvpd
 				 *   The specified data
 				 */
 				void setVPDField( Component* fillMe, const string& key,
-					const string& val , char *file, int lineNum);
+					const string& val , const char *file, int lineNum);
 
 				/**
 				 * Set the appropriate data field in the System object.
@@ -162,7 +162,7 @@ namespace lsvpd
 				 *   THe VPD data
 				 */
 				void setVPDField( System* sys, const string& key,
-					const string& val , char *file, int lineNum);
+					const string& val , const char *file, int lineNum);
 				/**
 				 * Convert the fru-type key to description.
 				 */

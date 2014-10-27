@@ -209,7 +209,7 @@ out:
 	 * 		Should be set to __LINE__ at call point
 	 */
 	void ICollector::setVPDField( Component* fillMe, const string& key,
-		const string& val , char *file, int lineNum)
+		const string& val , const char *file, int lineNum)
 	{
 		if( key == "EC" )
 			fillMe->mEngChangeLevel.setValue( val, 90, file, lineNum );
@@ -279,7 +279,7 @@ out:
 	}
 
 	void ICollector::setVPDField( System* sys, const string& key,
-		const string& val , char *file, int lineNum)
+		const string& val , const char *file, int lineNum)
 	{
 		if( key == "BR" )
 			sys->mBrand.setValue( val, 70, file, lineNum );
