@@ -486,7 +486,7 @@ namespace lsvpd
 	{
 		int i, eon, value; //End of name field
 		string str;
-		char **endptr;
+		char **endptr = NULL;
 
 		if 	(pattern.length() <= 0)
 			return -1;
@@ -774,9 +774,7 @@ namespace lsvpd
 							int subtype,
 							string *subtypeDS)
 	{
-		bool ret;
 		string ds;
-		ret = false;
 		string dataTmp = string(data);
 		string z0;
 		Logger log;
@@ -870,17 +868,6 @@ namespace lsvpd
 	        device_close(device_fd, major, minor, mode);
 	        return -ERROR_ACCESSING_DEVICE;
 
-	}
-
-	static int bufferIsEmpty(char *device_sg_read_buffer, int bufSize)
-	{
-		int i = 0;
-        while (i < bufSize && device_sg_read_buffer[i] == '\0')
-        	i++;
-        if (i == bufSize)
-        	return 0;
-        else
-        	return -1;
 	}
 
 	/* Calculate the length of the response from SG Utils */
@@ -1120,7 +1107,6 @@ namespace lsvpd
 		int pageCodeInt;
 		int rc;
 		string str;
-		int loc;
 		char vendor[32], model[32], firmware[32];
 
 		memset(vendor, '\0', 32);
@@ -1146,20 +1132,16 @@ namespace lsvpd
 			/* Stuff the returned buffer into a string for easier parsing */
 			int j = 8;
 			while (j < 40) {
-				if (buffer[j] == ' ') {
-					loc = j;
+				if (buffer[j] == ' ')
 					break;
-				}
 				j++;
 			}
 			memcpy(vendor, &buffer[8], &buffer[j] - &buffer[8]);
 
 			j = 16;
 			while (j < 48) {
-				if (buffer[j] == ' ') {
-					loc = j;
+				if (buffer[j] == ' ')
 					break;
-				}
 				j++;
 			}
 			memcpy(model, &buffer[16], &buffer[j] - &buffer[16]);
@@ -1324,7 +1306,6 @@ namespace lsvpd
 		int tmp, useGeneric = 0;
 		int beg, end;
 		string devClass, link, genericPath;
-		bool doneAIX = false;
 		vector<DataItem*>::const_iterator j, stop;
 
 		if (fillMe->idNode.getValue().empty())
@@ -1459,7 +1440,6 @@ namespace lsvpd
 		string sg, output;
 		char *devSg;
 		string cmd;
-		int i;
 
 		if (path == "")
 			return;

@@ -205,7 +205,7 @@ namespace lsvpd
 	bool DeviceTreeCollector::fillQuickVPD(Component * fillMe)
 	{
 		string val, path, path_tmp;
-		int done = 0, i;
+		int i;
 
 		/* Grab an easy AIX Name, higher quality than the base AIX */
 		val = getAttrValue( fillMe->deviceTreeNode.dataValue, "name" );
@@ -955,7 +955,6 @@ ERROR:
 		string curPath, tmpDirName, devType;
 		Component *tmp;
 		FSWalk fsw = FSWalk();
-		bool dev;
 
 		fullList.push_back(rootDir); //Start at top of device tree
 
@@ -970,7 +969,6 @@ ERROR:
 
 			while (curList.size() > 0) {
 				tmpDirName = curList.back();
-				dev = false;
 
 				if (isDevice(tmpDirName)) {
 					// Create new component
@@ -1009,14 +1007,13 @@ ERROR:
 					tmp->mParent.setValue("/proc/device-tree",
 						 INIT_PREF_LEVEL, __FILE__, __LINE__);
 
-					dev = true;
 					// Push all dirs into fullList for future walking
 					fullList.push_back(curPath + "/" + tmpDirName);
 				}
 
 				curList.pop_back();
 			}
-		fullListFrontNode++;
+			fullListFrontNode++;
 			processed++;
 		}
 

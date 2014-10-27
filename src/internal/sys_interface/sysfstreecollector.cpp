@@ -347,7 +347,6 @@ namespace lsvpd
 	{
 		vector <string> children;
 		vector <Component*>::iterator parent,tmp;
-		int i, j;
 		string devNode, devName;
 
 		/* Remove duplicate devices */
@@ -852,7 +851,6 @@ namespace lsvpd
 		vector<string> listing;
 		Component *tmpDev;
 		string tmp, devName, parentDev;
-		int tmp_count = 0;
 		char *parent;
 
 		parent = strdup(parentDir.c_str());

@@ -310,7 +310,6 @@ out:
 	string ICollector::getFruDescription(string &key)
 	{
 		const char *fru_type = key.c_str();
-		char *desc = NULL;
 
 		switch (fru_type[0]) {
 		case 'A':

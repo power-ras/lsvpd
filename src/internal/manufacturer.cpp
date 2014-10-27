@@ -43,7 +43,6 @@ namespace lsvpd
 
 	Manufacturer::Manufacturer( ifstream& pciID )
 	{
-		int devID;
 		string in;
 		bool done = false;
 		char str[4096];

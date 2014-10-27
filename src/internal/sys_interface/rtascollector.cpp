@@ -36,17 +36,6 @@ namespace lsvpd {
 
 #ifdef HAVE_LIBRTAS
 
-	static bool checkRtasCall(void)
-	{
-		int fd = 0;
-		if ((fd = open(PROC_FILE_RTAS_CALL, O_RDONLY, 0)) < 0)
-			return false;
-		else {
-			close(fd);
-			return true;
-		}
-	}
-
 	/**
 	 * Based on rtas_ibm_get_vpd.c by
 	 *  @author Michael Strosaker <strosake@us.ibm.com>
@@ -138,9 +127,8 @@ namespace lsvpd {
 	{
 		int size = 0;
 		struct rtas_buf_element *current, *list;
-		char err_buf[RTAS_ERR_BUF_SIZE];
 		unsigned int seq = 1, nextSeq;
-		int num = 0, rc;
+		int rc;
 		int vpd_changed = 0;
 		char *locCode, *buf;
 
