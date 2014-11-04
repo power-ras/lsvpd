@@ -404,7 +404,7 @@ int main( int argc, char** argv )
 			gzFile gzf = gzopen( path.c_str( ), "rb" );
 			if( gzf == NULL )
 			{
-				cout << "Faile to open database archive " << path << endl;
+				cout << "Failed to open database archive " << path << endl;
 				return 1;
 			}
 
