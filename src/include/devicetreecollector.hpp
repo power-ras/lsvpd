@@ -51,6 +51,7 @@ namespace lsvpd
 	#define OPAL_SYS_FW_ML_FILE	"ml-version"
 	#define OPAL_SYS_FW_MI_FILE	"mi-version"
 	#define OPAL_SYS_FW_CL_FILE	"git-id"
+	#define OPAL_SYS_FW_CL_FILE2	"version"
 
 	/**
 	 * DeviceTreeCollector contains the logic for device discovery and VPD

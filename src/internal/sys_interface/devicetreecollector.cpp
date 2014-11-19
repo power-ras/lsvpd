@@ -837,11 +837,17 @@ ERROR:
 		if (val.length() > 0)
 			setVPDField( c, string("MI"), val.substr(3), __FILE__, __LINE__ );
 
-		val = getAttrValue( os.str( ), OPAL_SYS_FW_CL_FILE );
+		val = getAttrValue( os.str( ), OPAL_SYS_FW_CL_FILE2 );
 		if (val.length() > 0) {
-			string firmware = PlatformCollector::getFirmwareName();
-			val = firmware + " " + val;
+			val = "OPAL " + val;
 			setVPDField( c, string("CL"), val, __FILE__, __LINE__ );
+		} else {
+			val = getAttrValue( os.str( ), OPAL_SYS_FW_CL_FILE );
+			if (val.length() > 0) {
+				string firmware = PlatformCollector::getFirmwareName();
+				val = firmware + " " + val;
+				setVPDField( c, string("CL"), val, __FILE__, __LINE__ );
+			}
 		}
 
 		devs.push_back( c );
