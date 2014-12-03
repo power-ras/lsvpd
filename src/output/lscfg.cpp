@@ -600,10 +600,46 @@ int initCPUModelList(const string& filename)
 	return 0;
 }
 
+int getCPUModelNameFromList(System *root, string &name)
+{
+	vector<model_conv *>::iterator i, end;
+
+	if (initCPUModelList(IBM_CPU_MODEL_LIST))
+		return -ENOENT;
+
+	i = cpu_models.begin();
+	end = cpu_models.end();
+	while (++i != end) {
+		if ((*i)->model_number == root->getMachineModel()) {
+			name = (*i)->model_name;
+			return 0;
+		}
+	}
+
+	return -1;
+}
+
+int OpalgetCPUModelName(System *root, string &name)
+{
+	FILE *fin;
+	char buf[512];
+
+	fin = fopen ("/proc/device-tree/model-name", "r");
+	if (fin != NULL) {
+		if (fgets(buf, 512, fin) != NULL) {
+			name = string (buf);
+			return 0;
+		}
+	}
+
+	return -1;
+}
+
 int getCPUModelName(System *root, string &name)
 {
 	vector<model_conv *>::iterator i, end;
-	
+	int platform = PlatformCollector::platform_type;
+
 	if (root->getMachineModel().length() <= 0) {
 		/* Likely on a non-Power system.  Get CPU model info from /proc/cpuinfo */
 		string model_tmp = HelperFunctions::readMatchFromFile("/proc/cpuinfo", "model name");
@@ -615,21 +651,16 @@ int getCPUModelName(System *root, string &name)
 		} 
 		return -1;
 	}
-	
-	if (initCPUModelList(IBM_CPU_MODEL_LIST))
-		return -ENOENT;
-		
-	i = cpu_models.begin();
-	end = cpu_models.end();
-	while (++i != end) {
-		if ((*i)->model_number == root->getMachineModel()) {
-			name = (*i)->model_name;
-			return 0;
-		}
-	}
-	return -1;
-}
 
+	/*
+	 * On PowerNV platform we get model name in device tree.
+	 * On pSeries we have to rely on static file.
+	 */
+	if (platform ==  PF_POWERKVM_HOST)
+		return OpalgetCPUModelName(root, name);
+	else
+		return getCPUModelNameFromList(root, name);
+}
 
 void printVPD( System* root )
 {
