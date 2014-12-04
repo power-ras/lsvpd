@@ -58,16 +58,36 @@ error:
 
 	void PlatformCollector::get_platform()
 	{
-		string platform = getCpuInfoTag("platform");
+		string buf;
+		ifstream ifs(PLATFORM_FILE);
+		Logger log;
 
-		if ( platform == "PowerNV" )
-			platform_type = PF_POWERKVM_HOST;
-		else if ( platform == "pSeries (emulated by qemu)" )
-			platform_type = PF_POWERKVM_PSERIES_GUEST;
-		else if ( platform == "pSeries" )
-			platform_type = PF_POWERVM_LPAR;
-		else
+		if (!ifs.is_open()) {
+			log.log("Unable to open file /proc/cpuinfo", LOG_WARNING);
 			platform_type = PF_ERROR;
+			return;
+		}
+
+		buf[0] = '\0';
+
+		while (getline(ifs, buf)) {
+			if (strstr(buf.c_str(), "PowerNV")) {
+				platform_type = PF_POWERKVM_HOST;
+				break;
+			} else if (strstr(buf.c_str(), "pSeries (emulated by qemu)")) {
+				platform_type = PF_POWERKVM_PSERIES_GUEST;
+				break;
+			} else if (strstr(buf.c_str(), "pSeries")) {
+				platform_type = PF_POWERVM_LPAR;
+				/* catch model for PowerNV guest */
+				continue;
+			}
+		}
+
+		if (platform_type == PF_NULL)
+			platform_type = PF_ERROR;
+
+		ifs.close();
 	}
 
 	string PlatformCollector::get_platform_name()
