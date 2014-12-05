@@ -22,6 +22,11 @@ AC_PROG_INSTALL
 AC_PROG_LN_S
 AC_PROG_MAKE_SET
 
+AC_COMPILE_IFELSE(
+		  [AC_LANG_PROGRAM([int i;])],
+		  [],
+		  [AC_MSG_ERROR([C++ compiler is missing])],
+		  )
 #headers
 AC_HEADER_STDBOOL
 AC_TYPE_SIZE_T
