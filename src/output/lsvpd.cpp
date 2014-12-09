@@ -398,7 +398,7 @@ int main( int argc, char** argv )
 	bool compressed = false;
 	System * root = NULL;
 	VpdRetriever* vpd = NULL;
-	int index;
+	int index, first = 1;
 
 	string platform = PlatformCollector::get_platform_name();
 
@@ -473,13 +473,20 @@ int main( int argc, char** argv )
 
 			case -1:
 				done = true;
+				if ( first && argc > 1 ) {
+					printUsage( );
+					return 0;
+				}
 				break;
 
 			case 'h':
-			default:
 				printUsage( );
 				return 0;
+			default:
+				printUsage( );
+				return -1;
 		}
+		first = 0;
 	}
 
 	if( path != "" )
