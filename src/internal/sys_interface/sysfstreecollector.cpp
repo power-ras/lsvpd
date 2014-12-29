@@ -931,23 +931,24 @@ namespace lsvpd
 		FILE *fi;
 		int i;
 
-        HelperFunctions::fs_fixPath(sysPath);
-        sysPath += "/devspec";
+	        HelperFunctions::fs_fixPath(sysPath);
+		sysPath += "/devspec";
 
-        buf = sysPath.c_str();
-        if ((lstat(buf, &astats)) != 0) {
-            return string("");
-        }
+	        buf = sysPath.c_str();
+		if ((lstat(buf, &astats)) != 0) {
+			return string("");
+		}
 
 		// Read Results
 		fi = fopen(buf , "r");
 		if (fi != NULL) {
-			fgets(buf2, 512, fi);
-			i = 0;
-			while (buf2[i] != '\0') {
-				if (buf2[i] == '\n')
-					buf2[i] = '\0';
-				i++;
+			if (fgets(buf2, 512, fi) != NULL) {
+				i = 0;
+				while (buf2[i] != '\0') {
+					if (buf2[i] == '\n')
+						buf2[i] = '\0';
+					i++;
+				}
 			}
 			fclose(fi);
 		}

@@ -973,7 +973,7 @@ namespace lsvpd
 	int doSGQuery(int device_fd, char *device_sg_read_buffer, int bufSize,
 					int evpd, int page_code, int cmd = 0)
 	{
-		int len, ret_ll, ret_san;
+		int len = 0 , ret_ll, ret_san;
 
 //		coutd << "doSGQuery:  " << __LINE__ << " : Querying with evpd: " << evpd << ", page_code = " << page_code << ", cmd = " << cmd
 //				<< ", bufSize = " << bufSize << endl;
