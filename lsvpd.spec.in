@@ -12,6 +12,7 @@ Summary:	VPD/hardware inventory utilities for Linux
 Group:		Applications/System
 License:	GPLv2+
 Vendor:		IBM Corp.
+ExclusiveArch:	ppc64 ppc ppc64le
 URL:		http://linux-diag.sf.net/Lsvpd.html
 Source:		http://downloads.sourceforge.net/linux-diag/files/%{name}-new/%{version}/%{name}-%{version}.tar.gz
 
