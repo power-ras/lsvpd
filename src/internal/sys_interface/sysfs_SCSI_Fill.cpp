@@ -1443,16 +1443,22 @@ namespace lsvpd
 
 		if (path == "")
 			return;
+
 		devSg = strdup(path.c_str());
-		sg = basename(devSg);
-		free(devSg);
-		if (sg == "")
-			return;
-		cmd = "2>/dev/null iprconfig -c show-details " + sg;
-		if (HelperFunctions::execCmd(cmd.c_str(), output)) 
+		if (devSg == NULL)
 			return;
 
+		sg = basename(devSg);
+		if (sg == "")
+			goto out;
+
+		cmd = "2>/dev/null iprconfig -c show-details " + sg;
+		if (HelperFunctions::execCmd(cmd.c_str(), output))
+			goto out;
+
 		parseIPRData(fillMe, output);
+out:
+		free(devSg);
 	}
 
 	/********************************************************************
