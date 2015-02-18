@@ -230,9 +230,11 @@ using namespace lsvpd;
                     continue;
 
             memset(file_path, 0, SYSFS_PATH_MAX);
-            strcpy(file_path, path);
+            strncpy(file_path, path, SYSFS_PATH_MAX - 1);
             strcat(file_path, "/");
             strcat(file_path, dirent->d_name);
+
+            file_path[SYSFS_PATH_MAX - 1] = '\0';
 
             if (type == 'f' && fs_isFile(file_path)) {
             	list.push_back(string(dirent->d_name));
