@@ -231,8 +231,11 @@ using namespace lsvpd;
 
             memset(file_path, 0, SYSFS_PATH_MAX);
             strncpy(file_path, path, SYSFS_PATH_MAX - 1);
-            strcat(file_path, "/");
-            strcat(file_path, dirent->d_name);
+
+            if (strlen(file_path) + 1 < SYSFS_PATH_MAX)
+		strncat(file_path, "/", 1);
+            if (strlen(file_path) + strlen(dirent->d_name) < SYSFS_PATH_MAX)
+		strncat(file_path, dirent->d_name, strlen(dirent->d_name));
 
             file_path[SYSFS_PATH_MAX - 1] = '\0';
 
