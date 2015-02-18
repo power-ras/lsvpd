@@ -1484,7 +1484,8 @@ namespace lsvpd
 			memset( &ifr, 0, sizeof( ifr ) );
 			memset( &info, 0, sizeof( ethtool_drvinfo ) );
 			info.cmd = ETHTOOL_GDRVINFO;
-			strncpy( ifr.ifr_name, (*i)->getValue().c_str(), IFNAMSIZ );
+			strncpy( ifr.ifr_name, (*i)->getValue().c_str(), IFNAMSIZ - 1 );
+			ifr.ifr_name[IFNAMSIZ - 1] = '\0';
 			ifr.ifr_data = (caddr_t)&info;
 
 			if( ioctl( fd, SIOCETHTOOL, &ifr ) == -1 )
