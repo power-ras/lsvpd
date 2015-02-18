@@ -628,6 +628,7 @@ int OpalgetCPUModelName(System *root, string &name)
 	if (fin != NULL) {
 		if (fgets(buf, 512, fin) != NULL) {
 			name = string (buf);
+			fclose(fin);
 			return 0;
 		}
 	}
