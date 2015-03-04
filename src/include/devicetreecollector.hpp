@@ -208,7 +208,7 @@ namespace lsvpd
 				vector<Component*> devs);
 			void buildSCSILocCode(Component *fillMe, vector<Component*> devs);
 
-			vector<Component*> getComponentsVector( vector<Component*>& devs );
+			void getComponentsVector( vector<Component*>& devs );
 
 			bool setup(const string path_t );
 

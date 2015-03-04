@@ -171,6 +171,9 @@ namespace lsvpd
 		while( (int) size < rtasDataSize && (int) ret > 0 )
 		{
 			Component* c = new Component( );
+			if ( c == NULL )
+				return;
+
 			ret = parseVPDBuffer( c, rtasData );
 			if( ret == 0 )
 			{
@@ -339,6 +342,8 @@ namespace lsvpd
 		if (ptr + dlen > dataEnd)
 			goto error;
 		*fruName = new char [ dlen + 1 ];
+		if ( *fruName == NULL )
+			goto error;
 		memset(*fruName, 0, dlen + 1);
 		memcpy(*fruName, ptr, dlen);
 
@@ -785,6 +790,8 @@ ERROR:
 	{
 		/* Grab system params from rtas, N5 and N6 */
 		Component* c = new Component( );
+		if ( c == NULL )
+			return;
 		/*
 		 * Build a unique device ID and deviceTreeNode for the system params
 		 */
@@ -821,6 +828,8 @@ ERROR:
 	{
 		ostringstream os;
 		Component *c = new Component();
+		if ( c == NULL )
+			return;
 		string val;
 
 		os << OPAL_SYS_FW_DIR;
@@ -959,7 +968,7 @@ ERROR:
 	 * to list list.  Must call fillComponent on these to obtain full
 	 * details
 	 */
-	vector<Component*> DeviceTreeCollector::getComponentsVector(
+	void DeviceTreeCollector::getComponentsVector(
 		vector<Component*>& devs )
 	{
 		vector<string> curList;
@@ -987,6 +996,8 @@ ERROR:
 				if (isDevice(tmpDirName)) {
 					// Create new component
 					tmp = new Component();
+					if (  tmp == NULL )
+						return;
 					/*
 					 * Set identifying node (idNode) to dev-tree entry if
 					 * sysfs did not previously set it *
@@ -1031,7 +1042,7 @@ ERROR:
 			processed++;
 		}
 
-		return devs;
+		return;
 	}
 
 	int DeviceTreeCollector::numDevicesInTree(void)

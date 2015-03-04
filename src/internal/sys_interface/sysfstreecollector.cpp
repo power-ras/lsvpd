@@ -505,6 +505,8 @@ namespace lsvpd
 		int lastSlash;
 
 		fillMe = new Component();
+		if ( fillMe == NULL )
+			return NULL;
 		fillMe->sysFsNode.setValue(newDevDir, INIT_PREF_LEVEL, __FILE__, __LINE__);
 		fillMe->sysFsLinkTarget.setValue(newDevDir, INIT_PREF_LEVEL, __FILE__, __LINE__);
 		fillMe->idNode.setValue(newDevDir, INIT_PREF_LEVEL, __FILE__, __LINE__);
@@ -874,7 +876,8 @@ namespace lsvpd
 				    	filterDevice(devName)) {
 					/* Found device */
 					tmpDev = getInitialDetails(parentDir, newDevDir);
-					devs.push_back(tmpDev);
+					if ( tmpDev != NULL )
+						devs.push_back(tmpDev);
 					findDevices(devs, newDevDir, newDevDir);
 				} else if(filterDevicePath(devs, parentDir, devName))
 					findDevices(devs, parentDir, newDevDir);

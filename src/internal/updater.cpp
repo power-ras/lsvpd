@@ -63,7 +63,7 @@ void printUsage( );
 void printVersion( );
 int ensureEnv( const string& env );
 void archiveDB( const string& fullPath );
-void __lsvpdInit(string env, string file);
+int __lsvpdInit(string env, string file);
 void __lsvpdFini(void);
 void lsvpdSighandler(int sig);
 
@@ -282,7 +282,14 @@ int initializeDB( bool limitSCSI )
 	archiveDB( fullPath );
 
 	Gatherer info( limitSCSI );
-	__lsvpdInit(env, file);
+	ret = __lsvpdInit(env, file);
+
+	if ( ret != 0 ) {
+		Logger l;
+		l.log( " Could not allocate memory for the VPD database.", LOG_ERR);
+		return ret;
+	}
+
 	root = info.getComponentTree( );
 
 	/*
@@ -384,7 +391,7 @@ int ensureEnv( const string& env )
  * @brief initializes data base access, sets up signal handling
  * to ensure proper cleanup if process if prematurely aborted
  */
-void __lsvpdInit(string env, string file)
+int __lsvpdInit(string env, string file)
 {
 	struct sigaction sigact;
 
@@ -400,6 +407,10 @@ void __lsvpdInit(string env, string file)
 	sigaction(SIGTERM, &sigact, NULL);
 
 	db = new VpdDbEnv( env, file, false );
+	if ( db == NULL )
+		return -1;
+	else
+		return 0;
 }
 
 /** __lsvpdFini
