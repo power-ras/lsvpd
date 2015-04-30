@@ -38,6 +38,7 @@
 
 #include <sys/stat.h>
 #include <sys/types.h>
+#include <endian.h>
 #include <fcntl.h>
 #include <string>
 #include <unistd.h>
@@ -379,6 +380,9 @@ error:
 		/* Read the size of the buffer */
 		size = *buf++;
 		size |= (*buf++) << 8;
+
+		/* Convert to host format */
+		size = be16toh(size);
 
 		/* Records start here */
 		*recordStart = buf;
