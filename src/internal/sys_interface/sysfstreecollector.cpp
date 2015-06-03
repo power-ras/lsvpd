@@ -368,6 +368,8 @@ namespace lsvpd
 			if (childDev == NULL || childDev->getChildren().size() != 0)
 				continue;
 			tchild = strdup(child.c_str());
+			if (tchild == NULL)
+				return;
 			devName = basename(tchild);
 
 			/* Rule 3 */
@@ -856,6 +858,8 @@ namespace lsvpd
 		char *parent;
 
 		parent = strdup(parentDir.c_str());
+		if ( parent == NULL )
+			return;
 		parentDev = string(basename(parent));
 		free(parent);
 
@@ -1003,9 +1007,15 @@ namespace lsvpd
 			string fname = entry->d_name;
 			if( HelperFunctions::countChar( fname, ':' ) == 1 )
 			{
-				char* f, *p;
+				char *f, *p;
 				f = strdup( fname.c_str( ) );
+				if ( f == NULL )
+					return NULL;
 				p = strdup( sysDir.c_str( ) );
+				if ( p == NULL ) {
+					free (f);
+					return NULL;
+				}
 				link = HelperFunctions::getAbsolutePath( f, p );
 				free( f );
 				free( p );
