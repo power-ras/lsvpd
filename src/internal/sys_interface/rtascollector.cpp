@@ -106,7 +106,7 @@ namespace lsvpd {
 	{
 		struct rtas_buf_element *head = list, *next;
 
-		while (!head) {
+		while (head) {
 			next = head->next;
 			delete head;
 			head = next;
