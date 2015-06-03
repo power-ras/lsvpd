@@ -167,8 +167,6 @@ bool printSystem( const vector<Component*>& leaves )
 				if( val.find( "PFW" ) != string::npos )
 				{
 					pfw = val.substr( 4 );
-					if (pfw.empty())
-						pfw = pfw;
 					break;
 				}
 			}
