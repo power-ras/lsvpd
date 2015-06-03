@@ -626,6 +626,7 @@ int OpalgetCPUModelName(System *root, string &name)
 			fclose(fin);
 			return 0;
 		}
+		fclose(fin);
 	}
 
 	return -1;
