@@ -656,7 +656,8 @@ namespace lsvpd
 	string strdupTrim(char *buf, int maxLen)
 	{
 		int beg, end;
-		string tmp;
+		string result;
+		char *tmp;
 
 		beg = 0;
 		while	(beg < maxLen &&
@@ -667,9 +668,13 @@ namespace lsvpd
 		while	(end > beg && buf[end] == 32)
 			end--;
 
-		tmp = string(strndup(buf + beg, end - beg));
+		tmp = strndup(buf + beg, end - beg);
+		if (!tmp)
+			return NULL;
 
-		return tmp;
+		result = string(tmp);
+		free(tmp);
+		return result;
 	}
 
 	/**
