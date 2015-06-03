@@ -1456,7 +1456,7 @@ namespace lsvpd
 		if (sg == "")
 			goto out;
 
-		cmd = "2>/dev/null iprconfig -c show-details " + sg;
+		cmd = "/usr/sbin/iprconfig -c show-details " + sg;
 		if (HelperFunctions::execCmd(cmd.c_str(), output))
 			goto out;
 
