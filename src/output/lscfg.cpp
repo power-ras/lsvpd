@@ -192,12 +192,7 @@ void printSpecific( Component* root )
 		loc = node.find( '@' );
 		if( loc != (int) string::npos )
 		{
-			cout << "  Name:  ";
-			if( loc == (int) string::npos )
-				cout << node;
-			else
-				cout << node.substr( 0, loc );
-			cout << endl;
+			cout << "  Name:  "<< node.substr( 0, loc ) << endl;
 
 			if( root->getModel( ) != "" )
 				cout << "    " << root->getModelHN( ) << ":  " <<
