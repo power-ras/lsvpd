@@ -585,7 +585,17 @@ int main( int argc, char** argv )
 		}
 		catch( VpdException& ve )
 		{
+			const char *expection = "Failed to fetch VPD DB, it may be corrupt";
 			cout << "Error reading VPD DB: " << ve.what( ) << endl;
+			if (strncmp(expection, ve.what(),strlen(expection)) == 0) {
+				string prefix( DEST_DIR );
+				cout << "Please run " << prefix;
+				if( prefix[ prefix.length( ) - 1 ] != '/' )
+				{
+					cout << "/";
+				}
+				cout << "sbin/vpdupdate again, before running lsvpd." << endl;
+			}
 			delete vpd;
 			return 1;
 		}
