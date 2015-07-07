@@ -420,8 +420,10 @@ int __lsvpdInit(string env, string file)
 void __lsvpdFini()
 {
 	if (db != NULL) {
-		delete db;
-	}
+		try {
+			delete db;
+		} catch (VpdException & ve) {  }
+	} /* if */
 
 	db = NULL;
 }
@@ -436,8 +438,6 @@ void lsvpdSighandler(int sig)
 		case SIGINT:
 		case SIGQUIT:
 		case SIGTERM:
-			__lsvpdFini();
-
 			/* remove the handler for this action and raise
 			 * the signal again so that the expected default
 			 * behavior for the signal occurs.
@@ -445,6 +445,7 @@ void lsvpdSighandler(int sig)
 			sigact.sa_handler = SIG_DFL;
 			sigemptyset(&sigact.sa_mask);
 			sigaction(sig, &sigact, NULL);
+			__lsvpdFini();
 			raise(sig);
 			break;
 	}
