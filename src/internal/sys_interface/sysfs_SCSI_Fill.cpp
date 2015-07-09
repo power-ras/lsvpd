@@ -429,7 +429,7 @@ namespace lsvpd
 	        }
 
 	        tmp = ret;
-	        delete ret;
+	        delete []ret;
 	        return tmp;
 	}
 
@@ -438,24 +438,24 @@ namespace lsvpd
 	 */
 	string hexify(string str_t)
 	{
-        int i;
-        char *str = (char *) str_t.c_str();
-        char * ret = new char[ (sizeof(char) * str_t.length() * 2) + 1 ];
-	if ( ret == NULL )
-		return ret;
+		int i;
+		char *str = (char *) str_t.c_str();
+		char * ret = new char[ (sizeof(char) * str_t.length() * 2) + 1 ];
+		if ( ret == NULL )
+			return ret;
 
-        if (str_t.length() == 0)
-        	return str_t;
+		if (str_t.length() == 0)
+			return str_t;
 
-        for (i = 0; i < (int) str_t.length(); i++) {
-                snprintf(&ret[i*2], 3, "%.2X", str[i]);
-        }
+		for (i = 0; i < (int) str_t.length(); i++) {
+			snprintf(&ret[i*2], 3, "%.2X", str[i]);
+		}
 
-        str_t = ret;
+		str_t = ret;
 
-        delete ret;
+		delete[] ret;
 
-        return str_t;
+		return str_t;
 	}
 
 	/**
