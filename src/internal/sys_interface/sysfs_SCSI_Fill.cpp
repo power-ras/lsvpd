@@ -856,55 +856,52 @@ namespace lsvpd
 	        int ret;
 	        struct stat statbuf;
 
-            if (-1 != sprintf(name, "/tmp/node-%d-%d-%d",
-                      	mode, major, minor)) {
-               if (stat(name, &statbuf) == 0) {
-               	unlink(name);
-               }
-
-					ret = mknod(name, 0760 | mode, makedev(major, minor));
-	            if (ret == 0) {
-		                device_fd = open(name, 0);
-		                if (device_fd <= 0)
-		                	return -UNABLE_TO_OPEN_FILE;
-		             return device_fd;
-	            }
-	            else {
-	            	return -UNABLE_TO_MKNOD_FILE;
-	            }
+		if (-1 != sprintf(name, "/tmp/node-%d-%d-%d", mode, major, minor)) {
+			if (stat(name, &statbuf) == 0) {
+				unlink(name);
 			}
+
+			ret = mknod(name, 0760 | mode, makedev(major, minor));
+			if (ret == 0) {
+				device_fd = open(name, 0);
+				if (device_fd <= 0)
+					return -UNABLE_TO_OPEN_FILE;
+				return device_fd;
+			}
+			else {
+				return -UNABLE_TO_MKNOD_FILE;
+			}
+		}
 
 	        device_close(device_fd, major, minor, mode);
 	        return -ERROR_ACCESSING_DEVICE;
-
 	}
 
 	/* Calculate the length of the response from SG Utils */
 	static int
-	device_scsi_sg_resp_len(bool evpd,
-							char *device_sg_read_buffer,
+	device_scsi_sg_resp_len(bool evpd, char *device_sg_read_buffer,
 	                        int bufSize)
 	{
-		int len;
+		int len = 0;
 
-        /*
-         * SPC-3 (7.6) defines some EVPD pages with the page length in
-         * bytes 2 and 3, and some that just use byte 3 with byte 2
-         * reserved.  However, 3.3.9:
-         * 	http://www.t10.org/ftp/t10/drafts/spc3/spc3r21b.pdf
-         *  says:
-         *
-         *   [...] A reserved bit, byte, word or field shall be set to
-         *   zero, or in accordance with a future extension to this
-         *   standard. Recipients are not required to check reserved
-         *   bits, bytes, words or fields for zero values. Receipt of
-         *   reserved code values in defined fields shall be reported
-         *   as an error.
-         */
-      if (evpd == 0)
-      	len = device_sg_read_buffer[4] + 5;
-      else if (evpd == 1)
-      	len = device_sg_read_buffer[2] * 256 + device_sg_read_buffer[3] + 4;
+		/*
+		 * SPC-3 (7.6) defines some EVPD pages with the page length in
+		 * bytes 2 and 3, and some that just use byte 3 with byte 2
+		 * reserved.  However, 3.3.9:
+		 *	http://www.t10.org/ftp/t10/drafts/spc3/spc3r21b.pdf
+		 *  says:
+		 *
+		 *   [...] A reserved bit, byte, word or field shall be set to
+		 *   zero, or in accordance with a future extension to this
+		 *   standard. Recipients are not required to check reserved
+		 *   bits, bytes, words or fields for zero values. Receipt of
+		 *   reserved code values in defined fields shall be reported
+		 *   as an error.
+		 */
+		if (evpd == 0)
+			len = device_sg_read_buffer[4] + 5;
+		else if (evpd == 1)
+			len = device_sg_read_buffer[2] * 256 + device_sg_read_buffer[3] + 4;
 		/* Size field is useful for error detection, but seems to be in error
 			when evpd is enabled.  Thus, hacked to return 256 for all inquiries
 		*/
