@@ -399,6 +399,8 @@ int __lsvpdInit(string env, string file)
 {
 	struct sigaction sigact;
 
+	memset(&sigact, 0, sizeof(sigact));
+
 	sigact.sa_handler = lsvpdSighandler;
 	sigemptyset(&sigact.sa_mask);
 
