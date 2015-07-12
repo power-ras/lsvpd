@@ -151,7 +151,6 @@ namespace lsvpd
 	{
 		Component* root = new Component( );
 		vector<Component*> devs;
-		System* ret = new System( );
 
 		if( root == NULL )
 		{
@@ -163,8 +162,11 @@ namespace lsvpd
 			throw ve;
 		}
 
+		System* ret = new System( );
 		if( ret == NULL )
 		{
+			delete root;
+
 			Logger l;
 			l.log( "Gatherer.getDeviceTree: Failed to build new System.",
 			       LOG_ERR );
