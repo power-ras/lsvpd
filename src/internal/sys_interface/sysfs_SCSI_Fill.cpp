@@ -440,12 +440,14 @@ namespace lsvpd
 	{
 		int i;
 		char *str = (char *) str_t.c_str();
-		char * ret = new char[ (sizeof(char) * str_t.length() * 2) + 1 ];
-		if ( ret == NULL )
-			return ret;
+		char *ret;
 
 		if (str_t.length() == 0)
 			return str_t;
+
+		ret = new char[ (sizeof(char) * str_t.length() * 2) + 1 ];
+		if ( ret == NULL )
+			return ret;
 
 		for (i = 0; i < (int) str_t.length(); i++) {
 			snprintf(&ret[i*2], 3, "%.2X", str[i]);
