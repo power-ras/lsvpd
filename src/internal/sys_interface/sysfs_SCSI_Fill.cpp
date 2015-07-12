@@ -861,25 +861,26 @@ namespace lsvpd
 		int ret;
 		struct stat statbuf;
 
-		if (-1 != sprintf(name, "/tmp/node-%d-%d-%d", mode, major, minor)) {
-			if (stat(name, &statbuf) == 0) {
-				unlink(name);
-			}
-
-			ret = mknod(name, 0760 | mode, makedev(major, minor));
-			if (ret == 0) {
-				device_fd = open(name, 0);
-				if (device_fd < 0)
-					return -UNABLE_TO_OPEN_FILE;
-				return device_fd;
-			}
-			else {
-				return -UNABLE_TO_MKNOD_FILE;
-			}
+		if (sprintf(name, "/tmp/node-%d-%d-%d", mode, major, minor) < 0) {
+			return -ERROR_ACCESSING_DEVICE;
 		}
 
-		device_close(device_fd, major, minor, mode);
-		return -ERROR_ACCESSING_DEVICE;
+		if (stat(name, &statbuf) == 0) {
+			unlink(name);
+		}
+
+		ret = mknod(name, 0760 | mode, makedev(major, minor));
+		if (ret != 0){
+			return -UNABLE_TO_MKNOD_FILE;
+		}
+
+		device_fd = open(name, 0);
+		if (device_fd < 0) {
+			device_close(device_fd, major, minor, mode);
+			return -UNABLE_TO_OPEN_FILE;
+		}
+
+		return device_fd;
 	}
 
 	/* Calculate the length of the response from SG Utils */
