@@ -869,7 +869,7 @@ namespace lsvpd
 			ret = mknod(name, 0760 | mode, makedev(major, minor));
 			if (ret == 0) {
 				device_fd = open(name, 0);
-				if (device_fd <= 0)
+				if (device_fd < 0)
 					return -UNABLE_TO_OPEN_FILE;
 				return device_fd;
 			}
@@ -1501,7 +1501,7 @@ out:
 			device_fd = device_open(fillMe->devMajor,
 						fillMe->devMinor,
 						fillMe->devAccessMode);
-			if (device_fd <= 0) {
+			if (device_fd < 0) {
 				msg = string("vpdupdate: Failed opening device: ")
 					+ fillMe->idNode.getValue();
 				logger.log( msg, LOG_WARNING );
