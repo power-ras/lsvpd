@@ -91,10 +91,9 @@ int FSWalk::fileScout(char *file, int *lines, int *maxLen)
 		ch = fgetc(fi);
 		len++;
 		if(ch == '\n') {
-			if (len > *maxLen) {
+			if (len > *maxLen)
 				*maxLen = len;
-				len = 0;
-			}
+			len = 0;
 			ct ++;
 		}
 	} while(ch != EOF);
