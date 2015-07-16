@@ -104,7 +104,7 @@ bool printSystem( const vector<Component*>& leaves )
 				ml = *pml;
 			else
 				ml = string("");
-			
+
 
 			if( mi != "" )
 			{
@@ -129,7 +129,7 @@ bool printSystem( const vector<Component*>& leaves )
 
 			if (fwl_t != "" )
 			{
-				/* 
+				/*
 				 * When we have both ML and MI records, the output
 				 * is in the following format.
 				 * ML_t (MI_t) (t) ML_p (MI_p) (p) ML_b (MI_b) (b)
@@ -161,7 +161,7 @@ bool printSystem( const vector<Component*>& leaves )
 
 			vector<DataItem*>::const_iterator j, stop;
 			for( j = c->getDeviceSpecific( ).begin( ),
-				stop = c->getDeviceSpecific( ).end( ); j != stop; ++j )
+			     stop = c->getDeviceSpecific( ).end( ); j != stop; ++j )
 			{
 				string val = (*j)->getValue( );
 				if( val.find( "PFW" ) != string::npos )
@@ -215,7 +215,7 @@ void printVPD( Component* root )
 
 		vector<string>::const_iterator i, end;
 		for( i = root->getChildren( ).begin( ), end = root->getChildren( ).end( );
-			i != end; ++i )
+		     i != end; ++i )
 		{
 			cout << *(i) << endl;
 		}
@@ -277,7 +277,7 @@ void printVPD( System* root )
 		vector<string>::const_iterator i, end;
 		cout << "Children: " << endl;
 		for( i = root->getChildren( ).begin( ), end = root->getChildren( ).end( );
-			i != end; ++i )
+		     i != end; ++i )
 		{
 			cout << *(i) << endl;
 		}
@@ -340,53 +340,53 @@ int main( int argc, char** argv )
 		switch( getopt_long( argc, argv, opts, longOpts, &index ) )
 		{
 
-			case 'v':
-				printVersion( );
-				return 0;
+		case 'v':
+			printVersion( );
+			return 0;
 
-			case 'A':
-				all = true;
-				tabular = true;
-				break;
+		case 'A':
+			all = true;
+			tabular = true;
+			break;
 
-			case 'D':
-				debug = true;
-				break;
+		case 'D':
+			debug = true;
+			break;
 
-			case 'd':
-				if( device != "" )
-				{
-					cout << "Please specify at most one device."
-						<< endl;
-					return 1;
-				}
-				device = optarg;
-				break;
-
-			case 'p':
-				if( path == "" )
-					path = optarg;
-				break;
-
-			case 'z':
-				path = optarg;
-				compressed = true;
-				break;
-
-			case -1:
-				done = true;
-				if ( first && argc > 1 ) {
-					printUsage( );
-					return 0;
-				}
-				break;
-
-			case 'h':
-				printUsage( );
-				return 0;
-			default:
-				printUsage( );
+		case 'd':
+			if( device != "" )
+			{
+				cout << "Please specify at most one device."
+					<< endl;
 				return 1;
+			}
+			device = optarg;
+			break;
+
+		case 'p':
+			if( path == "" )
+				path = optarg;
+			break;
+
+		case 'z':
+			path = optarg;
+			compressed = true;
+			break;
+
+		case -1:
+			done = true;
+			if ( first && argc > 1 ) {
+				printUsage( );
+				return 0;
+			}
+			break;
+
+		case 'h':
+			printUsage( );
+			return 0;
+		default:
+			printUsage( );
+			return 1;
 		}
 		first = 0;
 	}
@@ -414,12 +414,12 @@ int main( int argc, char** argv )
 			index = path.rfind( '.' );
 			path = path.substr( 0, index );
 			int fd = open( path.c_str( ), O_CREAT | O_WRONLY,
-				S_IRGRP | S_IWUSR | S_IRUSR | S_IROTH );
+				       S_IRGRP | S_IWUSR | S_IRUSR | S_IROTH );
 			if( fd < 0 )
 			{
 				cout << "Failed to open file for uncompressed database archive"
 					<< endl;
-					return 1;
+				return 1;
 			}
 
 			char buffer[ 4096 ] = { 0 };
@@ -430,7 +430,7 @@ int main( int argc, char** argv )
 			{
 				int out = 0, tot = 0;
 				while( ( out = write( fd, buffer + tot, in - tot ) ) > 0 &&
-					tot < in )
+				       tot < in )
 					tot += out;
 				memset( buffer, 0 , 4096 );
 			}

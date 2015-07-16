@@ -22,7 +22,12 @@ using namespace std;
 
 namespace lsvpd {
 
-	enum platform { PF_NULL, PF_POWERVM_LPAR, PF_POWERKVM_HOST , PF_POWERKVM_PSERIES_GUEST, PF_ERROR };
+	enum platform {
+		PF_NULL,
+		PF_POWERVM_LPAR,
+		PF_POWERKVM_HOST,
+		PF_POWERKVM_PSERIES_GUEST,
+		PF_ERROR };
 
 	class PlatformCollector {
 		public:

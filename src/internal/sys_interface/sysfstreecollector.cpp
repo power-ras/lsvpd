@@ -86,8 +86,8 @@ namespace lsvpd
 		{
 			Logger logger;
 			logger.log(
-				"pci.ids file not found, continuing but there will be a lot of missing information",
-				LOG_ERR );
+				   "pci.ids file not found, continuing but there will be a lot of missing information",
+				   LOG_ERR );
 		}
 
 		id.open( DeviceLookup::getUsbIds( ).c_str( ), ios::in );
@@ -100,8 +100,8 @@ namespace lsvpd
 		{
 			Logger logger;
 			logger.log(
-				"usb.ids file not found, continuing but there will be a lot of missing information",
-				LOG_ERR );
+				   "usb.ids file not found, continuing but there will be a lot of missing information",
+				   LOG_ERR );
 		}
 	}
 
@@ -123,19 +123,20 @@ namespace lsvpd
 			tmp = tmp.substr(loc + 1, tmp.length());
 
 			if ( (loc = tmp.find(":", 0)) != (int) string::npos)
-				fillMe->addDeviceSpecific("XH", "SCSI Host", tmp.substr(0, loc), 60);
+				fillMe->addDeviceSpecific("XH", "SCSI Host",
+							  tmp.substr(0, loc), 60);
 
 			ploc = loc + 1;
 			if ( (loc = tmp.find(":", ploc)) != (int) string::npos)
 				fillMe->addDeviceSpecific("XB", "SCSI Bus",
-													tmp.substr(ploc, loc - ploc), 60);
+							  tmp.substr(ploc, loc - ploc), 60);
 			ploc = loc + 1;
 			if ( (loc = tmp.find(":", ploc)) != (int) string::npos)
 				fillMe->addDeviceSpecific("XT", "SCSI Target",
-											tmp.substr(ploc, loc - ploc), 60);
+							  tmp.substr(ploc, loc - ploc), 60);
 			ploc = loc + 1;
 			fillMe->addDeviceSpecific("XL", "SCSI Lun",
-											tmp.substr(ploc, tmp.length() - ploc), 60);
+						  tmp.substr(ploc, tmp.length() - ploc), 60);
 
 		}
 	}
@@ -146,33 +147,35 @@ namespace lsvpd
 
 		if ( (loc = tmp.rfind("/",tmp.length())) != (int) string::npos )
 			fillMe->addDeviceSpecific("XI", "IDE Device Identifier",
-					tmp.substr(loc + 1, tmp.length()), 60);
+						  tmp.substr(loc + 1, tmp.length()), 60);
 
 	}
 
 	void SysFSTreeCollector::usbGetHTBL(Component *fillMe)
 	{
-/*		coutd << "USB: Cur Dev Node = " <<  fillMe->sysFsNode.getValue() << endl; */
+		/* coutd << "USB: Cur Dev Node = " <<  fillMe->sysFsNode.getValue() << endl; */
 	}
 
 	/**
 	 * @brief: Collects vpd for devices specified by bus.  This is necessary
-	 * 	since the bus of a device can determine the methods used to
-	 * 	collect vpd.
+	 *	since the bus of a device can determine the methods used to
+	 *	collect vpd.
 	 * @arg bus: The devices bus, as seen at /sys/bus/XXX
 	 * @arg fillMe: Device component to be filled
 	 */
 	Component *SysFSTreeCollector::fillByBus(const string& bus,
-		Component* fillMe)
+						 Component* fillMe)
 	{
 		/* Component is a scsi device - fill accordingly */
 		if(bus  == "scsi" )
 		{
 			fillMe->mManufacturer.setValue( getAttrValue(
-				fillMe->sysFsLinkTarget.getValue() , "vendor" ), 50, __FILE__, __LINE__);
+				fillMe->sysFsLinkTarget.getValue() , "vendor" ),
+							50, __FILE__, __LINE__);
 
 			fillMe->mDescription.setValue( getAttrValue(
-				fillMe->sysFsLinkTarget.getValue() , "device" ), 50, __FILE__, __LINE__);
+				fillMe->sysFsLinkTarget.getValue() , "device" ),
+						       50, __FILE__, __LINE__);
 
 			fillSCSIComponent(fillMe, mLimitSCSISize);  /* Fills SH, ST, SB, SL */
 
@@ -204,7 +207,7 @@ namespace lsvpd
 	 * @brief: Fill a device component by class.
 	 */
 	Component *SysFSTreeCollector::fillByDevClass(const string& devClass,
-		Component* fillMe)
+						      Component* fillMe)
 	{
 		string classLink;
 		Logger l;
@@ -249,7 +252,7 @@ namespace lsvpd
 
 		/* No /sys entry - try to build from parent */
 		if( fillMe->mpParent != NULL &&
-			fillMe->mpParent->mPhysicalLocation.dataValue != "" )
+		    fillMe->mpParent->mPhysicalLocation.dataValue != "" )
 		{
 			if( fillMe->mpParent->mPhysicalLocation.dataValue[ 0 ] != 'U' )
 				os << fillMe->mpParent->mPhysicalLocation.dataValue << "/";
@@ -262,8 +265,9 @@ namespace lsvpd
 		fillMe->mPhysicalLocation.setValue( os.str( ), 50 , __FILE__, __LINE__);
 
 		if( fillMe->mDescription.dataValue == "" &&
-			fillMe->mModel.dataValue != "" )
-			fillMe->mDescription.setValue( fillMe->mModel.dataValue, 1 , __FILE__, __LINE__);
+		    fillMe->mModel.dataValue != "" )
+			fillMe->mDescription.setValue( fillMe->mModel.dataValue,
+						       1 , __FILE__, __LINE__);
 
 		return fillMe;
 	}
@@ -277,7 +281,7 @@ namespace lsvpd
 	 *  available.  If it is not, we cannot use this collector, as the
 	 *  /sys file system is lacking.
 	 * Note: This will substantially and negatively impact device
-	 * 	data collection.
+	 *	data collection.
 	 */
 	bool SysFSTreeCollector::setup(const string path_t )
 	{
@@ -306,7 +310,7 @@ namespace lsvpd
 	 * @return the specified component, or NULL on failure
 	 */
 	Component *SysFSTreeCollector::findComponent(const vector<Component*> devs,
-		string sysPath )
+						     string sysPath )
 	{
 		for (int i = 0; i < (int) devs.size(); i++) {
 			if (devs[i]->sysFsNode.getValue() == sysPath) {
@@ -316,11 +320,11 @@ namespace lsvpd
 		return NULL;
 	}
 
-/* Set the parent attribute to child attribute if the former is empty */
+	/* Set the parent attribute to child attribute if the former is empty */
 #define mergeField(parent, child, item, force) \
 	do { \
 		if (force || parent->item.getValue() == "") \
-			parent->item.setValue(child->item.getValue(), INIT_PREF_LEVEL, __FILE__, __LINE__); \
+		parent->item.setValue(child->item.getValue(), INIT_PREF_LEVEL, __FILE__, __LINE__); \
 	} while (0)
 
 	/**
@@ -343,7 +347,7 @@ namespace lsvpd
 	 */
 
 	void SysFSTreeCollector::removeDuplicateDevices(
-			vector<Component*>& devs )
+							vector<Component*>& devs )
 	{
 		vector <string> children;
 		vector <Component*>::iterator parent,tmp;
@@ -356,7 +360,7 @@ namespace lsvpd
 			string child;
 			char *tchild;
 
- 			children = (*parent)->getChildren();
+			children = (*parent)->getChildren();
 
 			/* Rule 1 */
 			if (children.size() != 1)
@@ -394,19 +398,19 @@ namespace lsvpd
 
 
 	/* Creates a vector of components, representing all devices this
-	 *		collector is aware of (ie - those discovered in the /sys tree),
-	 *		and back-walks tree to determine inheritance
+	 * collector is aware of (ie - those discovered in the /sys tree),
+	 * and back-walks tree to determine inheritance
 	 * @arg devs: An empty vector, which will be filled with one Component
-	 * 	for each device on the system.
+	 *	      for each device on the system.
 	 */
 	vector<Component*> SysFSTreeCollector::getComponents(
-		vector<Component*>& devs )
+							     vector<Component*>& devs )
 	{
 		Component *dev, *parent;
 		string devNode;
 		int i;
 
-/*		devs = getComponentsVector(devs); */
+		/*		devs = getComponentsVector(devs); */
 		findDevicePaths(devs);
 
 		for (i = (devs.size() - 1); i >= 0; i--) {
@@ -433,7 +437,7 @@ namespace lsvpd
 			if (dev->devBus.getValue() == "scsi")
 				scsiGetHTBL(dev);  /* Get Host:Target:Bus:Lun data for device */
 			/*
- 			 * If our syfsdir has a "device" link, that is our physical device.
+			 * If our syfsdir has a "device" link, that is our physical device.
 			 * Add our name to the list of AX names for the target device.
 			 */
 			string link = string(devNode + "/device");
@@ -490,14 +494,14 @@ namespace lsvpd
 	/**
 	 * getInitialDetails
 	 * @brief Given just a sys/devices node, collect whatever high-level
-	 * 	details can be immediately collected.  All more detailed,
-	 * 	time consuming (> O(1)), and/or device intra-dependant data should be
+	 *	details can be immediately collected.  All more detailed,
+	 *	time consuming (> O(1)), and/or device intra-dependant data should be
 	 *  collected in fillComponent.
 	 * @param fillMe: Empty component
 	 * @param parent: Default parent of any devices discovered in this dir
 	 */
 	Component * SysFSTreeCollector::getInitialDetails(const string& parentDir,
-			const string& newDevDir)
+							  const string& newDevDir)
 	{
 		string link;
 		string absTargetPath, tmp, type;
@@ -520,47 +524,47 @@ namespace lsvpd
 		locBeg = 1;
 		for (int i = 0; i < 2; i++)
 			locBeg = fillMe->sysFsNode.getValue().find("/",
-				locBeg+1);
+								   locBeg+1);
 		locEnd = fillMe->sysFsNode.getValue().find("/",
-			locBeg+1);
+							   locBeg+1);
 
 		tmp = fillMe->sysFsNode.getValue().substr(locBeg + 1, locEnd - locBeg -1);
 		if (tmp == "virtual") {
 			fillMe->mDescription.setValue("Virtual",
-						1, __FILE__, __LINE__);
+						      1, __FILE__, __LINE__);
 		}
 		else if (fillMe->sysFsNode.getValue().find("acpi", 0) != string::npos) {
 			fillMe->mDescription.setValue("Advanced Configuration and Power Interface",
-						1, __FILE__, __LINE__);
+						      1, __FILE__, __LINE__);
 		}
 		else if (tmp == "vio") {
 			fillMe->mDescription.setValue("Virtual I/O Device",
-						1, __FILE__, __LINE__);
+						      1, __FILE__, __LINE__);
 		}
 		else if (tmp == "system") {
 			fillMe->mDescription.setValue("System Component",
-						1, __FILE__, __LINE__);
+						      1, __FILE__, __LINE__);
 		}
 		else if (tmp == "ibmebus") {
 			fillMe->mDescription.setValue("IBM EBUS Device",
-						1, __FILE__, __LINE__);
+						      1, __FILE__, __LINE__);
 		}
 		else if (tmp == "platform") {
 			fillMe->mDescription.setValue("Platform",
-						1, __FILE__, __LINE__);
+						      1, __FILE__, __LINE__);
 		}
 		else if (HelperFunctions::matches("pnp*", tmp)) {
 			fillMe->mDescription.setValue("Plug and Play Port - Unused",
-						1, __FILE__, __LINE__);
+						      1, __FILE__, __LINE__);
 		}
 
 		/* Set parentage */
 		if (parentDir.length() > 0)
 			fillMe->mParent.setValue(parentDir, INIT_PREF_LEVEL,
-									__FILE__, __LINE__);
+						 __FILE__, __LINE__);
 		else
 			fillMe->mParent.setValue("/sys/devices", INIT_PREF_LEVEL,
-										__FILE__, __LINE__);
+						 __FILE__, __LINE__);
 
 		link = string ("");
 		/* Look for either a /bus entry or, for pci, /subsystem is the same */
@@ -577,10 +581,10 @@ namespace lsvpd
 
 				buf = strdup(link.c_str());
 				int len = readlink(buf, linkTarget, sizeof(
-					linkTarget));
+									   linkTarget));
 				linkTarget[len] = '\0';
 				absTargetPath = HelperFunctions::getAbsolutePath(linkTarget,
-					buf);
+										 buf);
 				free(buf);
 
 				/* 
@@ -606,7 +610,7 @@ namespace lsvpd
 					fillMe->devBus.setValue(tmp, INIT_PREF_LEVEL, __FILE__, __LINE__);
 				else if (type == "class")
 					fillMe->mDevClass.setValue(absTargetPath + "/" + devName, 
-									INIT_PREF_LEVEL, __FILE__, __LINE__);
+								   INIT_PREF_LEVEL, __FILE__, __LINE__);
 				else {
 					Logger l;
 					string s = "Unknown type (" + type + ") while processing" + newDevDir;
@@ -616,54 +620,54 @@ namespace lsvpd
 				/* Add detail to basic descriptions */
 				if (tmp == "tty") {
 					fillMe->mDescription.setValue(fillMe->mDescription.getValue()
-								+ " Terminal Device",
-								2, __FILE__, __LINE__);
+								      + " Terminal Device",
+								      2, __FILE__, __LINE__);
 				}
 				else if (tmp == "graphics") {
 					fillMe->mDescription.setValue(fillMe->mDescription.getValue()
-								+ " Graphical Device",
-								2, __FILE__, __LINE__);
+								      + " Graphical Device",
+								      2, __FILE__, __LINE__);
 				}
 				else if (tmp == "input") {
 					fillMe->mDescription.setValue(fillMe->mDescription.getValue()
-								+ " Input Device",
-								2, __FILE__, __LINE__);
+								      + " Input Device",
+								      2, __FILE__, __LINE__);
 				}
 				else if (tmp == "net") {
 					fillMe->mDescription.setValue(fillMe->mDescription.getValue()
-								+ " Networking Device",
-								2, __FILE__, __LINE__);
+								      + " Networking Device",
+								      2, __FILE__, __LINE__);
 				}
 				else if (tmp == "cpu") {
 					fillMe->mDescription.setValue(fillMe->mDescription.getValue()
-								+ " - Processing Device",
-								2, __FILE__, __LINE__);
+								      + " - Processing Device",
+								      2, __FILE__, __LINE__);
 				}
 				/*
 				 * FIXME: This is a problem, this case will never be true, should
 				 * it be removed or should the test be changed?
-				else if (tmp == "cpu") {
-					fillMe->mDescription.setValue(fillMe->mDescription.getValue()
-								+ " - Time Device",
-								2, __FILE__, __LINE__);
-				}
-				*/
+				 * else if (tmp == "cpu") {
+				 * fillMe->mDescription.setValue(fillMe->mDescription.getValue()
+				 * + " - Time Device",
+				 * 2, __FILE__, __LINE__);
+				 * }
+				 */
 				else if (tmp == "mem") {
 					fillMe->mDescription.setValue(fillMe->mDescription.getValue()
-								+ " Memory Device",
-								2, __FILE__, __LINE__);
+								      + " Memory Device",
+								      2, __FILE__, __LINE__);
 				}
 			}
 		}
 
 		if (fillMe->mDescription.getValue() == "Virtual") {
 			fillMe->mDescription.setValue("Virtual Device",
-					2, __FILE__, __LINE__);
+						      2, __FILE__, __LINE__);
 		}
 
 		if (fillMe->mDescription.getValue() == "Platform") {
 			fillMe->mDescription.setValue("Platform Device",
-					2, __FILE__, __LINE__);
+						      2, __FILE__, __LINE__);
 		}
 
 		/* Looking for device driver link */
@@ -676,22 +680,22 @@ namespace lsvpd
 
 				buf = strdup(link.c_str());
 				int len = readlink(buf, linkTarget, sizeof(
-					linkTarget));
+									   linkTarget));
 				linkTarget[len] = '\0';
 				absTargetPath = HelperFunctions::getAbsolutePath(linkTarget,
-					buf);
+										 buf);
 				free(buf);
 				/* Now grab last part of link */
 				lastSlash = absTargetPath.rfind("/", absTargetPath.length()) + 1;
 				driver = absTargetPath.substr(lastSlash,
-							absTargetPath.length() - lastSlash);
+							      absTargetPath.length() - lastSlash);
 				fillMe->devDriver.setValue(driver, INIT_PREF_LEVEL,
-								 __FILE__, __LINE__);
+							   __FILE__, __LINE__);
 
 				if (driver == "hvc_console") {
 					fillMe->addAIXName(driver,90);
 					fillMe->mDescription.setValue("Hypervisor Virtual Console",
-									90, __FILE__, __LINE__);
+								      90, __FILE__, __LINE__);
 				}
 			}
 		}
@@ -705,7 +709,7 @@ namespace lsvpd
 
 			len = readlink(link.c_str(), linkTarget, sizeof(linkTarget));
 			linkTarget[len] = '\0';
-			
+
 			name = string(linkTarget);
 			start = name.rfind("/", name.length()) + 1;
 			fillMe->addAIXName(name.substr(start, name.length() - start), 90);
@@ -717,12 +721,12 @@ namespace lsvpd
 		 * 'numeric' sysfs node name. Use it whenever available.
 		 */
 		if (fillMe->devBus.getValue() == "vio" &&
-				HelperFunctions::file_exists(newDevDir + "/name")) {
+		    HelperFunctions::file_exists(newDevDir + "/name")) {
 			string name = getAttrValue(newDevDir, "name");
 			if (name != "")
 				devName = name;
 		}
-				
+
 		fillMe->devSysName.setValue(devName, INIT_PREF_LEVEL, __FILE__, __LINE__);
 		fillMe->devBusAddr.setValue(devName, INIT_PREF_LEVEL, __FILE__, __LINE__);
 
@@ -736,8 +740,9 @@ namespace lsvpd
 		if (link.length() > 0)
 		{
 			fillMe->deviceTreeNode.setValue(
-				"/proc/device-tree" + link,
-				INIT_PREF_LEVEL - 1, __FILE__, __LINE__);
+							"/proc/device-tree" + link,
+							INIT_PREF_LEVEL - 1,
+							__FILE__, __LINE__);
 		}
 
 		return fillMe;
@@ -797,7 +802,8 @@ namespace lsvpd
 	 *
 	 */
 	int SysFSTreeCollector::filterDevicePath(vector<Component*>& devs,
-					const string& parentDir, const string& devName)
+						 const string& parentDir,
+						 const string& devName)
 	{
 		string bus;
 		Component *parentDev;
@@ -829,7 +835,7 @@ namespace lsvpd
 		if (bus == "scsi") {
 			/* For a scsi device, we can skip the following nodes:
 			 * scsi_generic: which provides generic access.
-                         * enclosure: which provides info about scsi enclosures.
+			 * enclosure: which provides info about scsi enclosures.
 			 */
 			if (devName == "scsi_generic" || devName == "enclosure")
 				return 0;
@@ -841,14 +847,15 @@ namespace lsvpd
 	/**
 	 * findDevices
 	 * @brief Starting at a device, recursively search for and fill out any
-	 * 	child devices.
+	 *	  child devices.
 	 * @param devs Partially filled vector - discovery process will add
-	 * 	devices found to this vector
+	 *	  devices found to this vector
 	 * @param parent This will be parent device of devices discovered in
-	 * 	'parent' directory.  May be NULL
+	 *	  'parent' directory.  May be NULL
 	 */
 	void SysFSTreeCollector::findDevices(vector<Component*>& devs,
-			const string& parentDir, const string& searchDir)
+					     const string& parentDir,
+					     const string& searchDir)
 	{
 		FSWalk fsw = FSWalk();
 		string newDevDir;
@@ -876,8 +883,8 @@ namespace lsvpd
 				/* Last check - if dir == one of a few known to exist for
 				 * each device, this is not a new device */
 				if ((parentDev != devName) &&
-					isDevice(newDevDir) &&
-				    	filterDevice(devName)) {
+				    isDevice(newDevDir) &&
+				    filterDevice(devName)) {
 					/* Found device */
 					tmpDev = getInitialDetails(parentDir, newDevDir);
 					if ( tmpDev != NULL )
@@ -891,7 +898,7 @@ namespace lsvpd
 
 	/**
 	 * findDevicePaths( vector<Component*>& devs ,
-	 * 	Component *parent)
+	 *	Component *parent)
 	 *
 	 * @brief Recursively walks /sys/devices dirs, ID's all devices,
 	 * adds path and other relevant data to the components vector.
@@ -902,7 +909,7 @@ namespace lsvpd
 	 * collector knows how to elucidate
 	 *
 	 * @param parent Parent component to all devices discovered in parent's
-	 * 	dir
+	 *	dir
 	 */
 	void SysFSTreeCollector::findDevicePaths(vector<Component*>& devs)
 	{
@@ -938,10 +945,10 @@ namespace lsvpd
 		FILE *fi;
 		int i;
 
-	        HelperFunctions::fs_fixPath(sysPath);
+		HelperFunctions::fs_fixPath(sysPath);
 		sysPath += "/devspec";
 
-	        buf = sysPath.c_str();
+		buf = sysPath.c_str();
 		if ((lstat(buf, &astats)) != 0) {
 			return string("");
 		}
@@ -965,7 +972,7 @@ namespace lsvpd
 	}
 
 	/* Collects devices on system, then returns how many were found.
-	 */
+	*/
 	int SysFSTreeCollector::numDevicesInTree()
 	{
 		vector<Component*> devs;
@@ -982,10 +989,10 @@ namespace lsvpd
 
 	/**
 	 * @brief: Walks thru all links in this directory, looking for one
-	 * 	with a ':' in the name.  This one has always been the back
-	 * 	link to the /sys/class dir, where more info is gathered.
+	 *	with a ':' in the name.  This one has always been the back
+	 *	link to the /sys/class dir, where more info is gathered.
 	 * Note: This may break on occassion, so a better method should be
-	 * 	investigated.
+	 *	investigated.
 	 * @arg: The directory in which the device was found
 	 */
 	string SysFSTreeCollector::getClassLink( const string& sysDir )
@@ -1028,11 +1035,11 @@ namespace lsvpd
 
 	/* Attempts a best effort collection of AIX name, of AX
 	 * @param sysDir: Dir to start a directory walk, looking for
-	 * 		link fitting the known class link format (ie ':' present)
+	 *		link fitting the known class link format (ie ':' present)
 	 * @return bool: Whether the AX name was successfully filled
 	 */
 	bool SysFSTreeCollector::setKernelName( Component* fillMe,
-		const string& sysDir )
+						const string& sysDir )
 	{
 		Logger logger;
 		struct dirent* entry;
@@ -1061,7 +1068,7 @@ namespace lsvpd
 				idx = fname.find( ':' );
 				idx++;
 				if( !HelperFunctions::contains( fillMe->mAIXNames,
-					fname.substr( idx ) ) )
+								fname.substr( idx ) ) )
 				{
 					ostringstream dirName;
 					dirName << "/sys/class/" << fname.substr( 0, idx - 1 ) <<
@@ -1087,7 +1094,7 @@ namespace lsvpd
 	/**
 	 * readClassEntries
 	 * @brief Top level call in to discover links from /sys/class and
-	 * 	/sys/block to a device.  These are collected as AIX names
+	 *	/sys/block to a device.  These are collected as AIX names
 	 */
 	void SysFSTreeCollector::readClassEntries( vector<Component*>& devs )
 	{
@@ -1098,11 +1105,11 @@ namespace lsvpd
 	/**
 	 * findClassEntries
 	 * @brief Walks through all of /sys/class and /sys/block, looking
-	 * 	for links into known devices.  If found, we grab AIX names here
+	 *	for links into known devices.  If found, we grab AIX names here
 	 *  and store the class dir for the device.
 	 */
 	void SysFSTreeCollector::findClassEntries( vector<Component*>& devs,
-			const string& searchDir)
+						   const string& searchDir)
 	{
 		FSWalk fsw = FSWalk();
 		string dev, devDir;
@@ -1118,22 +1125,26 @@ namespace lsvpd
 			listing.pop_back();
 			devDir = searchDir + "/" + dev;
 			if (FSWalk::fs_isLink(devDir)
-				&& ((dev == "device") || (dev == "bridge"))) {
+			    && ((dev == "device") || (dev == "bridge"))) {
 				target = HelperFunctions::getSymLinkTarget(devDir);
 				tmp = findComponent(devs, target);
 				if (tmp == NULL)
 					continue;
 
 				/* Set newly discovered class dir */
-				tmp->mDevClass.setValue(searchDir, INIT_PREF_LEVEL, __FILE__, __LINE__);
+				tmp->mDevClass.setValue(searchDir, INIT_PREF_LEVEL,
+							__FILE__, __LINE__);
 				/* store AIX name */
-				int lastSlash = searchDir.rfind("/", searchDir.length()) + 1;
+				int lastSlash = searchDir.rfind("/",
+							searchDir.length()) + 1;
 
-				target = searchDir.substr(lastSlash, searchDir.length() - lastSlash);
+				target = searchDir.substr(lastSlash,
+						searchDir.length() - lastSlash);
+
 				tmp->addAIXName(target, INIT_PREF_LEVEL + 1);
 			}
 			else if ((FSWalk::fs_isDir(devDir))
-				&& (!FSWalk::fs_isLink(devDir))) {
+				 && (!FSWalk::fs_isLink(devDir))) {
 				/* recurse on all directories */
 				findClassEntries(devs, devDir);
 			}
@@ -1141,25 +1152,25 @@ namespace lsvpd
 	}
 
 	string findIOCTLAIXEntry(Component * fillMe)
-		{
-			string fin;
-			int fd;
-			vector<DataItem*>::const_iterator i, end;
-			i = fillMe->getAIXNames().begin();
-			end = fillMe->getAIXNames().end();
+	{
+		string fin;
+		int fd;
+		vector<DataItem*>::const_iterator i, end;
+		i = fillMe->getAIXNames().begin();
+		end = fillMe->getAIXNames().end();
 
-			while (i != end) {
-				fin = string("/dev/") + (*i)->getValue();
-				fd = open( fin.c_str( ), O_RDONLY | O_NONBLOCK );
-				if( fd < 0 )
-					i++;
-				else {
-					close(fd);
-					return fin;
-				}
+		while (i != end) {
+			fin = string("/dev/") + (*i)->getValue();
+			fd = open( fin.c_str( ), O_RDONLY | O_NONBLOCK );
+			if( fd < 0 )
+				i++;
+			else {
+				close(fd);
+				return fin;
 			}
-			return string("");
 		}
+		return string("");
+	}
 
 	void SysFSTreeCollector::fillIDEDev( Component* fillMe )
 	{
@@ -1180,27 +1191,27 @@ namespace lsvpd
 			if( val.find( "cdrom" ) != string::npos )
 			{
 				fillMe->mDescription.setValue( "IDE Optical Drive", 80,
-					__FILE__, __LINE__);
+							       __FILE__, __LINE__);
 			}
 			else if( val.find( "disk" ) != string::npos )
 			{
 				fillMe->mDescription.setValue( "IDE Disk Drive", 80,
-					__FILE__, __LINE__);
+							       __FILE__, __LINE__);
 			}
 			else if( val.find( "tape" ) != string::npos )
 			{
 				fillMe->mDescription.setValue( "IDE Tape Drive", 80,
-					__FILE__, __LINE__) ;
+							       __FILE__, __LINE__) ;
 			}
 			else if( val.find( "floppy" ) != string::npos )
 			{
 				fillMe->mDescription.setValue( "IDE Floppy Drive", 80,
-					__FILE__, __LINE__) ;
+							       __FILE__, __LINE__) ;
 			}
 			else
 			{
 				fillMe->mDescription.setValue( "IDE Unknown Device", 80,
-					__FILE__, __LINE__) ;
+							       __FILE__, __LINE__) ;
 			}
 		}
 
@@ -1220,7 +1231,7 @@ namespace lsvpd
 		{
 			Logger logger;
 			logger.log( "SysFsTreeCollector.fillIDEDev: ioctl call failed.",
-				LOG_WARNING );
+				    LOG_WARNING );
 			close( fd );
 			return;
 		}
@@ -1248,7 +1259,7 @@ namespace lsvpd
 	}
 
 	void SysFSTreeCollector::fillPCIDev( Component* fillMe,
-		const string& sysDir )
+					     const string& sysDir )
 	{
 		string val;
 		int manID = UNKNOWN_ID, devID = UNKNOWN_ID;
@@ -1291,7 +1302,9 @@ namespace lsvpd
 				{
 					val = mPciTable->getName( manID );
 					if( val != "" )
-						fillMe->mManufacturer.setValue( val, 50, __FILE__, __LINE__ );
+						fillMe->mManufacturer.setValue( val,
+							50, __FILE__, __LINE__ );
+
 					os << hex << setw( 4 ) << setfill( '0' ) << manID;
 				}
 			}
@@ -1299,20 +1312,23 @@ namespace lsvpd
 			{
 				val = mPciTable->getName( subMan );
 				if( val != "" )
-					fillMe->mManufacturer.setValue( val, 50, __FILE__, __LINE__ );
+					fillMe->mManufacturer.setValue( val, 50,
+							__FILE__, __LINE__ );
+
 				os << hex << setw( 4 ) << setfill( '0' ) << subMan;
 			}
 
 			// Fill Device Model
 			if( subID == UNKNOWN_ID || mPciTable->getName( manID, devID,
-				subID ) == "Unknown" )
+								       subID ) == "Unknown" )
 			{
 				if( manID != UNKNOWN_ID )
 				{
 					os << hex << setw( 4 ) << setfill( '0' )<< devID;
 					val = mPciTable->getName( manID, devID );
 					if( val != "" )
-						fillMe->mModel.setValue( val, 80, __FILE__, __LINE__ );
+						fillMe->mModel.setValue( val, 80,
+							 __FILE__, __LINE__ );
 				}
 			}
 			else
@@ -1365,53 +1381,53 @@ namespace lsvpd
 
 		if( val == "net" )
 			fillMe->mDescription.setValue( "Ethernet PCI Adapter", 30,
-						__FILE__, __LINE__ );
+						       __FILE__, __LINE__ );
 		else if( val == "graphics" )
 			fillMe->mDescription.setValue( "Display Adapter", 30,
-						__FILE__, __LINE__ );
+						       __FILE__, __LINE__ );
 		else if( val == "sound" )
 			fillMe->mDescription.setValue( "Multimedia Audio Controller", 30,
-						__FILE__, __LINE__ );
+						       __FILE__, __LINE__ );
 		else if( val == "serial" )
 			fillMe->mDescription.setValue( "Serial Adapter", 30,
-						__FILE__, __LINE__ );
+						       __FILE__, __LINE__ );
 		else if( val == "scsi_device" )
 			fillMe->mDescription.setValue( "SCSI Device", 30,
-						__FILE__, __LINE__ );
+						       __FILE__, __LINE__ );
 		else if( val == "scsi_disk" )
 			fillMe->mDescription.setValue( "SCSI Disk", 30,
-						__FILE__, __LINE__ );
+						       __FILE__, __LINE__ );
 		else if( val == "scsi_generic" )
 			fillMe->mDescription.setValue( "Generic SCSI Device", 30,
-						__FILE__, __LINE__ );
+						       __FILE__, __LINE__ );
 		else if( val == "scsi_host" )
 			fillMe->mDescription.setValue( "SCSI Adapter", 30,
-						__FILE__, __LINE__ );
+						       __FILE__, __LINE__ );
 		else if( val == "bluetooth" )
 			fillMe->mDescription.setValue( "Bluetooth Device", 30,
-						__FILE__, __LINE__ );
+						       __FILE__, __LINE__ );
 		else if( val == "pcmcia_socket" )
 			fillMe->mDescription.setValue( "PCMCIA Adapter", 30,
-						__FILE__, __LINE__ );
+						       __FILE__, __LINE__ );
 		else if( val == "usb" )
 			fillMe->mDescription.setValue( "Generic USB Device", 30,
-						__FILE__, __LINE__ );
+						       __FILE__, __LINE__ );
 		else if( val == "usb_device" )
 			fillMe->mDescription.setValue( "USB Device", 30,
-						__FILE__, __LINE__ );
+						       __FILE__, __LINE__ );
 		else if( val == "usb_host" )
 			fillMe->mDescription.setValue( "USB Host Controller", 30,
-						__FILE__, __LINE__ );
+						       __FILE__, __LINE__ );
 		else if( val == "block" )
 			fillMe->mDescription.setValue( "Generic Block Device", 10,
-						__FILE__, __LINE__ );
+						       __FILE__, __LINE__ );
 		else if( val == "tty" )
 			fillMe->mDescription.setValue( "Serial Device", 20,
-						__FILE__, __LINE__ );
+						       __FILE__, __LINE__ );
 	}
 
 	void SysFSTreeCollector::fillUSBDev( Component* fillMe,
-		const string& sysDir )
+					     const string& sysDir )
 	{
 		string val;
 		int manID = UNKNOWN_ID, devID = UNKNOWN_ID;
@@ -1437,15 +1453,17 @@ namespace lsvpd
 			if(  manID != UNKNOWN_ID )
 			{
 				fillMe->mManufacturer.setValue( mUsbTable->getName( manID ),
-					50, __FILE__, __LINE__ );
+								50, __FILE__, __LINE__ );
 			}
 
 			// Fill Device Description
 			if( devID != UNKNOWN_ID )
 			{
-				fillMe->mDescription.setValue( "USB Device", 50, __FILE__, __LINE__ );
+				fillMe->mDescription.setValue( "USB Device", 50,
+							       __FILE__, __LINE__ );
+
 				fillMe->mModel.setValue( mUsbTable->getName( manID, devID ),
-					50, __FILE__, __LINE__ );
+							 50, __FILE__, __LINE__ );
 			}
 		}
 
@@ -1462,7 +1480,7 @@ namespace lsvpd
 #define SIOCETHTOOL     0x8946
 #endif
 	void SysFSTreeCollector::fillNetClass( Component* fillMe,
-		const string& classDir )
+					       const string& classDir )
 	{
 		string val = getAttrValue( classDir, "address" );
 		val = val.substr( 0, 17 );
@@ -1483,7 +1501,7 @@ namespace lsvpd
 		{
 			Logger logger;
 			logger.log( "SysFsTreeCollector.fillNetClass: socket call failed.",
-				LOG_WARNING );
+				    LOG_WARNING );
 			return;
 		}
 
@@ -1512,7 +1530,7 @@ namespace lsvpd
 			close( fd );
 			Logger logger;
 			logger.log( "SysFsTreeCollector.fillNetClass: ioctl call failed.",
-				LOG_WARNING );
+				    LOG_WARNING );
 			return;
 		}
 
@@ -1528,9 +1546,9 @@ namespace lsvpd
 		struct utsname info;
 
 		sys->mDescription.setValue( string( "System VPD" ), 100,
-											__FILE__, __LINE__ );
+					    __FILE__, __LINE__ );
 		sys->mRecordType.setValue( string( "VSYS" ), 100,
-											__FILE__, __LINE__ );
+					   __FILE__, __LINE__ );
 
 		if( uname( &info ) != 0 )
 		{
@@ -1545,7 +1563,7 @@ namespace lsvpd
 			os << info.sysname << " " << info.release;
 			sys->mOS.setValue( os.str( ), 100, __FILE__, __LINE__ );
 			sys->mNodeName.setValue( string( info.nodename ), 50
-											, __FILE__, __LINE__ );
+						 , __FILE__, __LINE__ );
 			sys->mArch.dataValue = info.machine;
 		}
 	}
@@ -1558,9 +1576,10 @@ namespace lsvpd
 		string classNode = fillMe->getClassNode();
 		if (classNode.length() > 0) {
 			fillMe->mFirmwareVersion.setValue( getAttrValue( classNode,
-				"fw_version" ), 30, __FILE__, __LINE__ );
+					"fw_version" ), 30, __FILE__, __LINE__ );
+
 			fillMe->mFirmwareLevel.setValue( getAttrValue( classNode,
-				"fwrev" ), 30, __FILE__, __LINE__ );
+					"fwrev" ), 30, __FILE__, __LINE__ );
 		}
 	}
 

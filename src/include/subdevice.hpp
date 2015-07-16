@@ -37,7 +37,7 @@ namespace lsvpd
 	static const int UNKNOWN_ID = 0xffff;
 
 	/**
-	 * The SubDevice object will contain the SubDevice ID, the manufacurer id,
+	 * The SubDevice object will contain the SubDevice ID, the manufacturer id,
 	 * and the SubDevice name.
 	 */
 	class SubDevice

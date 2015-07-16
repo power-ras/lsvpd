@@ -109,33 +109,33 @@ int main( int argc, char** argv )
 	{
 		switch( getopt_long( argc, argv, opts, longOpts, &index ) )
 		{
-			case 'p':
-				env = optarg;
-				index = env.rfind( '/' );
-				file = env.substr( index + 1 );
-				env = env.substr( 0, index );
-				break;
+		case 'p':
+			env = optarg;
+			index = env.rfind( '/' );
+			file = env.substr( index + 1 );
+			env = env.substr( 0, index );
+			break;
 
-			case 's':
-				limitSCSISize = true;
-				break;
+		case 's':
+			limitSCSISize = true;
+			break;
 
-			case 'v':
-				printVersion( );
-				return 0;
+		case 'v':
+			printVersion( );
+			return 0;
 
-			case 'a':
-				archiveDB( env + '/' + file );
-				return 0;
+		case 'a':
+			archiveDB( env + '/' + file );
+			return 0;
 
-			case -1:
-				done = true;
-				break;
+		case -1:
+			done = true;
+			break;
 
-			case 'h':
-			default:
-				printUsage( );
-				return 0;
+		case 'h':
+		default:
+			printUsage( );
+			return 0;
 		}
 	}
 
@@ -204,7 +204,11 @@ void archiveDB( const string& fullPath )
 			os << timeval->tm_min << "." << timeval->tm_sec;
 		}
 
-		link( fullPath.c_str( ), os.str( ).c_str( ) );
+		if (link( fullPath.c_str( ), os.str( ).c_str( ) ) != 0) {
+			cout << "Creating link of " <<  fullPath.c_str(  ) <<
+			" to " <<os.str(  ).c_str(  ) << " failed" << endl;
+			return;
+		}
 		unlink( fullPath.c_str( ) );
 
 		if( stat( os.str( ).c_str( ), &st ) == 0 )
@@ -230,7 +234,7 @@ void archiveDB( const string& fullPath )
 
 			// Read the original file into memory.
 			while( ( in = read( fd, buffer + tot, st.st_size - tot ) ) > 0 &&
-				tot < st.st_size )
+			       tot < st.st_size )
 				tot += in;
 			close( fd );
 			unlink( os.str( ).c_str( ) );
@@ -248,7 +252,7 @@ void archiveDB( const string& fullPath )
 			in = 0;
 			tot = 0;
 			while( ( in = gzwrite( gzf, buffer + tot, st.st_size - tot ) ) > 0
-				&& tot < st.st_size )
+			       && tot < st.st_size )
 				tot += in;
 
 			delete [] buffer;
@@ -293,9 +297,9 @@ int initializeDB( bool limitSCSI )
 	root = info.getComponentTree( );
 
 	/*
-	coutd << "After Merge: " << endl;
-	info.diplayInheritanceTree(root);
-	*/
+	   coutd << "After Merge: " << endl;
+	   info.diplayInheritanceTree(root);
+	   */
 
 	ret = storeComponents( root, *db );
 
@@ -376,9 +380,9 @@ int ensureEnv( const string& env )
 	}
 
 	if( mkdir( env.c_str( ),
-			S_IRUSR | S_IWUSR | S_IXUSR |
-			S_IRGRP | S_IWGRP | S_IXGRP |
-			S_IROTH | S_IXOTH ) != 0 )
+		   S_IRUSR | S_IWUSR | S_IXUSR |
+		   S_IRGRP | S_IWGRP | S_IXGRP |
+		   S_IROTH | S_IXOTH ) != 0 )
 	{
 		Logger logger;
 		logger.log( "Failed to create directory for vpd db.", LOG_ERR );
@@ -399,7 +403,7 @@ int __lsvpdInit(string env, string file)
 	sigemptyset(&sigact.sa_mask);
 
 	/* Set up signal handler for terminating signals;
-	 */
+	*/
 	sigaction(SIGABRT, &sigact, NULL);
 	sigaction(SIGILL, &sigact, NULL);
 	sigaction(SIGINT, &sigact, NULL);
@@ -433,21 +437,21 @@ void lsvpdSighandler(int sig)
 	struct sigaction sigact;
 
 	switch (sig) {
-		case SIGABRT:
-		case SIGILL:
-		case SIGINT:
-		case SIGQUIT:
-		case SIGTERM:
-			/* remove the handler for this action and raise
-			 * the signal again so that the expected default
-			 * behavior for the signal occurs.
-			 */
-			sigact.sa_handler = SIG_DFL;
-			sigemptyset(&sigact.sa_mask);
-			sigaction(sig, &sigact, NULL);
-			__lsvpdFini();
-			raise(sig);
-			break;
+	case SIGABRT:
+	case SIGILL:
+	case SIGINT:
+	case SIGQUIT:
+	case SIGTERM:
+		/* remove the handler for this action and raise
+		 * the signal again so that the expected default
+		 * behavior for the signal occurs.
+		 */
+		sigact.sa_handler = SIG_DFL;
+		sigemptyset(&sigact.sa_mask);
+		sigaction(sig, &sigact, NULL);
+		__lsvpdFini();
+		raise(sig);
+		break;
 	}
 }
 

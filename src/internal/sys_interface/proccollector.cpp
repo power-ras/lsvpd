@@ -100,75 +100,89 @@ namespace lsvpd
 				if( val.find( "IBM" ) == 0 )
 				{
 					fillMe->mManufacturer.setValue( "IBM", 80,
-						__FILE__, __LINE__  );
+									__FILE__,
+									__LINE__  );
 				}
 				else if( val.find( "QUANTUM" ) == 0 )
 				{
 					fillMe->mManufacturer.setValue( "Quantum", 80,
-						__FILE__, __LINE__  );
+									__FILE__,
+									__LINE__  );
 				}
 				else if( val.find( "MATSHITA" ) == 0 ||
-						val.find( "UJDA" ) == 0 )
+					 val.find( "UJDA" ) == 0 )
 				{
 					fillMe->mManufacturer.setValue( "Matshita", 80,
-						__FILE__, __LINE__  );
+									__FILE__,
+									__LINE__  );
 				}
 				else if( val.find( "HL-DT-ST" ) == 0 ||
-						val.find( "LG" ) == 0 )
+					 val.find( "LG" ) == 0 )
 				{
 					fillMe->mManufacturer.setValue( "LG Electronics", 80,
-						__FILE__, __LINE__  );
+									__FILE__,
+									__LINE__  );
 				}
 				else if( val.find( "TOSHIBA" ) == 0 )
 				{
 					fillMe->mManufacturer.setValue( "Toshiba", 80,
-						__FILE__, __LINE__  );
+									__FILE__,
+									__LINE__  );
 				}
 				else if( val.find( "LTN" ) == 0 )
 				{
 					fillMe->mManufacturer.setValue( "Lite-On", 80,
-						__FILE__, __LINE__  );
+									__FILE__,
+									__LINE__  );
 				}
 				else if( val.find( "AOPEN" ) == 0 )
 				{
 					fillMe->mManufacturer.setValue( "AOpen", 80,
-						__FILE__, __LINE__ );
+									__FILE__,
+									__LINE__ );
 				}
 				else if( val.find( "RICOH" ) == 0 )
 				{
 					fillMe->mManufacturer.setValue( "Ricoh", 80,
-						__FILE__, __LINE__ );
+									__FILE__,
+									__LINE__ );
 				}
 				else if( val.find( "NEC" ) == 0 )
 				{
 					fillMe->mManufacturer.setValue( "NEC", 80,
-						__FILE__, __LINE__ );
+									__FILE__,
+									__LINE__ );
 				}
 				else if( val.find( "MAXTOR" ) == 0 )
 				{
 					fillMe->mManufacturer.setValue( "Maxtor", 80,
-						__FILE__, __LINE__ );
+									__FILE__,
+									__LINE__ );
 				}
 				else if( val.find( "HTS" ) == 0 ||
-						val.find( "IC25N" ) == 0 )
+					 val.find( "IC25N" ) == 0 )
 				{
 					fillMe->mManufacturer.setValue( "Hitachi", 80,
-						__FILE__, __LINE__ );
+									__FILE__,
+									__LINE__ );
 				}
 				else if( val.find( "PIONEER" ) == 0 )
 				{
 					fillMe->mManufacturer.setValue( "Pioneer", 80,
-						__FILE__, __LINE__ );
+									__FILE__,
+									__LINE__ );
 				}
 				else if( val.find( "ST" ) == 0 )
 				{
 					fillMe->mManufacturer.setValue( "Seagate", 80,
-						__FILE__, __LINE__ );
+									__FILE__,
+									__LINE__ );
 				}
 				else
 				{
 					fillMe->mManufacturer.setValue( "Unknown", 10,
-						__FILE__, __LINE__ );
+									__FILE__,
+									__LINE__ );
 				}
 			}
 		}
@@ -199,8 +213,9 @@ namespace lsvpd
 				string ln = line;
 				if( ln.find( "model name" ) != string::npos )
 				{
-					sys->mMachineType.setValue( ln.substr( ln.find( ':' ) + 2 ), 40,
-						__FILE__, __LINE__ );
+					sys->mMachineType.setValue(
+						ln.substr( ln.find( ':' ) + 2 ),
+							40,  __FILE__, __LINE__ );
 				}
 				else if( ln.find( "processor" ) != string::npos )
 					count++;

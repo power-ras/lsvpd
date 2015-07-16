@@ -98,20 +98,20 @@ namespace lsvpd
 	};
 
 	struct intStr {
-	        int key;
-	        string val;
+		int key;
+		string val;
 	};
 
 	struct strStr {
-	        string key;
-	        string val;
+		string key;
+		string val;
 	};
 
 	static vector<scsi_template*> scsi_templates;
 
 	typedef struct my_scsi_idlun {
-	    int dev_id;
-	    int host_unique_id;
+		int dev_id;
+		int host_unique_id;
 	} My_scsi_idlun;
 
 	static int scsi_template_count = 0;
@@ -138,15 +138,15 @@ namespace lsvpd
 
 	static const struct intStr cdrom_device_types[] =
 	{
-	        {0, SCSI_CDROM_DEFAULT},
-	        {1, "OEM SCSI CD-ROM Drive"},
-	        {2, "SCSI CD-ROM Drive"},
-	        {3, "SCSI Multimedia CD-ROM Drive"},
-	        {4, "OEM SCSI DVD-ROM Drive"},
-	        {5, "SCSI DVD-ROM Drive"},
-	        {6, "SCSI DVD-RAM Drive"},
-	        {7, "OEM SCSI DVD-RAM Drive"},
-	        {-1, ""}
+		{0, SCSI_CDROM_DEFAULT},
+		{1, "OEM SCSI CD-ROM Drive"},
+		{2, "SCSI CD-ROM Drive"},
+		{3, "SCSI Multimedia CD-ROM Drive"},
+		{4, "OEM SCSI DVD-ROM Drive"},
+		{5, "SCSI DVD-ROM Drive"},
+		{6, "SCSI DVD-RAM Drive"},
+		{7, "OEM SCSI DVD-RAM Drive"},
+		{-1, ""}
 	};
 
 	/*
@@ -156,51 +156,51 @@ namespace lsvpd
 	 */
 	static const struct intStr device_scsi_types_short[] =
 	{
-	        {0x0, "disk"},
-	        {0x1, "tape"},
-	        {0x2, "printer"},
-	        {0x3, "processor"},
-	        {0x4, "worm"},
-	        {0x5, "cdrom"},
-	        {0x6, "scanner"},
-	        {0x7, "optical-disk"},
-	        {0x8, "jukebox"},
-	        {0x9, "communications"},
-	        {0xa, "graphics"},
-	        {0xb, "graphics"},
-	        {0xd, "enclosure"},
-	        {-1, 	""}
+		{0x0, "disk"},
+		{0x1, "tape"},
+		{0x2, "printer"},
+		{0x3, "processor"},
+		{0x4, "worm"},
+		{0x5, "cdrom"},
+		{0x6, "scanner"},
+		{0x7, "optical-disk"},
+		{0x8, "jukebox"},
+		{0x9, "communications"},
+		{0xa, "graphics"},
+		{0xb, "graphics"},
+		{0xd, "enclosure"},
+		{-1, 	""}
 	};
 
 	static const struct intStr device_scsi_types[] =
 	{
-	        {0x0, "Disk Drive"},
-	        {0x1, "Tape Drive"},
-	        {0x2, "Printer Device"},
-	        {0x3, "Processor Device"},
-	        {0x4, "Write-once Device"},
-	        {0x5, "CD-ROM Drive"},
-	        {0x6, "Scanner Device"},
-	        {0x7, "Optical Memory Device"},
-	        {0x8, "Medium Changer Device"},
-	        {0x9, "Communications Device"},
-	        {0xa, "Graphics Arts Pre-press Device"},
-	        {0xb, "Graphics Arts Pre-press Device"},
-			{0xd, "Enclosure Services Device"},
-	        {-1, ""}
+		{0x0, "Disk Drive"},
+		{0x1, "Tape Drive"},
+		{0x2, "Printer Device"},
+		{0x3, "Processor Device"},
+		{0x4, "Write-once Device"},
+		{0x5, "CD-ROM Drive"},
+		{0x6, "Scanner Device"},
+		{0x7, "Optical Memory Device"},
+		{0x8, "Medium Changer Device"},
+		{0x9, "Communications Device"},
+		{0xa, "Graphics Arts Pre-press Device"},
+		{0xb, "Graphics Arts Pre-press Device"},
+		{0xd, "Enclosure Services Device"},
+		{-1, ""}
 	};
 
 	struct strStr device_scsi_ds_prefixes[] = {
-        { DEVICE_TYPE_SCSI,		"SCSI"            },
-        { DEVICE_TYPE_SATA,		"ATA"             },
-        { DEVICE_TYPE_ATA,		"ATA"             },
-        { DEVICE_TYPE_ISCSI,	"iSCSI"           },
-        { DEVICE_TYPE_FIBRE,	"Fibre Channel"   },
-        { DEVICE_TYPE_RAID,		"SCSI"            },
-        { DEVICE_TYPE_SCSI_DEBUG,"SCSI Debug Fake" },
-        { DEVICE_TYPE_IBMVSCSI,	"Virtual SCSI"    },
-        { DEVICE_TYPE_USB,		"USB"             },
-        { "",                   ""              },
+		{ DEVICE_TYPE_SCSI,		"SCSI"            },
+		{ DEVICE_TYPE_SATA,		"ATA"             },
+		{ DEVICE_TYPE_ATA,		"ATA"             },
+		{ DEVICE_TYPE_ISCSI,	"iSCSI"           },
+		{ DEVICE_TYPE_FIBRE,	"Fibre Channel"   },
+		{ DEVICE_TYPE_RAID,		"SCSI"            },
+		{ DEVICE_TYPE_SCSI_DEBUG,"SCSI Debug Fake" },
+		{ DEVICE_TYPE_IBMVSCSI,	"Virtual SCSI"    },
+		{ DEVICE_TYPE_USB,		"USB"             },
+		{ "",                   ""              },
 	};
 
 	void printBuf(char *buf, int size)
@@ -221,48 +221,48 @@ namespace lsvpd
 	 * Requires that fillMe-> devBus be filled
 	 */
 	string SysFSTreeCollector::make_basic_device_scsi_ds(Component *fillMe,
-		string type, int subtype)
+							     string type, int subtype)
 	{
-		  string ds;
-		  int i, j;
-		  string prefix;
-		  string subtypeDS;
+		string ds;
+		int i, j;
+		string prefix;
+		string subtypeDS;
 
-		  if (!fillMe->devBus.getValue().empty()) {
-		          i = 0;
-		          while ((device_scsi_ds_prefixes[i].key != "") &&
-		          		(type != device_scsi_ds_prefixes[i].key))
-		          			i++;
+		if (!fillMe->devBus.getValue().empty()) {
+			i = 0;
+			while ((device_scsi_ds_prefixes[i].key != "") &&
+			       (type != device_scsi_ds_prefixes[i].key))
+				i++;
 
-		          prefix = device_scsi_ds_prefixes[i].val;
-		  }
-		  if (prefix.empty())
+			prefix = device_scsi_ds_prefixes[i].val;
+		}
+		if (prefix.empty())
 			prefix = "SCSI";
 
 		i = 0;
 		// Lookup device subtype
 		while ((device_scsi_types[i].key != -1)
-			&& (subtype != device_scsi_types[i].key))
-				i++;
+		       && (subtype != device_scsi_types[i].key))
+			i++;
 
 		if (device_scsi_types[i].key != -1)
 			subtypeDS = device_scsi_types[i].val;
 
 		j = 0;
 		if ((device_scsi_types[i].key == -1)
-			&& (!cdrom_device_types[j].key != -1))
-				subtypeDS = cdrom_device_types[j].val;
+		    && (!cdrom_device_types[j].key != -1))
+			subtypeDS = cdrom_device_types[j].val;
 		else if (device_scsi_types[i].key == -1)
-		  	subtypeDS = "Unknown Device";
+			subtypeDS = "Unknown Device";
 
-		  /*
-		   * When we get 2 special cases we will generalise this using a
-		   * sparse lookup-table like the above string array, but keyed
-		   * off both type and subtype.
-		   */
-			if ((prefix == "usb") && (subtypeDS == "Disk Drive")) {
-				subtypeDS = "Mass Storage Device";
-			}
+		/*
+		 * When we get 2 special cases we will generalise this using a
+		 * sparse lookup-table like the above string array, but keyed
+		 * off both type and subtype.
+		 */
+		if ((prefix == "usb") && (subtypeDS == "Disk Drive")) {
+			subtypeDS = "Mass Storage Device";
+		}
 
 		return (prefix + " " + subtypeDS);
 	}
@@ -273,49 +273,49 @@ namespace lsvpd
 	 * Note: Can only be called for evpd retrieved from page code 199
 	 */
 	string SysFSTreeCollector::make_full_scsi_ds(Component *fillMe,
-				string type, int subtype,
-				char * data, int dataSize)
+						     string type, int subtype,
+						     char * data, int dataSize)
 	{
-        string subtypeDS;
-        int cdtype;
-        string ds;
-        int i = 0;
+		string subtypeDS;
+		int cdtype;
+		string ds;
+		int i = 0;
 
-			ds = make_basic_device_scsi_ds(fillMe, type, subtype);
-			/*cout << "Type = " << type << " subtype = " << subtype
-					<< endl;
-			printf("data[34] =  %d\n", data[34]);*/
+		ds = make_basic_device_scsi_ds(fillMe, type, subtype);
+		/*cout << "Type = " << type << " subtype = " << subtype
+		  << endl;
+		  printf("data[34] =  %d\n", data[34]);*/
 
-        // Only do the fancy stuff for real SCSI devices.
-        if ((type ==  "scsi")
-         	|| (type ==  "raid")) {
-				// Check for SCSI *Multimedia* CD-ROM Drive.
-            if (subtype == 5) {
-                cdtype = ((NULL != data) &&
-                          (34 <= strlen(data))) ?
-                        (int) data[33] : 0;
+		// Only do the fancy stuff for real SCSI devices.
+		if ((type ==  "scsi")
+		    || (type ==  "raid")) {
+			// Check for SCSI *Multimedia* CD-ROM Drive.
+			if (subtype == 5) {
+				cdtype = ((NULL != data) &&
+					  (34 <= strlen(data))) ?
+					(int) data[33] : 0;
 
-					// Find CDROM type string
-	                while ((cdrom_device_types[i].key != -1) &&
-			    		(cdtype != cdrom_device_types[i].key))
-			    			i++;
+				// Find CDROM type string
+				while ((cdrom_device_types[i].key != -1) &&
+				       (cdtype != cdrom_device_types[i].key))
+					i++;
 
-	    			if (!cdrom_device_types[i].key != -1)
-	    				subtypeDS = cdrom_device_types[i].val;
-	    			else
-	    				subtypeDS = SCSI_CDROM_DEFAULT;
+				if (!cdrom_device_types[i].key != -1)
+					subtypeDS = cdrom_device_types[i].val;
+				else
+					subtypeDS = SCSI_CDROM_DEFAULT;
 
-            }
-            else {
-            	if (subtype == 0 && (81 == data[34])) {
-            		subtypeDS = "LVD " + ds;
-//                    label = ((0 == subtype) && (NULL != data)
-//                        && (7 == data[34])) ?
-            	}
+			}
+			else {
+				if (subtype == 0 && (81 == data[34])) {
+					subtypeDS = "LVD " + ds;
+					//                    label = ((0 == subtype) && (NULL != data)
+					//                        && (7 == data[34])) ?
+				}
 
-            }
+			}
 
-        }
+		}
 
 		if (subtypeDS.empty()) {
 			return ds;
@@ -377,7 +377,7 @@ namespace lsvpd
 			else {
 				if (string::npos != s2.find(s1.substr(beg, end), 0))
 					matches(s1.substr(end, s1.length() - end),
-							s2.substr(end, s2.length() - end));
+						s2.substr(end, s2.length() - end));
 			}
 		}
 		else
@@ -385,7 +385,7 @@ namespace lsvpd
 
 		if (s1.substr(beg, end) == s2.substr(beg, end)) {
 			return matches(s1.substr(end, s1.length() - end),
-						s2.substr(end, s2.length() - end));
+				       s2.substr(end, s2.length() - end));
 		}
 		else {
 			return false;
@@ -397,7 +397,7 @@ namespace lsvpd
 	 * values.
 	 */
 	const scsi_template *findTemplate(string vendor,
-							string devClass, string model)
+					  string devClass, string model)
 	{
 		vector<scsi_template*>::iterator i, end;
 
@@ -416,21 +416,21 @@ namespace lsvpd
 	}
 
 	string lsvpd_hexify(const unsigned char * str,
-	             size_t len)
+			    size_t len)
 	{
-	        int i;
-	        string tmp;
+		int i;
+		string tmp;
 
-	        char * ret = new char[ len*2+1 ];
+		char * ret = new char[ len*2+1 ];
 		if ( ret == NULL )
 			return ret;
-	        for (i = 0; i < (int) len ; i++) {
-	                snprintf(&ret[i*2], 3, "%.2X", str[i]);
-	        }
+		for (i = 0; i < (int) len ; i++) {
+			snprintf(&ret[i*2], 3, "%.2X", str[i]);
+		}
 
-	        tmp = ret;
-	        delete []ret;
-	        return tmp;
+		tmp = ret;
+		delete []ret;
+		return tmp;
 	}
 
 	/**
@@ -484,7 +484,7 @@ namespace lsvpd
 
 	/**
 	 * @brief: Grab int value from template, representing the size of the
-	 * 	field in bytes
+	 *	   field in bytes
 	 */
 	int getFieldValue(string pattern)
 	{
@@ -492,7 +492,7 @@ namespace lsvpd
 		string str;
 		char **endptr = NULL;
 
-		if 	((int) pattern.length() <= 0)
+		if ((int) pattern.length() <= 0)
 			return -1;
 
 		i = 0;
@@ -508,7 +508,8 @@ namespace lsvpd
 
 		str = pattern.substr(eon, pattern.length() - eon);
 		value = strtol(str.c_str(), endptr, 0);
-//		cout << "GetValue() Pattern = " << pattern << ", str = " << str << ", eon = " << eon << "Value = " << value << endl;
+		//cout << "GetValue() Pattern = " << pattern << ", str = "
+		//<< str << ", eon = " << eon << "Value = " << value << endl;
 
 		return value;
 	}
@@ -525,7 +526,7 @@ namespace lsvpd
 
 		end = beg = curPos = 0;
 
-//		coutd << "Data: " << data << ", Len = " << strlen(data) <<  endl;
+		//coutd << "Data: " << data << ", Len = " << strlen(data) <<  endl;
 
 		while ((commaCount <= num) && (data[curPos] != '\0')) {
 			if (str[curPos] == ',') {
@@ -536,7 +537,7 @@ namespace lsvpd
 					end = curPos;
 			}
 			if (str[curPos + 1] == '\0') {
-					end = curPos;
+				end = curPos;
 			}
 			curPos++;
 
@@ -559,9 +560,9 @@ namespace lsvpd
 
 	/**
 	 * Takes a full format specifier template string, counts number of
-	 * 	page codes within it
-	 * 	Ex: ?0x0=RL:4,_:78,FN:12,EC:10,PN:12;?0x83=_:4,UM:8;
-	 * 		returns 2
+	 *	page codes within it
+	 *	Ex: ?0x0=RL:4,_:78,FN:12,EC:10,PN:12;?0x83=_:4,UM:8;
+	 *		returns 2
 	 */
 	int numPageTemplates(string templ)
 	{
@@ -582,9 +583,9 @@ namespace lsvpd
 	 * Takes a full format specifier template string, and parses it for
 	 * the page-specific format code specified by num.
 	 * For example, suppose the template string is:
-	 * 		?0x0=RL:4,_:78,FN:12,EC:10,PN:12;?0x83=_:4,UM:8;
-	 * 	retrievePageTemplate(templ, 0) = 0x0=RL:4,_:78,FN:12,EC:10,PN:12;
-	 * 	retrievePageTemplate(templ, 1) = 0x83=_:4,UM:8;
+	 *		?0x0=RL:4,_:78,FN:12,EC:10,PN:12;?0x83=_:4,UM:8;
+	 *	retrievePageTemplate(templ, 0) = 0x0=RL:4,_:78,FN:12,EC:10,PN:12;
+	 *	retrievePageTemplate(templ, 1) = 0x83=_:4,UM:8;
 	 */
 	string retrievePageTemplate(string templ, int num)
 	{
@@ -617,27 +618,27 @@ namespace lsvpd
 
 	/**
 	 * Takes a page specific template, ie '0x83=_:4,UM:8;' and parses out
-	 * 	page code and format string for this page of data
+	 *	page code and format string for this page of data
 	 *
 	 *  @return the page code '83' as 'page_code',
-	 * 		format string '_:4,UM:8;' as format
+	 *		format string '_:4,UM:8;' as format
 	 */
 	int retrievePageCode(const string page_spec_template,
-							string& page_code, string& format)
+			     string& page_code, string& format)
 	{
 		int i = 0, beg, end = 0;
 
 		/* Get page code */
 		while (page_spec_template[i-1] != '0'
-				&& page_spec_template[i] != 'x'
-				&& i < (int) page_spec_template.length())
+		       && page_spec_template[i] != 'x'
+		       && i < (int) page_spec_template.length())
 			i++;
 		beg = i + 1;
 		while (page_spec_template[i] != '=' && i < (int) page_spec_template.length())
 			i++;
 		end = i;
 		if ((beg >= (int) page_spec_template.length())
-			|| (end >= (int) page_spec_template.length()))
+		    || (end >= (int) page_spec_template.length()))
 			return -1;
 		page_code = page_spec_template.substr(beg, end - beg);
 
@@ -661,7 +662,7 @@ namespace lsvpd
 
 		beg = 0;
 		while	(beg < maxLen &&
-				(buf[beg] == 32 || buf[beg] == '\n'))
+			 (buf[beg] == 32 || buf[beg] == '\n'))
 			beg++;
 
 		end = beg + maxLen;
@@ -684,8 +685,10 @@ namespace lsvpd
 	 * device_scsi_types_short[] table.  This is different than type!
 	 */
 	void SysFSTreeCollector::process_template(Component *fillMe,
-			string *deviceType, char *data, int dataSize, string *format,
-			int pageCode)
+						  string *deviceType,
+						  char *data, int dataSize,
+						  string *format,
+						  int pageCode)
 	{
 		int eof[30]; // End of field pointers
 		int fieldTotal = 0;
@@ -716,15 +719,15 @@ namespace lsvpd
 		tempCurLoc = 0; //Skip size specifier
 		while (fieldNum < fieldTotal) {
 			fieldTemplate = (*format).substr(tempCurLoc,
-				eof[fieldNum] - tempCurLoc);
+							 eof[fieldNum] - tempCurLoc);
 
 			fieldName = getFieldName(fieldTemplate);
 			fieldSize = getFieldValue(fieldTemplate);
 
 			dataVal = strdupTrim(data + dataCurLoc, fieldSize);
-//			coutd << "	fieldTemplate = " << fieldTemplate << " ,fieldName = "
-//					<< fieldName << ", fieldSize = " << fieldSize
-//					<< ", Dataval =  " << dataVal << endl;
+			//coutd << "	fieldTemplate = " << fieldTemplate << " ,fieldName = "
+			//<< fieldName << ", fieldSize = " << fieldSize
+			//<< ", Dataval =  " << dataVal << endl;
 			dataCurLoc += fieldSize;
 			tempCurLoc = eof[fieldNum] + 1;
 			fieldNum++;
@@ -739,7 +742,7 @@ namespace lsvpd
 				while (dataVal[end] != '-')
 					end++;
 				fillMe->plantMfg.setValue(dataVal.substr(0, end), 85,
-													__FILE__, __LINE__);
+							  __FILE__, __LINE__);
 			}
 			else if (fieldName == "AA") {
 				// The third byte of the last 4 read is the one we want.
@@ -749,12 +752,12 @@ namespace lsvpd
 				ostringstream os;
 				os << (int)slotNum;
 				fillMe->mSecondLocation.setValue( os.str( ), 60, __FILE__,
-					__LINE__ );
+								  __LINE__ );
 			}
 			else if (fieldName != "_") {
 				/* Default behavior for most fields.  */
 				//Z0 hexification handled during collection
-//				Martin liked to hexify this, but I don't think it is necessary
+				//Martin liked to hexify this, but I don't think it is necessary
 				if (fieldName == "RL" || fieldName == "Z7") {
 					dataVal = hexify(dataVal);
 				}
@@ -767,21 +770,21 @@ namespace lsvpd
 
 	/**
 	 * @brief: Takes a data stream obtained from sg_utils, and parses it.
-	 * 	Parsing is done both using a template, and through grabbing of
-	 * 	values from key locations in the data stream
+	 *	Parsing is done both using a template, and through grabbing of
+	 *	values from key locations in the data stream
 	 * @arg fillMe: The component that is being queried by sg_utils, and which
-	 * 	needs to be filled
+	 *	needs to be filled
 	 * @arg data: The sg_utils data stream
 	 * @arg dataSize: The length in bytes of the data stream
 	 * Note: Was called 'device_scsi_sg_render' under lsvpd-0.16
 	 */
 	int SysFSTreeCollector::interpretPage(Component *fillMe,
-							char *data,
-							int dataSize,
-							int pageCode,
-							string *pageFormat,
-							int subtype,
-							string *subtypeDS)
+					      char *data,
+					      int dataSize,
+					      int pageCode,
+					      string *pageFormat,
+					      int subtype,
+					      string *subtypeDS)
 	{
 		string ds;
 		string dataTmp = string(data);
@@ -789,47 +792,47 @@ namespace lsvpd
 		Logger log;
 		string tmpStr, lvd;
 
-      if (pageCode == 199) {
-      	/* pagecode = 0xc7 */
-      	ds = make_full_scsi_ds(fillMe, "scsi", subtype, data, dataSize);
+		if (pageCode == 199) {
+			/* pagecode = 0xc7 */
+			ds = make_full_scsi_ds(fillMe, "scsi", subtype, data, dataSize);
 
 			if (!ds.empty()) {
-			/* add LVD tag to DS if needed */
+				/* add LVD tag to DS if needed */
 				if (( 0 == subtype) && (NULL != data) &&
-					(35 <= dataSize) && (7 == data[34])) {
-						fillMe->mDescription.setValue(fillMe->mDescription.getValue()
-							+ " LVD " + ds, 90, __FILE__, __LINE__);
+				    (35 <= dataSize) && (7 == data[34])) {
+					fillMe->mDescription.setValue(fillMe->mDescription.getValue()
+								      + " LVD " + ds, 90, __FILE__, __LINE__);
 				}
 				else {
 					fillMe->mDescription.setValue(fillMe->mDescription.getValue()
-							+ " - " + ds, 90, __FILE__, __LINE__);
+								      + " - " + ds, 90, __FILE__, __LINE__);
 				}
 			}
 
 			return 0;
-      }
+		}
 		// If query was from page 0, the summary page, grab key data values
 		if (pageCode == 0) {
 			// Set Z0 - characterized as useful data
 			tmpStr = lsvpd_hexify((const unsigned char *) data, 8);
 
 			fillMe->updateDeviceSpecific("Z0",
-								"First 8 bytes of SCSI query response",
-								tmpStr, 90);
+						     "First 8 bytes of SCSI query response",
+						     tmpStr, 90);
 			tmpStr = string("");
 			/* Final mash up adding channel width data to DS field */
-	   		if (data[7] & 0x40) {
-	   			tmpStr = "32 Bit";
-	   		}
-	   		else if (data[7] & 0x20) {
-	   			tmpStr = "16 Bit";
-	   		}
-	         fillMe->mDescription.setValue(tmpStr + fillMe->mDescription.getValue(),
-	         										85, __FILE__, __LINE__);
+			if (data[7] & 0x40) {
+				tmpStr = "32 Bit";
 			}
+			else if (data[7] & 0x20) {
+				tmpStr = "16 Bit";
+			}
+			fillMe->mDescription.setValue(tmpStr + fillMe->mDescription.getValue(),
+						      85, __FILE__, __LINE__);
+		}
 
-			process_template(fillMe, subtypeDS, data, dataSize, pageFormat, pageCode);
-			return 0;
+		process_template(fillMe, subtypeDS, data, dataSize, pageFormat, pageCode);
+		return 0;
 	}
 
 	/**
@@ -839,22 +842,22 @@ namespace lsvpd
 	{
 		char name[256];
 		struct stat statbuf;
-       if (-1 != sprintf(name, "/tmp/node-%d-%d-%d",
-                	mode, major, minor)) {
-	        if (stat(name, &statbuf) == 0) {
-	        		unlink(name);
-            }
-       }
+		if (-1 != sprintf(name, "/tmp/node-%d-%d-%d",
+				  mode, major, minor)) {
+			if (stat(name, &statbuf) == 0) {
+				unlink(name);
+			}
+		}
 
 	}
 
 	// Open a temp file through which we can ioctl() to device for reading
 	int device_open(int major, int minor, int mode)
 	{
-	        char name[256];
-	        int device_fd = 0;
-	        int ret;
-	        struct stat statbuf;
+		char name[256];
+		int device_fd = 0;
+		int ret;
+		struct stat statbuf;
 
 		if (-1 != sprintf(name, "/tmp/node-%d-%d-%d", mode, major, minor)) {
 			if (stat(name, &statbuf) == 0) {
@@ -873,100 +876,100 @@ namespace lsvpd
 			}
 		}
 
-	        device_close(device_fd, major, minor, mode);
-	        return -ERROR_ACCESSING_DEVICE;
+		device_close(device_fd, major, minor, mode);
+		return -ERROR_ACCESSING_DEVICE;
 	}
 
 	/* Calculate the length of the response from SG Utils */
 	static int
-	device_scsi_sg_resp_len(bool evpd, char *device_sg_read_buffer,
-	                        int bufSize)
-	{
-		int len = 0;
+		device_scsi_sg_resp_len(bool evpd, char *device_sg_read_buffer,
+					int bufSize)
+		{
+			int len = 0;
 
-		/*
-		 * SPC-3 (7.6) defines some EVPD pages with the page length in
-		 * bytes 2 and 3, and some that just use byte 3 with byte 2
-		 * reserved.  However, 3.3.9:
-		 *	http://www.t10.org/ftp/t10/drafts/spc3/spc3r21b.pdf
-		 *  says:
-		 *
-		 *   [...] A reserved bit, byte, word or field shall be set to
-		 *   zero, or in accordance with a future extension to this
-		 *   standard. Recipients are not required to check reserved
-		 *   bits, bytes, words or fields for zero values. Receipt of
-		 *   reserved code values in defined fields shall be reported
-		 *   as an error.
-		 */
-		if (evpd == 0)
-			len = device_sg_read_buffer[4] + 5;
-		else if (evpd == 1)
-			len = device_sg_read_buffer[2] * 256 + device_sg_read_buffer[3] + 4;
-		/* Size field is useful for error detection, but seems to be in error
-			when evpd is enabled.  Thus, hacked to return 256 for all inquiries
-		*/
-		return len;
-	}
+			/*
+			 * SPC-3 (7.6) defines some EVPD pages with the page length in
+			 * bytes 2 and 3, and some that just use byte 3 with byte 2
+			 * reserved.  However, 3.3.9:
+			 *	http://www.t10.org/ftp/t10/drafts/spc3/spc3r21b.pdf
+			 *  says:
+			 *
+			 *   [...] A reserved bit, byte, word or field shall be set to
+			 *   zero, or in accordance with a future extension to this
+			 *   standard. Recipients are not required to check reserved
+			 *   bits, bytes, words or fields for zero values. Receipt of
+			 *   reserved code values in defined fields shall be reported
+			 *   as an error.
+			 */
+			if (evpd == 0)
+				len = device_sg_read_buffer[4] + 5;
+			else if (evpd == 1)
+				len = device_sg_read_buffer[2] * 256 + device_sg_read_buffer[3] + 4;
+			/* Size field is useful for error detection, but seems to be in error
+			   when evpd is enabled.  Thus, hacked to return 256 for all inquiries
+			   */
+			return len;
+		}
 
 	/********************************************************************/
 	/* Check response from SGUtils to see if it is valid, and can be used */
 	static int
-	device_scsi_sg_sanity_check(bool   evpd,
-	                            int    page_code,
-	                            char *device_sg_read_buffer,
-	                            int bufSize)
-	{
-	        bool ret;
-	        char last;
-	        int i;
+		device_scsi_sg_sanity_check(bool   evpd,
+					    int    page_code,
+					    char *device_sg_read_buffer,
+					    int bufSize)
+		{
+			bool ret;
+			char last;
+			int i;
 
-				// No sanity checking for non-EVPD pages.
-				if (!evpd)
-					return 0;
+			// No sanity checking for non-EVPD pages.
+			if (!evpd)
+				return 0;
 
-	        	/* If we asked for a particular EVPD page and we got something
-				 * else then we have failed.
-				 */
-				if (page_code != device_sg_read_buffer[1]) {
-					coutd << "Page Code returned not same as requested!  " <<  endl;
-					coutd << "page code: '" << device_sg_read_buffer[1] << "'" << endl;
-					return -SGUTILS_READ_ERROR;
-				}
+			/* If we asked for a particular EVPD page and we got something
+			 * else then we have failed.
+			 */
+			if (page_code != device_sg_read_buffer[1]) {
+				coutd << "Page Code returned not same as requested!  " <<  endl;
+				coutd << "page code: '" << device_sg_read_buffer[1] << "'" << endl;
+				return -SGUTILS_READ_ERROR;
+			}
 
-				// That's all for EVPD page != 0.
-				if (0 != page_code)
-                return 0;
+			// That's all for EVPD page != 0.
+			if (0 != page_code)
+				return 0;
 
-	        /* If we asked for a particular EVPD page and we got something
-	         * else then we have failed.
-	         */
-	        if (page_code != device_sg_read_buffer[1])
-	                return -SGUTILS_READ_ERROR;
+			/* If we asked for a particular EVPD page and we got something
+			 * else then we have failed.
+			 */
+			if (page_code != device_sg_read_buffer[1])
+				return -SGUTILS_READ_ERROR;
 
-	        // That's all for EVPD page != 0.
-	        if (0 != page_code)
-	                return 0;
+			// That's all for EVPD page != 0.
+			if (0 != page_code)
+				return 0;
 
-	        /* Check EVPD page 0 specifies a legal/useful number
-	         * of page codes...
-	         */
-	        ret = (0 < device_sg_read_buffer[3])
-	        			&& (0 == device_sg_read_buffer[2]);
+			/* Check EVPD page 0 specifies a legal/useful number
+			 * of page codes...
+			 */
+			ret = (0 < device_sg_read_buffer[3])
+				&& (0 == device_sg_read_buffer[2]);
 
-	        // ...  and the list of available pages is ordered.
-	        i = 4;
-	        last = device_sg_read_buffer[i];
-	        i++;
-	        while (ret && (i < (int) device_sg_read_buffer[3])) {
-	                ret = (device_sg_read_buffer[i] > last);
-	                last = device_sg_read_buffer[i];
-	                i++;
-	        }
+			// ...  and the list of available pages is ordered.
+			i = 4;
+			last = device_sg_read_buffer[i];
+			i++;
+			while (ret && (i < (int) device_sg_read_buffer[3])) {
+				ret = (device_sg_read_buffer[i] > last);
+				last = device_sg_read_buffer[i];
+				i++;
+			}
 			if (ret == true)
-	        	return 0;
-	       	else
-	        	return -1;
-	}
+				return 0;
+			else
+				return -1;
+		}
 
 	/**
 	 * @brief: Calles into sg_ll_inquiry for vpd data
@@ -977,60 +980,62 @@ namespace lsvpd
 	 * @arg: page_code: memory page to retrieve from device
 	 */
 	int doSGQuery(int device_fd, char *device_sg_read_buffer, int bufSize,
-					int evpd, int page_code, int cmd = 0)
+		      int evpd, int page_code, int cmd = 0)
 	{
 		int len = 0 , ret_ll, ret_san;
 
-//		coutd << "doSGQuery:  " << __LINE__ << " : Querying with evpd: " << evpd << ", page_code = " << page_code << ", cmd = " << cmd
-//				<< ", bufSize = " << bufSize << endl;
+		//coutd << "doSGQuery:  " << __LINE__ << " : Querying with evpd: "
+		//<< evpd << ", page_code = " << page_code << ", cmd = " << cmd
+		//<< ", bufSize = " << bufSize << endl;
 
-			if (evpd)
-				bufSize = DEVICE_SCSI_SG_DEFAULT_EVPD_LEN;
-			else
-				bufSize = DEVICE_SCSI_SG_DEFAULT_STD_LEN;
+		if (evpd)
+			bufSize = DEVICE_SCSI_SG_DEFAULT_EVPD_LEN;
+		else
+			bufSize = DEVICE_SCSI_SG_DEFAULT_STD_LEN;
 
-//			coutd << "sg_ll_inquiry Args: evpd: '" << evpd << "', page_code: "
-//					<< page_code << " BufSize: " << bufSize << endl;
-			ret_ll = sg_ll_inquiry(device_fd, cmd, evpd, page_code,
-				device_sg_read_buffer, bufSize, 0, 0);
+		//coutd << "sg_ll_inquiry Args: evpd: '" << evpd << "', page_code: "
+		//<< page_code << " BufSize: " << bufSize << endl;
+		ret_ll = sg_ll_inquiry(device_fd, cmd, evpd, page_code,
+				       device_sg_read_buffer, bufSize, 0, 0);
 
-			if (ret_ll == 0) { // Succeeded
+		if (ret_ll == 0) { // Succeeded
+			ret_san = device_scsi_sg_sanity_check(evpd, page_code,
+							      device_sg_read_buffer, bufSize);
+
+			if (ret_san < 0){
+			//coutd << "doSGQuery: " << __LINE__ << ": sanity check returned: "
+			//<< ret_san << endl;
+				return ret_san;
+			}
+
+			len = device_scsi_sg_resp_len(evpd, device_sg_read_buffer, bufSize);
+
+
+			//Redo sg_ll call with modified length
+			if (len > bufSize) {
+				bufSize = len;
+
+				//coutd << "Redoing inquiry: " << endl;
+				ret_ll = sg_ll_inquiry(device_fd, cmd, evpd, page_code,
+						       device_sg_read_buffer, bufSize, 0, 0);
 				ret_san = device_scsi_sg_sanity_check(evpd, page_code,
-					device_sg_read_buffer, bufSize);
+								      device_sg_read_buffer, bufSize);
 
 				if (ret_san < 0){
-//					coutd << "doSGQuery: " << __LINE__ << ": sanity check returned: " << ret_san << endl;
 					return ret_san;
 				}
-
-				len = device_scsi_sg_resp_len(evpd, device_sg_read_buffer, bufSize);
-
-
-//				Redo sg_ll call with modified length
-				if (len > bufSize) {
-					bufSize = len;
-
-//					coutd << "Redoing inquiry: " << endl;
-					ret_ll = sg_ll_inquiry(device_fd, cmd, evpd, page_code,
-											device_sg_read_buffer, bufSize, 0, 0);
-					ret_san = device_scsi_sg_sanity_check(evpd, page_code,
-							device_sg_read_buffer, bufSize);
-
-					if (ret_san < 0){
-						return ret_san;
-					}
-					len = device_scsi_sg_resp_len(evpd, device_sg_read_buffer,
-															bufSize);
-
-				}
+				len = device_scsi_sg_resp_len(evpd, device_sg_read_buffer,
+							      bufSize);
 
 			}
 
-			if (!ret_ll && len > MAXBUFSIZE - 1) {
-				len = MAXBUFSIZE - 1;
-			}
+		}
 
-        return len;
+		if (!ret_ll && len > MAXBUFSIZE - 1) {
+			len = MAXBUFSIZE - 1;
+		}
+
+		return len;
 	}
 
 	/* load_scsi_templates
@@ -1161,7 +1166,7 @@ namespace lsvpd
 			 * vendor is device manufacturer
 			 * product is Model
 			 */
-//			string fw = hexify(string(firmware));
+			//			string fw = hexify(string(firmware));
 
 			fillMe->mManufacturer.setValue(vendor, 100, __FILE__, __LINE__);
 			fillMe->mModel.setValue(model, 100, __FILE__, __LINE__);
@@ -1171,16 +1176,16 @@ namespace lsvpd
 			if (fillMe->mManufacturer.getValue() == "ATA") {
 				i = 0;
 				while ((!ata_device_renaming_scheme[i].key.empty())
-						&& (ata_device_renaming_scheme[i].key
-									!= fillMe->mModel.getValue()))
+				       && (ata_device_renaming_scheme[i].key
+					   != fillMe->mModel.getValue()))
 					i++;
 
 				if (!ata_device_renaming_scheme[i].key.empty()) {
 					fillMe->mManufacturer.setValue(ata_device_renaming_scheme[i].val,
-							100, __FILE__, __LINE__);
+								       100, __FILE__, __LINE__);
 					coutd << fillMe->mManufacturer.getValue() << endl;
 				}
-//				coutd << "mManufacturer Changed: " << fillMe->mManufacturer.getValue() << endl;
+				//				coutd << "mManufacturer Changed: " << fillMe->mManufacturer.getValue() << endl;
 			}
 
 		}
@@ -1202,23 +1207,23 @@ namespace lsvpd
 
 			subtype = buffer[0] & 0x1F;
 
-		 /* Lookup this subtype in the desc table */
-         i = 0;
-         while ((device_scsi_types_short[i].key != -1)
-    				&& (subtype != device_scsi_types_short[i].key))
-    					i++;
+			/* Lookup this subtype in the desc table */
+			i = 0;
+			while ((device_scsi_types_short[i].key != -1)
+			       && (subtype != device_scsi_types_short[i].key))
+				i++;
 			if (!device_scsi_types_short[i].key != -1)
 				subtypeDS = device_scsi_types_short[i].val;
 			else
 				subtypeDS = "Unknown";
 			if (!fillMe->mManufacturer.getValue().empty()) {
-					devTemplate =  findTemplate(fillMe->mManufacturer.getValue(),
-									subtypeDS,
-									fillMe->mModel.getValue());
-					/* No template - unknown device */
-					if (devTemplate == NULL) {
-						return -1;
-					}
+				devTemplate =  findTemplate(fillMe->mManufacturer.getValue(),
+							    subtypeDS,
+							    fillMe->mModel.getValue());
+				/* No template - unknown device */
+				if (devTemplate == NULL) {
+					return -1;
+				}
 			}
 			else {
 				// Need device manufacturer to query
@@ -1240,14 +1245,14 @@ namespace lsvpd
 					pageCodeInt = 0x02;
 					memset(buffer, '\0', MAXBUFSIZE);
 
-//					coutd << "Querying using evpd:  page code: " << pageCodeInt <<    endl;
+					//					coutd << "Querying using evpd:  page code: " << pageCodeInt <<    endl;
 
 					if (limitSCSISize)
 						evpd = 0;
 					else evpd = 1;
 
 					len = doSGQuery( device_fd, buffer, MAXBUFSIZE, evpd,
-						pageCodeInt, RECEIVE_DIAGNOSTIC );
+							 pageCodeInt, RECEIVE_DIAGNOSTIC );
 				}
 				else
 				{
@@ -1264,7 +1269,7 @@ namespace lsvpd
 
 					// Query this page
 					memset(buffer, '\0', MAXBUFSIZE);
-//					coutd << "Attempting query, evpd = " << evpd << ", pageCodeInt = " << pageCodeInt <<endl;
+					//					coutd << "Attempting query, evpd = " << evpd << ", pageCodeInt = " << pageCodeInt <<endl;
 					len = doSGQuery(device_fd, buffer, MAXBUFSIZE, evpd, pageCodeInt, 0);
 				}
 
@@ -1276,19 +1281,19 @@ namespace lsvpd
 				/*
 				 * Useful code for debugging
 				 * cout << " ------------------------------------- " << endl;
-				cout << "Page: " << pageCodeInt << ", Buffer: " << endl;
-				for (int s = 0; s < 170; s++)
-					printf("%c", buffer[s]);
-				printf("\n");
+				 cout << "Page: " << pageCodeInt << ", Buffer: " << endl;
+				 for (int s = 0; s < 170; s++)
+				 printf("%c", buffer[s]);
+				 printf("\n");
 
-				cout << "Page: " << pageCodeInt << ",Buffer: " << endl;
-				for (int s = 0; s < 170; s++)
-					printf("%d:%c  ", s, buffer[s]);
-				printf("\n");*/
+				 cout << "Page: " << pageCodeInt << ",Buffer: " << endl;
+				 for (int s = 0; s < 170; s++)
+				 printf("%d:%c  ", s, buffer[s]);
+				 printf("\n");*/
 
 				//Interpret this page
 				interpretPage(fillMe, buffer, len, pageCodeInt, &pageFormat,
-					subtype, &subtypeDS);
+					      subtype, &subtypeDS);
 			}
 		}
 
@@ -1300,7 +1305,7 @@ namespace lsvpd
 		string link = fillMe->sysFsNode.getValue() + "/generic";
 		return HelperFunctions::getSymLinkTarget(link);
 	}
-		
+
 
 	/********************************************************************
 	 * Get device Major:Minor device codes, as well as access mode
@@ -1483,20 +1488,20 @@ out:
 		/* Not a SCSI device */
 		if (fillMe->devBus.getValue() == "usb")
 			return;
-//		coutd << " Querying with limitSCSISize set to: " << limitSCSISize << endl;
+		//		coutd << " Querying with limitSCSISize set to: " << limitSCSISize << endl;
 
-//		coutd << "Query SCSI dev at: " << fillMe->idNode.getValue() << endl;
+		//		coutd << "Query SCSI dev at: " << fillMe->idNode.getValue() << endl;
 
 		/* Need major:minor codes to query device */
 		if (!(rc = get_mm_scsi(fillMe))) {
 
 			// Open Device for reading
 			device_fd = device_open(fillMe->devMajor,
-								fillMe->devMinor,
-								fillMe->devAccessMode);
+						fillMe->devMinor,
+						fillMe->devAccessMode);
 			if (device_fd <= 0) {
 				msg = string("vpdupdate: Failed opening device: ")
-							+ fillMe->idNode.getValue();
+					+ fillMe->idNode.getValue();
 				logger.log( msg, LOG_WARNING );
 				return;
 			}
@@ -1504,9 +1509,9 @@ out:
 			collectVpd(fillMe, device_fd, limitSCSISize);
 
 			device_close(device_fd,
-						fillMe->devMajor,
-						fillMe->devMinor,
-						fillMe->devAccessMode);
+				     fillMe->devMajor,
+				     fillMe->devMinor,
+				     fillMe->devAccessMode);
 		}
 
 		fillIPRData( fillMe );

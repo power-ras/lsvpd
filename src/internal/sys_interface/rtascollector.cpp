@@ -13,7 +13,7 @@
 #endif
 
 
-// #define DEBUGRTAS 1 
+// #define DEBUGRTAS 1
 
 #include <libvpd-2/lsvpd_error_codes.hpp>
 #include <rtascollector.hpp>
@@ -38,8 +38,8 @@ namespace lsvpd {
 
 	/**
 	 * Based on rtas_ibm_get_vpd.c by
-	 *  @author Michael Strosaker <strosake@us.ibm.com>
-	 * 	and @author Martin Schwenke <schwenke@au1.ibm.com>
+	 * @author Michael Strosaker <strosake@us.ibm.com>
+	 * and @author Martin Schwenke <schwenke@au1.ibm.com>
 	 *
 	 * librtas_error
 	 * @brief check for any librtas specific return codes
@@ -56,7 +56,7 @@ namespace lsvpd {
 	{
 		switch (error) {
 		case RTAS_KERNEL_INT:
-		    return string("No kernel interface to firmware");
+			return string("No kernel interface to firmware");
 		case RTAS_KERNEL_IMP:
 			return string("No kernel implementation of function");
 		case RTAS_PERM:
@@ -123,7 +123,7 @@ namespace lsvpd {
 	 *   char** where we will put the vpd (*data should be NULL)
 	 */
 	int RtasCollector::rtasGetVPD(const string& yl = "",
-					char ** data = NULL)
+				      char ** data = NULL)
 	{
 		int size = 0;
 		struct rtas_buf_element *current, *list;
@@ -153,7 +153,7 @@ namespace lsvpd {
 #endif
 		do {
 			rc = rtas_get_vpd(locCode, current->buf, RTAS_BUF_SIZE,
-						seq, &nextSeq, &(current->size));
+					  seq, &nextSeq, &(current->size));
 
 			switch (rc) {
 			case CONTINUE:
@@ -210,9 +210,9 @@ namespace lsvpd {
 		free(locCode);
 
 		current = list;
-	        do {
+		do {
 			size += current->size;
-	        } while ((current = (current->next)) != NULL);
+		} while ((current = (current->next)) != NULL);
 
 		current = list;
 		*data = new char[ size ];

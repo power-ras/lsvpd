@@ -45,7 +45,7 @@ namespace lsvpd
 	 * @return Data contained in 'devPath'/'attrName'
 	 */
 	string ICollector::getAttrValue( const string& path,
-								const string& attrName )
+					 const string& attrName )
 	{
 		Logger logger;
 		struct stat info;
@@ -179,8 +179,8 @@ out:
 			j = i;
 			while(++j < len && val[j] == '\0');
 			/* After index i, we have all 0s' */
-				if (j == len)
-					break;
+			if (j == len)
+				break;
 		}
 		return nonSpace;
 	}
@@ -204,12 +204,13 @@ out:
 	/* Generic field setter, allow field name to be passed in
 	 * and data value to be stored in the correct place.
 	 * @arg file: Source file of call, for simple back tracing.
-	 * 		Should be set to __FILE__ at call point
+	 *		Should be set to __FILE__ at call point
 	 * @arg lineNum: Source Line of call, for simple back tracing.
-	 * 		Should be set to __LINE__ at call point
+	 *		Should be set to __LINE__ at call point
 	 */
 	void ICollector::setVPDField( Component* fillMe, const string& key,
-		const string& val , const char *file, int lineNum)
+				      const string& val , const char *file,
+				      int lineNum)
 	{
 		if( key == "EC" )
 			fillMe->mEngChangeLevel.setValue( val, 90, file, lineNum );
@@ -247,15 +248,15 @@ out:
 			fillMe->addDeviceSpecific( key, "Size", val, 90 );
 		else if( key == "CC" )
 			fillMe->addDeviceSpecific( key, "Customer Card ID Number",
-				val, 90 );
+						   val, 90 );
 		else if( key == "PR" )
 			fillMe->addDeviceSpecific( key, "Power Control", val, 90 );
 		else if ( key == "ML" )
 			fillMe->addDeviceSpecific( key, "Microcode Level",
-							val, 90 );
+						   val, 90 );
 		else if ( key == "MG" )
 			fillMe->addDeviceSpecific( key, "Microcode Build Date",
-							val, 90 );
+						   val, 90 );
 		else if ( key == "ME" )
 			fillMe->addDeviceSpecific( key, "Update Access Key Exp"
 						   " Date", val, 90 );
@@ -279,7 +280,8 @@ out:
 	}
 
 	void ICollector::setVPDField( System* sys, const string& key,
-		const string& val , const char *file, int lineNum)
+				      const string& val , const char *file,
+				      int lineNum)
 	{
 		if( key == "BR" )
 			sys->mBrand.setValue( val, 70, file, lineNum );

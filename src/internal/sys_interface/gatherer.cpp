@@ -83,7 +83,8 @@ namespace lsvpd
 		{
 			Logger logger;
 			logger.log( "Notice: /proc/device-tree Not found."
-					"  This is expected on non-Power systems.", LOG_INFO );
+				    "  This is expected on non-Power systems.",
+					LOG_INFO );
 			delete devTree;
 		}
 
@@ -134,7 +135,7 @@ namespace lsvpd
 		getComponentTree(devs);
 
 		for( start = devs.begin( ), stop = devs.end( ); start != stop;
-			++start )
+		     ++start )
 		{
 			devIDs.push_back(string((*start)->idNode.getValue()));
 		}
@@ -154,22 +155,22 @@ namespace lsvpd
 
 		if( root == NULL )
 		{
-            Logger l;
-            l.log( "Gatherer.getDeviceTree: Failed to build new Component.",
-            	LOG_ERR );
-            VpdException ve(
-            	"Gatherer.getDeviceTree: Failed to build new Component." );
-            throw ve;
+			Logger l;
+			l.log( "Gatherer.getDeviceTree: Failed to build new Component.",
+			       LOG_ERR );
+			VpdException ve(
+					"Gatherer.getDeviceTree: Failed to build new Component." );
+			throw ve;
 		}
 
 		if( ret == NULL )
 		{
-            Logger l;
-            l.log( "Gatherer.getDeviceTree: Failed to build new System.",
-            	LOG_ERR );
-            VpdException ve(
-				"Gatherer.getDeviceTree: Failed to build new System." );
-            throw ve;
+			Logger l;
+			l.log( "Gatherer.getDeviceTree: Failed to build new System.",
+			       LOG_ERR );
+			VpdException ve(
+					"Gatherer.getDeviceTree: Failed to build new System." );
+			throw ve;
 		}
 
 		devs.reserve(256);
@@ -181,7 +182,7 @@ namespace lsvpd
 		// Iterate through each collector, calling getComponents()
 		vector<ICollector*>::iterator start, stop;
 		for( start = sources.begin( ), stop = sources.end( ); start != stop;
-			++start )
+		     ++start )
 		{
 			(*start)->getComponents( devs );
 			(*start)->fillSystem( ret );
@@ -226,7 +227,7 @@ namespace lsvpd
 		fillTree( root->mLeaves );
 
 		for( start = sources.begin( ), stop = sources.end( ); start != stop;
-			++start )
+		     ++start )
 		{
 			(*start)->postProcess( root );
 		}
@@ -361,7 +362,7 @@ namespace lsvpd
 		for( cur = devs.begin( ), end = devs.end( ); cur != end; ++cur )
 		{
 			for( start = sources.begin( ), stop = sources.end( ); start != stop;
-				 ++start )
+			     ++start )
 			{
 				(*start)->fillComponent(*cur);
 			}
@@ -379,7 +380,7 @@ namespace lsvpd
 	 * by calling 'getComponents()' on each specific collector type
 	 *
 	 * @arg devs: a Component* vector, which will be filled with the
-	 * 	device tree
+	 *	device tree
 	 */
 	System* Gatherer::getComponentTree(vector<Component*>& devs)
 	{
@@ -388,22 +389,22 @@ namespace lsvpd
 
 		if( root == NULL )
 		{
-            Logger l;
-            l.log( "Gatherer.getDeviceTree: Failed to build new Component.",
-            	LOG_ERR );
-            VpdException ve(
-            	"Gatherer.getDeviceTree: Failed to build new Component." );
-            throw ve;
+			Logger l;
+			l.log( "Gatherer.getDeviceTree: Failed to build new Component.",
+			       LOG_ERR );
+			VpdException ve(
+					"Gatherer.getDeviceTree: Failed to build new Component." );
+			throw ve;
 		}
 
 		if( ret == NULL )
 		{
-            Logger l;
-            l.log( "Gatherer.getDeviceTree: Failed to build new System.",
-            	LOG_ERR );
-            VpdException ve(
-            	"Gatherer.getDeviceTree: Failed to build new System." );
-            throw ve;
+			Logger l;
+			l.log( "Gatherer.getDeviceTree: Failed to build new System.",
+			       LOG_ERR );
+			VpdException ve(
+					"Gatherer.getDeviceTree: Failed to build new System." );
+			throw ve;
 		}
 
 		devs.reserve(256);
@@ -415,14 +416,14 @@ namespace lsvpd
 		vector<Component*>::iterator cur, end;
 
 		for( start = sources.begin( ), stop = sources.end( ); start != stop;
-			++start )
+		     ++start )
 		{
 			(*start)->getComponents( devs );
 		}
 
 		// Fill the component tree with full details
 		for( start = sources.begin( ), stop = sources.end( ); start != stop;
-			++start )
+		     ++start )
 		{
 			for( cur = devs.begin( ), end = devs.end( ); cur != end; ++cur )
 			{
@@ -585,7 +586,7 @@ namespace lsvpd
 	 * @return the specified component, or NULL on failure
 	 */
 	Component *Gatherer::findComponent( const vector<Component*> devs,
-		string idNode )
+					    string idNode )
 	{
 		for (int i = 0; i < (int) devs.size(); i++)
 			if(devs[i]->idNode.getValue() == idNode)

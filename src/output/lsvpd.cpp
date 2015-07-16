@@ -84,16 +84,16 @@ void printVersion( )
 
 bool contains( const vector<DataItem*>& vec, const string& val )
 {
-        vector<DataItem*>::const_iterator i, end;
+	vector<DataItem*>::const_iterator i, end;
 
-        for( i = vec.begin( ), end = vec.end( ); i != end; ++i )
-        {
-                const string name = (*i)->getValue( );
-                if( name == val )
-                        return true;
-        }
+	for( i = vec.begin( ), end = vec.end( ); i != end; ++i )
+	{
+		const string name = (*i)->getValue( );
+		if( name == val )
+			return true;
+	}
 
-        return false;
+	return false;
 }
 
 void printVPD( Component* root )
@@ -118,7 +118,7 @@ void printVPD( Component* root )
 		cout << "Sysfs Device Class Node: " << root->getDevClass( ) << endl;
 		cout << "Parent ID: " << root->getParent( ) << endl;
 		cout << "Sysfs Name: " << root->getDevSysName( ) << endl;
-//		cout << "Device Tree Name: " << root->getDevTreeName( ) << endl;
+		//		cout << "Device Tree Name: " << root->getDevTreeName( ) << endl;
 		cout << "Bus: " << root->getDevBus( ) << endl;
 		if (root->getDevType( ).length() > 0)
 			cout << "Device Type: " << root->getDevType( ) << endl;
@@ -140,9 +140,9 @@ void printVPD( Component* root )
 	}
 
 	if( ( !root->getAIXNames( ).empty( ) || root->getDescription( ) != "" )
-		&& !( devType == "chrp" && root->getDevTreeNode( ).find( "/vdevice/" )
-		!= string::npos ) && ( bn.find( "pci@" ) == string::npos &&
-		bn.find( "isa@" ) == string::npos ) )
+	    && !( devType == "chrp" && root->getDevTreeNode( ).find( "/vdevice/" )
+		  != string::npos ) && ( bn.find( "pci@" ) == string::npos &&
+					 bn.find( "isa@" ) == string::npos ) )
 	{
 		if( devName != "" )
 		{
@@ -196,7 +196,7 @@ void printVPD( Component* root )
 			/*AX*/
 			vector<DataItem*>::const_iterator j, stop;
 			for( j = root->getAIXNames( ).begin( ),
-				stop = root->getAIXNames( ).end( ); j != stop; ++j )
+			     stop = root->getAIXNames( ).end( ); j != stop; ++j )
 			{
 				cout << "*" << (*j)->getAC( ) << " " << (*j)->getValue( ) << endl;
 			}
@@ -258,8 +258,8 @@ void printVPD( Component* root )
 					root->getn6( ) << endl;
 
 			for( j = root->getDeviceSpecific( ).begin( ),
-				stop = root->getDeviceSpecific( ).end( );
-				j != stop; ++j )
+			     stop = root->getDeviceSpecific( ).end( );
+			     j != stop; ++j )
 			{
 
 				if (!(*j)->getAC().compare("SZ")) {
@@ -276,8 +276,8 @@ void printVPD( Component* root )
 					root->getMicroCodeImage( ) << endl;
 
 			for( j = root->getUserData( ).begin( ),
-				stop = root->getUserData( ).end( );
-				j != stop; ++j )
+			     stop = root->getUserData( ).end( );
+			     j != stop; ++j )
 			{
 				cout << "*" << (*j)->getAC( ) << " " << (*j)->getValue( ) << endl;
 			}
@@ -319,7 +319,7 @@ void printVPD( System* root )
 			vector<string>::const_iterator i, end;
 			cout << "Children: " << endl;
 			for( i = root->getChildren( ).begin( ), end = root->getChildren( ).end( );
-				i != end; ++i )
+			     i != end; ++i )
 			{
 				cout << *(i) << endl;
 			}
@@ -377,7 +377,7 @@ void printVPD( System* root )
 
 		vector<DataItem*>::const_iterator j, stop;
 		for( j = root->getDeviceSpecific( ).begin( ), stop = root->getDeviceSpecific( ).end( );
-			j != stop; ++j )
+		     j != stop; ++j )
 		{
 			cout << "*" << (*j)->getAC( ) << " " << (*j)->getValue( ) << endl;
 		}
@@ -434,57 +434,57 @@ int main( int argc, char** argv )
 	{
 		switch( getopt_long( argc, argv, opts, longOpts, &index ) )
 		{
-			case 'm':
-				markedVpd = true;
-				break;
+		case 'm':
+			markedVpd = true;
+			break;
 
-			case 'v':
-				printVersion( );
-				return 0;
+		case 'v':
+			printVersion( );
+			return 0;
 
-			case 's':
-				if( optarg != NULL )
-					serial = optarg;
-				break;
+		case 's':
+			if( optarg != NULL )
+				serial = optarg;
+			break;
 
-			case 't':
-				if( optarg != NULL )
-					machineType = optarg;
-				break;
+		case 't':
+			if( optarg != NULL )
+				machineType = optarg;
+			break;
 
-			case 'p':
-				if( path == "" )
-					path = optarg;
-				break;
-
-			case 'z':
+		case 'p':
+			if( path == "" )
 				path = optarg;
-				compressed = true;
-				break;
+			break;
 
-                        case 'l':
-				if ( optarg != NULL )
-					devName = optarg;
-				break;
+		case 'z':
+			path = optarg;
+			compressed = true;
+			break;
 
-			case 'D':
-				debug = true;
-				break;
+		case 'l':
+			if ( optarg != NULL )
+				devName = optarg;
+			break;
 
-			case -1:
-				done = true;
-				if ( first && argc > 1 ) {
-					printUsage( );
-					return 0;
-				}
-				break;
+		case 'D':
+			debug = true;
+			break;
 
-			case 'h':
+		case -1:
+			done = true;
+			if ( first && argc > 1 ) {
 				printUsage( );
 				return 0;
-			default:
-				printUsage( );
-				return -1;
+			}
+			break;
+
+		case 'h':
+			printUsage( );
+			return 0;
+		default:
+			printUsage( );
+			return -1;
 		}
 		first = 0;
 	}
@@ -506,12 +506,12 @@ int main( int argc, char** argv )
 			index = path.rfind( '.' );
 			path = path.substr( 0, index );
 			int fd = open( path.c_str( ), O_CREAT | O_WRONLY,
-				S_IRGRP | S_IWUSR | S_IRUSR | S_IROTH );
+				       S_IRGRP | S_IWUSR | S_IRUSR | S_IROTH );
 			if( fd < 0 )
 			{
 				cout << "Failed to open file for uncompressed database archive"
 					<< endl;
-					return 1;
+				return 1;
 			}
 
 			char buffer[ 4096 ] = { 0 };
@@ -522,7 +522,7 @@ int main( int argc, char** argv )
 			{
 				int out = 0, tot = 0;
 				while( ( out = write( fd, buffer + tot, in - tot ) ) > 0 &&
-					tot < in )
+				       tot < in )
 					tot += out;
 				memset( buffer, 0 , 4096 );
 			}

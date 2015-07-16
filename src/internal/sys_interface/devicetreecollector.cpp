@@ -91,25 +91,26 @@ namespace lsvpd
 	 * Uses the highest preference Source to fill this DataItem
 	 */
 	void DeviceTreeCollector::readSources( DataItem& di,
-		const string& devTreeNode )
+					       const string& devTreeNode )
 	{
 		const Source * s = di.getFirstSource( );
 		if( s != NULL && s ->getType( ) == SRC_DEVICETREE )
 		{
 			string val = getAttrValue( devTreeNode, s->getData( ) );
 			if( val != "" )
-				di.setValue( val, s->getPrefLvl( ), __FILE__, __LINE__ );
+				di.setValue( val, s->getPrefLvl( ), __FILE__,
+								__LINE__ );
 		}
 		return;
 	}
 
 	void DeviceTreeCollector::initComponent( Component * newComp )
 	{
-			Source *src = new Source("ibm,fw-adapter-name", "",
-				 SRC_DEVICETREE, ASCII, 1, 3);
-			newComp->mDescription.setHumanName("Description");
-			newComp->mDescription.setAC("DS");
-			newComp->mDescription.addSource(src);
+		Source *src = new Source("ibm,fw-adapter-name", "",
+					 SRC_DEVICETREE, ASCII, 1, 3);
+		newComp->mDescription.setHumanName("Description");
+		newComp->mDescription.setAC("DS");
+		newComp->mDescription.addSource(src);
 	}
 
 	Component* DeviceTreeCollector::fillComponent(Component* fillMe )
@@ -133,7 +134,7 @@ namespace lsvpd
 	 * with code=code2.
 	 */
 	string collectEitherSystemParm(int code1,
-		int code2)
+				       int code2)
 	{
 
 		string s = RtasCollector::rtasSystemParm(code1);
@@ -161,8 +162,8 @@ namespace lsvpd
 	 * output for new Components, fill the new Components with the VPD
 	 * provided and add the new Components to the Component vector.
 	 */
-	void DeviceTreeCollector::parseRtasVpd( vector<Component*>& devs,
-		char *rtasData, int rtasDataSize)
+	void DeviceTreeCollector::parseRtasVpd(vector<Component*>& devs,
+					       char *rtasData, int rtasDataSize)
 	{
 		unsigned int size = 0;
 		unsigned int ret = 1;
@@ -227,7 +228,8 @@ namespace lsvpd
 
 		val = getAttrValue( fillMe->deviceTreeNode.dataValue, "fru-type" );
 		if (val.length() > 0)
-			fillMe->mDescription.setValue( getFruDescription(val), 90, __FILE__, __LINE__ );
+			fillMe->mDescription.setValue( getFruDescription(val),
+						       90, __FILE__, __LINE__ );
 
 		/* Loc code */
 		/* bpeters: Many storage devices sit on a port of an adapter, and are not
@@ -238,7 +240,8 @@ namespace lsvpd
 		path = fillMe->deviceTreeNode.dataValue;
 		val = getAttrValue( path, "ibm,loc-code" );
 		if (val.length() > 0) {
-			fillMe->mPhysicalLocation.setValue( val, 90, __FILE__, __LINE__ );
+			fillMe->mPhysicalLocation.setValue( val, 90, __FILE__,
+							    __LINE__ );
 			return true;
 		}
 		else { /* walk up device path until loc-code found */
@@ -248,7 +251,8 @@ namespace lsvpd
 				path = path_tmp.substr(0, i);
 				val = getAttrValue( path, "ibm,loc-code" );
 				if (val.length() > 0) {
-					fillMe->mPhysicalLocation.setValue( val, 90, __FILE__, __LINE__ );
+					fillMe->mPhysicalLocation.setValue( val,
+						90, __FILE__, __LINE__ );
 					return true;
 				}
 
@@ -277,7 +281,7 @@ namespace lsvpd
 		fillMe->mDescription.setValue( val, 25, __FILE__, __LINE__ );
 
 		val = getAttrValue( fillMe->deviceTreeNode.dataValue,
-			 "ibm,fw-adapter-name" );
+				    "ibm,fw-adapter-name" );
 		if( val != "" )
 		{
 			ostringstream os;
@@ -290,7 +294,8 @@ namespace lsvpd
 				os << val;
 				val = os.str( );
 			}
-			fillMe->mDescription.setValue( val, 60, __FILE__, __LINE__ );
+			fillMe->mDescription.setValue( val, 60, __FILE__,
+								__LINE__ );
 		}
 	}
 
@@ -319,8 +324,8 @@ namespace lsvpd
 	 * @fruName : Ptr to the name of the section if available.
 	 * @recordStart : Ptr in buf, where the records start.
 	 */
-	static unsigned int parseRtasVPDHeader( char *buf,
-					char **fruName, char **recordStart )
+	static unsigned int parseRtasVPDHeader( char *buf, char **fruName,
+						char **recordStart )
 	{
 		char *ptr, *dataEnd;
 		u32 size;
@@ -355,7 +360,7 @@ namespace lsvpd
 error:
 		Logger log;
 		log.log("Attempting to parse unsupported/corrupted VPD header",
-						LOG_WARNING);
+			LOG_WARNING);
 		return 0;
 	}
 
@@ -366,8 +371,8 @@ error:
 	 * 		in the OPAL VPD
 	 * @recordStart : Pointer to the area where the records start.
 	 */
-	static unsigned int parseOpalVPDHeader( char *buf,
-					char **fruName, char **recordStart)
+	static unsigned int parseOpalVPDHeader( char *buf, char **fruName,
+						char **recordStart)
 	{
 		char type;
 		unsigned int size = 0;
@@ -398,7 +403,8 @@ error:
 	}
 
 	unsigned int DeviceTreeCollector::parseVPDHeader( char *buf,
-								char **fruName, char **recordStart )
+							  char **fruName,
+							  char **recordStart )
 	{
 		if (isPlatformRTAS())
 			return parseRtasVPDHeader(buf, fruName, recordStart);
@@ -419,7 +425,7 @@ error:
 	 * setVPDField
 	 */
 	unsigned int DeviceTreeCollector::parseVPDBuffer( Component* fillMe,
-		char * buf )
+							  char * buf )
 	{
 		u32 size;
 		char key[ 3 ] = { '\0' };
@@ -435,7 +441,7 @@ error:
 
 		if (fruName) {
 			fillMe->mDescription.setValue(string(fruName), 80,
-							__FILE__, __LINE__);
+						      __FILE__, __LINE__);
 			delete [] fruName;
 		}
 
@@ -514,48 +520,48 @@ ERROR:
 		i = str.length();
 		while (ok) {
 			switch (str[i]) {
-				case '\0':;
-				case '0':;
-				case '1':;
-				case '2':;
-				case '3':;
-				case '4':;
-				case '5':;
-				case '6':;
-				case '7':;
-				case '8':;
-				case '9':;
-				case 'a':;
-				case 'b':;
-				case 'c':;
-				case 'd':;
-				case 'e':;
-				case 'f':;
-				case 'g':;
-				case 'h':;
-				case 'i':;
-				case 'j':;
-				case 'k':;
-				case 'l':;
-				case 'm':;
-				case 'n':;
-				case 'o':;
-				case 'p':;
-				case 'q':;
-				case 'r':;
-				case 's':;
-				case 't':;
-				case 'u':;
-				case 'v':;
-				case 'w':;
-				case 'x':;
-				case 'y':;
-				case 'z':;
-				case ',':;
-				case ':':
-							i--;
-							break;
-				default : ok = false;
+			case '\0':;
+			case '0':;
+			case '1':;
+			case '2':;
+			case '3':;
+			case '4':;
+			case '5':;
+			case '6':;
+			case '7':;
+			case '8':;
+			case '9':;
+			case 'a':;
+			case 'b':;
+			case 'c':;
+			case 'd':;
+			case 'e':;
+			case 'f':;
+			case 'g':;
+			case 'h':;
+			case 'i':;
+			case 'j':;
+			case 'k':;
+			case 'l':;
+			case 'm':;
+			case 'n':;
+			case 'o':;
+			case 'p':;
+			case 'q':;
+			case 'r':;
+			case 's':;
+			case 't':;
+			case 'u':;
+			case 'v':;
+			case 'w':;
+			case 'x':;
+			case 'y':;
+			case 'z':;
+			case ',':;
+			case ':':
+				 i--;
+				 break;
+			default : ok = false;
 			}
 		}
 		if (str[i] == '@')
@@ -571,7 +577,8 @@ ERROR:
 	 * @return the specified component, or NULL on failure
 	 */
 	Component *DeviceTreeCollector::findComponent(
-		const vector<Component*> devs, string devPath )
+						      const vector<Component*> devs,
+						      string devPath )
 	{
 		for (int i = 0; i < (int) devs.size(); i++)
 			if (devs[i]->deviceTreeNode.getValue() == devPath)
@@ -586,7 +593,8 @@ ERROR:
 	 * @return the specified component, or NULL on failure
 	 */
 	Component *DeviceTreeCollector::findCompIdNode(
-		vector<Component*> *devs, const string id )
+						       vector<Component*> *devs,
+						       const string id )
 	{
 		vector<Component*>::iterator i, end;
 
@@ -610,11 +618,12 @@ ERROR:
 		vector<string>::iterator vi, vend;
 
 		dest->deviceTreeNode.setValue(src->deviceTreeNode.getValue(), 100,
-												__FILE__, __LINE__);
+					      __FILE__, __LINE__);
 		dest->devDevTreeName.setValue(src->devDevTreeName.getValue(), 100,
-												__FILE__, __LINE__);
+					      __FILE__, __LINE__);
 		dest->devType.setValue(src->devType.getValue(),
-			src->devType.getPrefLevelUsed(), __FILE__, __LINE__);
+				       src->devType.getPrefLevelUsed(), __FILE__,
+				       __LINE__);
 
 		/* Copy children */
 		for ( vi = kids.begin( ), vend = kids.end( ); vi != vend; ++vi ) {
@@ -626,23 +635,23 @@ ERROR:
 	/*
 	 * transferChildren
 	 * @brief When a component is discovered in device tree collector,
-	 * 	then moved into the full device vector, this method handles
-	 * 	moving over the children (recursively) of the moved component
+	 *	then moved into the full device vector, this method handles
+	 *	moving over the children (recursively) of the moved component
 	 * @arg parentSrc - The parent component from the src tree
 	 * @arg defaultParent - The parent of top level components,
-	 * 	in this case, defined as those who's parents are
-	 * 	"/proc/device-tree"
+	 *	in this case, defined as those who's parents are
+	 *	"/proc/device-tree"
 	 * @arg target - The collection into which the children should
-	 * 	be moved
+	 *	be moved
 	 * @arg src - Collection from which the children are being moved.
-	 * 	Note, this collection is unchanged, components are simply
-	 * 	copied.
+	 *	Note, this collection is unchanged, components are simply
+	 *	copied.
 	 */
 
-	 /* transferChildren(&devRoot, sysRoot, &sysdevs, &devs); */
+	/* transferChildren(&devRoot, sysRoot, &sysdevs, &devs); */
 	void DeviceTreeCollector::transferChildren(Component *current,
-			vector<Component*> *target,
-			vector<Component*> *src)
+						   vector<Component*> *target,
+						   vector<Component*> *src)
 	{
 		vector<string> kids = current->getChildren( );
 		vector<string>::iterator vi, vend;
@@ -652,7 +661,7 @@ ERROR:
 			for ( i = src->begin( ), end = src->end( ); i != end; ++i ) {
 				if ( (*i)->idNode.getValue() == *vi) {
 					target->push_back(*i);
-//					src->erase(i);
+					//					src->erase(i);
 					/*Recurse*/
 					transferChildren(*i, target, src);
 				}
@@ -661,9 +670,9 @@ ERROR:
 	}
 
 	void DeviceTreeCollector::mergeTrees(Component *current,
-			Component *defaultParent,
-			vector<Component*> *target,
-			vector<Component*> *src)
+					     Component *defaultParent,
+					     vector<Component*> *target,
+					     vector<Component*> *src)
 	{
 		vector<string> kids = current->getChildren( );
 		vector<string>::iterator vi, vend;
@@ -687,20 +696,22 @@ ERROR:
 			transferChildren(current, target, src);
 
 			cpyinto(current->devSelfInSysfs, current);
-			parent = findCompIdNode(target, current->devSelfInSysfs->mParent.dataValue);
+			parent = findCompIdNode(target,
+						current->devSelfInSysfs->mParent.dataValue);
+
 			/* Update childs mParent pointer -
 			 * Note: The parent does not require a child ptr, since merged
 			 *  and already present */
 
 			current->mParent.setValue(
-					parent->idNode.dataValue,
-					90, __FILE__, __LINE__);
+						  parent->idNode.dataValue,
+						  90, __FILE__, __LINE__);
 
 		}
 		/* Convert top-level devices to point to defaultParent*/
 		else if (current->mParent.dataValue == DEVTREEPATH) {
 			current->mParent.setValue(defaultParent->idNode.dataValue,
-				 80, __FILE__, __LINE__);
+						  80, __FILE__, __LINE__);
 			defaultParent->addChild(current->idNode.dataValue);
 			target->push_back(current);
 			/* Recursively transfer all children of this node to new tree */
@@ -709,14 +720,14 @@ ERROR:
 	}
 
 	/* @brief Determine the parent of this device, using a bus-specific
-	 * 	search mechanism.  SCSI specific at this point, but some of this
-	 * 	may be generalizable and expanded for application to usb and ide
-	 * 	buses in future versions
+	 *	search mechanism.  SCSI specific at this point, but some of this
+	 *	may be generalizable and expanded for application to usb and ide
+	 *	buses in future versions
 	 *
 	 * @param devs - /sys & /proc/device-tree Merged tree of devices
 	 */
 	Component * DeviceTreeCollector::findSCSIParent(Component *fillMe,
-										vector<Component*> devs)
+							vector<Component*> devs)
 	{
 		string sysDev, devPath;
 		string parentSysFsName, pYL;
@@ -727,8 +738,8 @@ ERROR:
 		devSpecific = fillMe->getDeviceSpecific("XB");
 		if (devSpecific != NULL) {
 			parentSysFsName = fillMe->devBus.dataValue
-									+ string("@")
-									+ devSpecific->dataValue;
+				+ string("@")
+				+ devSpecific->dataValue;
 
 			sysDev = fillMe->sysFsLinkTarget.dataValue;
 			while (sysDev.length() > 1) {
@@ -751,19 +762,19 @@ ERROR:
 	 * @arg devs - device tree discovered devices
 	 *
 	 * TODO: Need to move Bus parsing for devices to before this step,
-	 * 	so we can test if bus == scsi, ide, usb, and ONLY do this extra
-	 * 	step for these device types
+	 *	so we can test if bus == scsi, ide, usb, and ONLY do this extra
+	 *	step for these device types
 	 */
 	void DeviceTreeCollector::buildSCSILocCode(Component *fillMe,
-											vector<Component*> devs)
+						   vector<Component*> devs)
 	{
 		Component *parent;
 		ostringstream val;
 		const DataItem *target, *lun, *bus;
 
 		/* Build up a distinct YL based on parents YL - for device such as
-		 * 	scsi, ide, usb, etc that do not generate ibm,loc-code
-		 * 	files for easy grabbing
+		 *	scsi, ide, usb, etc that do not generate ibm,loc-code
+		 *	files for easy grabbing
 		 */
 		if (fillMe->devBus.dataValue == "scsi") {
 			parent = findSCSIParent(fillMe, devs);
@@ -776,15 +787,15 @@ ERROR:
 					if (fillMe->mPhysicalLocation.dataValue != "")
 						val << fillMe->mPhysicalLocation.dataValue;
 					else if
-					(parent->mPhysicalLocation.dataValue != "")
-						val << parent->mPhysicalLocation.dataValue;
+						(parent->mPhysicalLocation.dataValue != "")
+							val << parent->mPhysicalLocation.dataValue;
 					else
 						val << getAttrValue( parent->deviceTreeNode.dataValue,
-											 "ibm,loc-code" );
+								     "ibm,loc-code" );
 					val << "-B" << bus->dataValue << "-T" << target->dataValue
 						<< "-L" << lun->dataValue;
 					fillMe->mPhysicalLocation.setValue( val.str( ), 60 ,
-						__FILE__, __LINE__ );
+									    __FILE__, __LINE__ );
 				}
 			}
 		}
@@ -886,11 +897,11 @@ ERROR:
 	 *
 	 * @arg sysdevs: Devices discovered through sysfstreecollector
 	 * @return: A fully merged tree of devices, with a single
-	 * 		root device and some path of inheritance to all
-	 * 		children
+	 *		root device and some path of inheritance to all
+	 *		children
 	 */
 	vector<Component*> DeviceTreeCollector::getComponents(
-		vector<Component*>& sysdevs )
+							      vector<Component*>& sysdevs )
 	{
 		vector<Component*> devs;
 		vector<Component*>::iterator i, end;
@@ -915,7 +926,7 @@ ERROR:
 
 				if (NULL != parent) {
 					child->mParent.setValue(parent->idNode.dataValue, 80,
-													__FILE__, __LINE__);
+								__FILE__, __LINE__);
 					parent->addChild(child->idNode.dataValue);
 					break;
 				}
@@ -923,7 +934,7 @@ ERROR:
 
 			if (parent == NULL) {
 				child->mParent.setValue(DEVTREEPATH, 60,
-													__FILE__, __LINE__);
+							__FILE__, __LINE__);
 				devRoot.addChild(child->idNode.dataValue);
 			}
 		}
@@ -959,7 +970,7 @@ ERROR:
 			 * so parent loc-codes are always going to be obtained if present
 			 */
 			fillQuickVPD( devC );
-				// Deprecated behavior: Otherwise, build one from parent
+			// Deprecated behavior: Otherwise, build one from parent
 			if (devC->devBus.dataValue == "scsi") {
 				buildSCSILocCode(devC, sysdevs);
 			}
@@ -973,7 +984,7 @@ ERROR:
 	 * details
 	 */
 	void DeviceTreeCollector::getComponentsVector(
-		vector<Component*>& devs )
+						      vector<Component*>& devs )
 	{
 		vector<string> curList;
 		vector<string> fullList;
@@ -1008,33 +1019,33 @@ ERROR:
 					 */
 					if (tmp->deviceTreeNode.dataValue.length() == 0) {
 						tmp->idNode.setValue(curPath  + "/" + tmpDirName,
-							INIT_PREF_LEVEL - 1, __FILE__, __LINE__);
+								     INIT_PREF_LEVEL - 1, __FILE__, __LINE__);
 					}
 
 					tmp->deviceTreeNode.setValue(curPath  + "/" + tmpDirName,
-						INIT_PREF_LEVEL, __FILE__, __LINE__);
+								     INIT_PREF_LEVEL, __FILE__, __LINE__);
 
 					// Set what we know of name - ie - directory entry
 					// Set immediately available data fields
 					tmp->devDevTreeName.setValue(tmpDirName, INIT_PREF_LEVEL,
-															__FILE__, __LINE__);
+								     __FILE__, __LINE__);
 
 					devType = getAttrValue(tmp->idNode.dataValue,
-						"device_type");
+							       "device_type");
 					tmp->devType.setValue(devType, 60, __FILE__, __LINE__);
 					/*
 					 * Do not add if this is a memory device. These are
 					 * discovered through rtas
 					 */
 					if (tmp->devDevTreeName.dataValue.substr(0, 6) !=
-						"memory")
+					    "memory")
 						devs.push_back(tmp);
 
 					/* default parent is top object.
 					 * This will be overwritten as more detailed info becomes
 					 * available */
 					tmp->mParent.setValue("/proc/device-tree",
-						 INIT_PREF_LEVEL, __FILE__, __LINE__);
+							      INIT_PREF_LEVEL, __FILE__, __LINE__);
 
 					// Push all dirs into fullList for future walking
 					fullList.push_back(curPath + "/" + tmpDirName);
@@ -1168,13 +1179,13 @@ ERROR:
 	}
 
 	/* Parses rtas and various system files for system level VPD
-	 */
+	*/
 	void DeviceTreeCollector::fillSystem( System* sys )
 	{
 		string val = "";
 
 		sys->deviceTreeNode.setValue( "/proc/device-tree", 100,
-							__FILE__, __LINE__);
+					      __FILE__, __LINE__);
 
 		sys->mKeywordVersion.setValue( "ipzSeries", 10, __FILE__, __LINE__ );
 
@@ -1200,7 +1211,7 @@ ERROR:
 			if( !val.compare(0, 4, "IBM,") )
 				sys->mSerialNum2.setValue( val.substr( 6 ), 80, __FILE__, __LINE__ );
 			else
-				 sys->mSerialNum2.setValue( val, 80 , __FILE__, __LINE__ );
+				sys->mSerialNum2.setValue( val, 80 , __FILE__, __LINE__ );
 		}
 
 		getSystemVPD(sys);
@@ -1244,7 +1255,7 @@ ERROR:
 	}
 
 	void DeviceTreeCollector::parseMajorMinor( Component* comp, string& major,
-		string& minor )
+						   string& minor )
 	{
 		string addr = comp->devSysName.dataValue;
 		int index;
@@ -1267,7 +1278,7 @@ ERROR:
 			minor = addr.substr( index + 1 );
 		}
 		else if( comp->devBus.dataValue == "usb" &&
-			( index = addr.find( ':' ) ) != (int) string::npos )
+			 ( index = addr.find( ':' ) ) != (int) string::npos )
 		{
 			major = addr.substr( 0, index );
 			minor = addr.substr( index + 1 );
@@ -1290,7 +1301,7 @@ ERROR:
 	{
 		ostringstream os;
 		if( comp->mPhysicalLocation.dataValue != "" &&
-			comp->mPhysicalLocation.dataValue[ 0 ] == 'U' )
+		    comp->mPhysicalLocation.dataValue[ 0 ] == 'U' )
 			return true;
 
 		/*
@@ -1298,8 +1309,8 @@ ERROR:
 		 * better one
 		 */
 
-		 if( comp->mpParent == NULL )
-		 	return false;
+		if( comp->mpParent == NULL )
+			return false;
 
 		string baseLoc = getBaseLoc( comp->mpParent );
 
@@ -1312,10 +1323,10 @@ ERROR:
 		 * now to the existing code.
 		 */
 		if (comp->mPhysicalLocation.dataValue != "" &&
-			comp->mPhysicalLocation.dataValue[ 0 ] == '-') {
+		    comp->mPhysicalLocation.dataValue[ 0 ] == '-') {
 			os << baseLoc << comp->mPhysicalLocation.getValue();
 			comp->mPhysicalLocation.setValue( os.str( ), 90, __FILE__,
-				__LINE__ );
+							  __LINE__ );
 			return true;
 		}
 
@@ -1336,7 +1347,7 @@ ERROR:
 		}
 
 		comp->mPhysicalLocation.setValue( os.str( ), 90, __FILE__,
-			__LINE__ );
+						  __LINE__ );
 		return true;
 
 	}
@@ -1356,7 +1367,7 @@ ERROR:
 					val << parent->mPhysicalLocation.dataValue;
 				else
 					val << getAttrValue( parent->deviceTreeNode.dataValue,
-										 "ibm,loc-code" );
+							     "ibm,loc-code" );
 				val << "-D" << comp->mSecondLocation.dataValue;
 				physical = val.str( );
 			}
@@ -1364,15 +1375,15 @@ ERROR:
 			if( physical != "" )
 			{
 				comp->mPhysicalLocation.setValue( physical, 70, __FILE__,
-					__LINE__ );
+								  __LINE__ );
 				comp->mSecondLocation.setValue( logical, 90, __FILE__,
-					__LINE__ );
+								__LINE__ );
 			}
 		}
 
 		vector<Component*>::iterator i, end;
 		for( i = comp->mLeaves.begin( ), end = comp->mLeaves.end( ); i != end;
-			++i )
+		     ++i )
 		{
 			postProcess( (*i) );
 		}

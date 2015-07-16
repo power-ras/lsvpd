@@ -104,7 +104,7 @@ void printVPD( Component* root )
 
 		vector<string>::const_iterator i, end;
 		for( i = root->getChildren( ).begin( ), end = root->getChildren( ).end( );
-			i != end; ++i )
+		     i != end; ++i )
 		{
 			cout << *(i) << endl;
 		}
@@ -114,24 +114,24 @@ void printVPD( Component* root )
 	if( dtNode.find( "vdevice" ) != string::npos )
 	{
 		if( ethernet && ( dtNode.find( "ethernet" ) != string::npos ||
-			dtNode.find( "l-lan" ) != string::npos ) )
+				  dtNode.find( "l-lan" ) != string::npos ) )
 		{
 			vector<DataItem*>::const_iterator j, stop;
 			for( j = root->getAIXNames( ).begin( ),
-				stop = root->getAIXNames( ).end( ); j != stop; ++j )
+			     stop = root->getAIXNames( ).end( ); j != stop; ++j )
 			{
 				cout << (*j)->getValue( ) << " ";
 			}
 			cout << root->getPhysicalLocation( ) << endl;
 		}
 		else if( ( scsiAdapters || scsiDevices )
-			&& dtNode.find( "v-scsi" ) != string::npos )
+			 && dtNode.find( "v-scsi" ) != string::npos )
 		{
 			if( !root->getAIXNames( ).empty( ) )
 			{
 				vector<DataItem*>::const_iterator j, stop;
 				for( j = root->getAIXNames( ).begin( ),
-					stop = root->getAIXNames( ).end( ); j != stop; ++j )
+				     stop = root->getAIXNames( ).end( ); j != stop; ++j )
 				{
 					cout << (*j)->getValue( ) << " ";
 				}
@@ -150,14 +150,14 @@ void printVPD( Component* root )
 		}
 	}
 	else if( scsiDevices &&
-		root->getSysFsLinkTarget( ).find( "vio" ) != string::npos &&
-		root->getDevBus( ).find( "scsi" ) != string::npos )
+		 root->getSysFsLinkTarget( ).find( "vio" ) != string::npos &&
+		 root->getDevBus( ).find( "scsi" ) != string::npos )
 	{
 		if( !root->getAIXNames( ).empty( ) )
 		{
 			vector<DataItem*>::const_iterator j, stop;
 			for( j = root->getAIXNames( ).begin( ),
-				stop = root->getAIXNames( ).end( ); j != stop; ++j )
+			     stop = root->getAIXNames( ).end( ); j != stop; ++j )
 			{
 				cout << (*j)->getValue( ) << " ";
 			}
@@ -192,7 +192,7 @@ void printVPD( System* root )
 		vector<string>::const_iterator i, end;
 		cout << "Children: " << endl;
 		for( i = root->getChildren( ).begin( ), end = root->getChildren( ).end( );
-			i != end; ++i )
+		     i != end; ++i )
 		{
 			cout << *(i) << endl;
 		}
@@ -250,53 +250,53 @@ int main( int argc, char** argv )
 	{
 		switch( getopt_long( argc, argv, opts, longOpts, &index ) )
 		{
-			case 's':
-				scsiAdapters = true;
-				break;
+		case 's':
+			scsiAdapters = true;
+			break;
 
-			case 'v':
-				printVersion( );
-				return 0;
+		case 'v':
+			printVersion( );
+			return 0;
 
-			case 'e':
-				ethernet = true;
-				break;
+		case 'e':
+			ethernet = true;
+			break;
 
-			case 'd':
-				scsiDevices = true;
-				break;
+		case 'd':
+			scsiDevices = true;
+			break;
 
-			case 'p':
-				if( path == "" )
-					path = optarg;
-				break;
-
-			case 'D':
-				debug = true;
-				scsiDevices = true;
-				scsiAdapters = true;
-				ethernet = true;
-				break;
-
-			case 'z':
+		case 'p':
+			if( path == "" )
 				path = optarg;
-				compressed = true;
-				break;
+			break;
 
-			case -1:
-				done = true;
-				if ( first && argc > 1 ) {
-					printUsage( );
-					return 0;
-				}
-				break;
+		case 'D':
+			debug = true;
+			scsiDevices = true;
+			scsiAdapters = true;
+			ethernet = true;
+			break;
 
-			case 'h':
+		case 'z':
+			path = optarg;
+			compressed = true;
+			break;
+
+		case -1:
+			done = true;
+			if ( first && argc > 1 ) {
 				printUsage( );
 				return 0;
-			default:
-				printUsage( );
-				return -1;
+			}
+			break;
+
+		case 'h':
+			printUsage( );
+			return 0;
+		default:
+			printUsage( );
+			return -1;
 		}
 		first = 0;
 	}
@@ -324,12 +324,12 @@ int main( int argc, char** argv )
 			index = path.rfind( '.' );
 			path = path.substr( 0, index );
 			int fd = open( path.c_str( ), O_CREAT | O_WRONLY,
-				S_IRGRP | S_IWUSR | S_IRUSR | S_IROTH );
+				       S_IRGRP | S_IWUSR | S_IRUSR | S_IROTH );
 			if( fd < 0 )
 			{
 				cout << "Failed to open file for uncompressed database archive"
 					<< endl;
-					return 1;
+				return 1;
 			}
 
 			char buffer[ 4096 ] = { 0 };
@@ -340,7 +340,7 @@ int main( int argc, char** argv )
 			{
 				int out = 0, tot = 0;
 				while( ( out = write( fd, buffer + tot, in - tot ) ) > 0 &&
-					tot < in )
+				       tot < in )
 					tot += out;
 				memset( buffer, 0 , 4096 );
 			}

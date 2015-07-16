@@ -55,8 +55,8 @@ using namespace lsvpd;
 #define MAX_AIX_NAMES 64
 #define IBM_CPU_MODEL_LIST     "/etc/lsvpd/cpu_mod_conv.conf"
 
-/* struct model_conv matches model number, ex: 8842-P1Z, to model name, 
-	ex: BladeCenter JS20 */
+/* struct model_conv matches model number, ex: 8842-P1Z, to model name,
+   ex: BladeCenter JS20 */
 struct model_conv {
 	string model_number;
 	string model_name;
@@ -92,7 +92,7 @@ string AIXNamePrefs[MAX_AIX_NAMES] =
 	"input*",
 	"audio*",
 	"serial*"
-	"tty*",
+		"tty*",
 	"audio*",
 	"usb_host*",
 	"usbdev*",
@@ -160,8 +160,8 @@ void printField( const string& label, const string& data )
 		int stop;
 		// Find the first white space before we run over our line limit
 		for( stop = data.length( ) - over;
-			data.at( stop ) != ' ' && data.at( stop ) != '\t' && stop > 0;
-			stop-- );
+		     data.at( stop ) != ' ' && data.at( stop ) != '\t' && stop > 0;
+		     stop-- );
 
 		if( stop <= 0 )
 		{
@@ -244,13 +244,13 @@ void printVPD( Component* root )
 
 		vector<string>::const_iterator i, end;
 		for( i = root->getChildren( ).begin( ), end = root->getChildren( ).end( );
-			i != end; ++i )
+		     i != end; ++i )
 		{
 			cout << *(i) << endl;
 		}
 	}
 
-//	if (root->getDevBus().length() > 0)
+	// if (root->getDevBus().length() > 0)
 	if(!root->getAIXNames( ).empty( ))
 	{
 		if( devName == "" ||
@@ -278,19 +278,19 @@ void printVPD( Component* root )
 
 			if (debug || verbose) {
 				for( j = root->getAIXNames( ).begin( ),
-					stop = root->getAIXNames( ).end( ); j != stop; ++j ) {
-						names << (*j)->getValue( ) << " ";
+				     stop = root->getAIXNames( ).end( ); j != stop; ++j ) {
+					names << (*j)->getValue( ) << " ";
 				}
 			}
 			else {
 				if (devName != "" && !islocation) {
 					names << devName;
 				} else {
-				/* look for a preferred name */
+					/* look for a preferred name */
 					ii = 0;
 					while ((ii < MAX_AIX_NAMES)
-							&& (AIXNamePrefs[ii].length() > 0)
-							&& !doneAIX)
+					       && (AIXNamePrefs[ii].length() > 0)
+					       && !doneAIX)
 					{
 						stop = root->getAIXNames( ).end( );
 						j = root->getAIXNames( ).begin( );
@@ -368,8 +368,8 @@ void printVPD( Component* root )
 				int over = val.length( ) - 35;
 				int stop;
 				for( stop = val.length( ) - over;
-					val.at( stop ) != ' ' && val.at( stop ) != '\t' &&
-					stop > 0; stop-- );
+				     val.at( stop ) != ' ' && val.at( stop ) != '\t' &&
+				     stop > 0; stop-- );
 
 				if( stop <= 0 )
 				{
@@ -387,43 +387,47 @@ void printVPD( Component* root )
 			{
 				if( root->getManufacturer( ) != "" )
 					printField( root->getManufacturerHN( ),
-						root->getManufacturer( ) );
+						    root->getManufacturer( ) );
 
 				if( root->getModel( ) != "" )
-					printField( root->getModelHN( ), root->getModel( ) );
+					printField( root->getModelHN( ),
+						    root->getModel( ) );
 
 				if( root->getMachineSerial( ) != "" )
-					printField( root->getMachineSerialHN( ), root->getMachineSerial( ) );
+					printField( root->getMachineSerialHN( ),
+						    root->getMachineSerial( ) );
 
 				if( root->getEngChange( ) != "" )
 					printField( root->getEngChangeHN( ),
-						root->getEngChange( ) );
+						    root->getEngChange( ) );
 
 				if( root->getFRU( ) != "" )
-					printField( root->getFRUHN( ), root->getFRU( ) );
+					printField( root->getFRUHN( ),
+						    root->getFRU( ) );
 
 				if( root->getManufacturerID( ) != "" )
 					printField( root->getManufacturerIDHN( ),
-						root->getManufacturerID( ) );
+						    root->getManufacturerID( ) );
 
 				if( root->getPartNumber( ) != "" )
 					printField( root->getPartNumberHN( ),
-						root->getPartNumber( ) );
+						    root->getPartNumber( ) );
 
 				if( root->getSerialNumber( ) != "" )
 					printField( root->getSerialNumberHN( ),
-						root->getSerialNumber( ) );
+						    root->getSerialNumber( ) );
 
 				if( root->getFirmwareVersion( ) != "" )
 					printField( root->getFirmwareVersionHN( ),
-						root->getFirmwareVersion( ) );
+						    root->getFirmwareVersion( ) );
 
 				if( root->getFirmwareLevel( ) != "" )
 					printField( root->getFirmwareLvlHN( ),
-						root->getFirmwareLevel( ) );
+						    root->getFirmwareLevel( ) );
 
 				if( root->getNetAddr( ) != "" )
-					printField( root->getNetAddrHN( ), root->getNetAddr( ) );
+					printField( root->getNetAddrHN( ),
+						    root->getNetAddr( ) );
 
 				vector<DataItem*>::const_iterator j, done;
 				const vector<DataItem*> sp = root->getDeviceSpecific( );
@@ -461,7 +465,7 @@ void printVPD( Component* root )
 	for( i = children.begin( ), end = children.end( ); i != end; ++i )
 	{
 		if ( debug )
-					cout << " - Child Device - " << endl;
+			cout << " - Child Device - " << endl;
 		printVPD( *i );
 	}
 }
@@ -557,7 +561,7 @@ void printSpecific( System* root )
 }
 
 /** initCPUModelList
- * @brief Loads CPU model conversion table.  
+ * @brief Loads CPU model conversion table.
  * Data loaded enables translation from encoded model
  * data pulled from /proc/device-tree/model to actual CPU release name
  * @param filename Path and filename of cpu model conversion file
@@ -587,8 +591,8 @@ int initCPUModelList(const string& filename)
 
 		HelperFunctions::parseString(line, 1, tmp->model_number);
 		HelperFunctions::parseString(line, 2, tmp->model_name);
-		
-//		cout << "Parsed from cpu_models file: " << tmp->model_number << " , " << tmp->model_name << endl;
+
+		//cout << "Parsed from cpu_models file: " << tmp->model_number << " , " << tmp->model_name << endl;
 
 		cpu_models.push_back(tmp);
 	}
@@ -643,9 +647,10 @@ int getCPUModelName(System *root, string &name)
 		if (model_tmp.length() > 0) {
 			int beg = model_tmp.find(": ");
 			if (beg != (int) string::npos)
-				name = model_tmp.substr(beg + 1, model_tmp.length() - beg + 1);
-				return 0;
-		} 
+				name = model_tmp.substr(beg + 1,
+						model_tmp.length() - beg + 1);
+			return 0;
+		}
 		return -1;
 	}
 
@@ -668,7 +673,7 @@ void printVPD( System* root )
 		vector<string>::const_iterator i, end;
 		cout << "Children: " << endl;
 		for( i = root->getChildren( ).begin( ), end = root->getChildren( ).end( );
-			i != end; ++i )
+		     i != end; ++i )
 		{
 			cout << *(i) << endl;
 		}
@@ -677,7 +682,7 @@ void printVPD( System* root )
 	if( devName == "" )
 	{
 		string name;
-		
+
 		cout << "INSTALLED RESOURCE LIST";
 		if( verbose )
 			cout << " WITH VPD";
@@ -784,52 +789,52 @@ int main( int argc, char** argv )
 	{
 		switch( getopt_long( argc, argv, opts, longOpts, &index ) )
 		{
-			case 'v':
-				verbose = true;
-				break;
+		case 'v':
+			verbose = true;
+			break;
 
-			case 'V':
-				printVersion( );
-				return 0;
+		case 'V':
+			printVersion( );
+			return 0;
 
-			case 'p':
-				specific = true;
-				break;
+		case 'p':
+			specific = true;
+			break;
 
-			case 'D':
-				debug = true;
-				break;
+		case 'D':
+			debug = true;
+			break;
 
-			case 'l':
-				listdev = true;
-				if( optarg != NULL )
-					devName = optarg;
-				break;
+		case 'l':
+			listdev = true;
+			if( optarg != NULL )
+				devName = optarg;
+			break;
 
-			case 'd':
-				if( path == "" )
-					path = optarg;
-				break;
-
-			case 'z':
+		case 'd':
+			if( path == "" )
 				path = optarg;
-				compressed = true;
-				break;
+			break;
 
-			case -1:
-				done = true;
-				if ( first && argc > 1 ) {
-					printUsage( );
-					return 0;
-				}
-				break;
+		case 'z':
+			path = optarg;
+			compressed = true;
+			break;
 
-			case 'h':
+		case -1:
+			done = true;
+			if ( first && argc > 1 ) {
 				printUsage( );
 				return 0;
-			default:
-				printUsage( );
-				return -1;
+			}
+			break;
+
+		case 'h':
+			printUsage( );
+			return 0;
+		default:
+			printUsage( );
+			return -1;
 		}
 		first = 0;
 	}
@@ -857,12 +862,12 @@ int main( int argc, char** argv )
 			index = path.rfind( '.' );
 			path = path.substr( 0, index );
 			int fd = open( path.c_str( ), O_CREAT | O_WRONLY,
-				S_IRGRP | S_IWUSR | S_IRUSR | S_IROTH );
+				       S_IRGRP | S_IWUSR | S_IRUSR | S_IROTH );
 			if( fd < 0 )
 			{
 				cout << "Failed to open file for uncompressed database archive"
 					<< endl;
-					return 1;
+				return 1;
 			}
 
 			char buffer[ 4096 ] = { 0 };
@@ -873,7 +878,7 @@ int main( int argc, char** argv )
 			{
 				int out = 0, tot = 0;
 				while( ( out = write( fd, buffer + tot, in - tot ) ) > 0 &&
-					tot < in )
+				       tot < in )
 					tot += out;
 				memset( buffer, 0 , 4096 );
 			}

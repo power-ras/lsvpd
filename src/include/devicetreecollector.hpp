@@ -41,7 +41,7 @@ namespace lsvpd
 	/* RTAS Specific definitions */
 	#define RTAS_VPD_TYPE	0x82
 
-	/* Opal Specific defintion */
+	/* Opal Specific definition */
 	#define OPAL_VPD_TYPE 0x84
 
 	/* Location for OPAL system VPD data */
