@@ -163,14 +163,17 @@ namespace lsvpd
 	 * provided and add the new Components to the Component vector.
 	 */
 	void DeviceTreeCollector::parseRtasVpd(vector<Component*>& devs,
-					       char *rtasData, int rtasDataSize)
+					       char *rtasData,
+					       unsigned long int rtasDataSize)
 	{
-		unsigned int size = 0;
+		unsigned long int size = 0;
 		unsigned int ret = 1;
 
-		if( rtasData == NULL || rtasDataSize <= 0 )
+		if( rtasData == NULL || (long int)rtasDataSize <= 0 )
 			return;
-		while( (int) size < rtasDataSize && (int) ret > 0 )
+
+		while( ((long int) size < (long int) rtasDataSize)
+		       && (int) ret > 0 )
 		{
 			Component* c = new Component( );
 			if ( c == NULL )
@@ -822,7 +825,7 @@ ERROR:
 
 	void DeviceTreeCollector::getRtasVPD(vector<Component*>& devs)
 	{
-		int bufSize;
+		unsigned long int bufSize;
 		char *rtasData = NULL;
 
 		bufSize = RtasCollector::rtasGetVPD("", &rtasData);
@@ -1116,7 +1119,7 @@ ERROR:
 
 	void DeviceTreeCollector::getRtasSystemVPD( System *sys )
 	{
-		int size;
+		unsigned long int size;
 		char *rtasVPD = NULL;
 		string loc;
 

@@ -60,6 +60,6 @@ namespace lsvpd
 			 * @param data
 			 *   A pointer to the address of the buffer to hold requested VPD
 			 */
-			static int rtasGetVPD(const string& yl, char** data);
+			static unsigned long int rtasGetVPD(const string& yl, char** data);
 	};
 }

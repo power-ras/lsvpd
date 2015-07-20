@@ -278,7 +278,7 @@ namespace lsvpd
 			 *   The size of the rtasData buffer.
 			 */
 			void parseRtasVpd( vector<Component*>& devs, char *rtasData,
-				int rtasDataSize);
+				unsigned long int rtasDataSize);
 
 			/**
 			 * Pares the System VPD  and add the information to the

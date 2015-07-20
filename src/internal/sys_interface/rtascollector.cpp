@@ -122,10 +122,10 @@ namespace lsvpd {
 	 * @param data
 	 *   char** where we will put the vpd (*data should be NULL)
 	 */
-	int RtasCollector::rtasGetVPD(const string& yl = "",
+	unsigned long int RtasCollector::rtasGetVPD(const string& yl = "",
 				      char ** data = NULL)
 	{
-		int size = 0;
+		unsigned long int size = 0;
 		struct rtas_buf_element *current, *list;
 		unsigned int seq = 1, nextSeq;
 		int rc;
@@ -244,9 +244,9 @@ namespace lsvpd {
 		return string();
 	}
 
-	int RtasCollector::rtasGetVPD(const string& yl, char **data)
+	unsigned long int RtasCollector::rtasGetVPD(const string& yl, char **data)
 	{
-		return -1;
+		return -1UL;
 	}
 
 #endif
