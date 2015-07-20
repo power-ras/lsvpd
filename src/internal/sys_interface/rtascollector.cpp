@@ -145,8 +145,10 @@ namespace lsvpd {
 
 		locCode = strdup(yl.c_str( ));
 
-		if(locCode == NULL)
+		if(locCode == NULL) {
+			deleteList(list);
 			return -ENOMEM;
+		}
 
 #ifdef DEBUGRTAS
 		printf("Collecting RTAS info: [%d] %s\n", __LINE__, __FILE__);
@@ -192,12 +194,15 @@ namespace lsvpd {
 				break;
 			case PARAMETER_ERROR:
 				deleteList(list);
+				free(locCode);
 				return -RTAS_PARAMETER_ERROR;
 			case HARDWARE_ERROR:
 				deleteList(list);
+				free(locCode);
 				return -RTAS_HARDWARD_ERROR;
 			default:
 				deleteList(list);
+				free(locCode);
 				librtas_error(rc);
 				return -RTAS_ERROR;
 			}
@@ -216,8 +221,10 @@ namespace lsvpd {
 
 		current = list;
 		*data = new char[ size ];
-		if( *data == NULL )
+		if( *data == NULL ) {
+			deleteList(list);
 			return -ENOMEM;
+		}
 		memset( *data, '\0', size );
 
 		buf = *data;
