@@ -361,11 +361,24 @@ int storeComponents( System* root, VpdDbEnv& db )
 int ensureEnv( const string& env )
 {
 	struct stat info;
-	int ret = 0;
+	int ret = -1;
+	Logger logger;
 
 	if( stat( env.c_str( ), &info ) == 0 )
 	{
-		return ret;
+		if (!S_ISDIR(info.st_mode & S_IFMT)) {
+			logger.log("/var/lib/lsvpd is not a directory\n", LOG_ERR);
+			return ret;
+		}
+
+		if ( ((info.st_mode & S_IRWXU) != S_IRWXU) ||
+		     ((info.st_mode & S_IRGRP) != S_IRGRP) ||
+		     ((info.st_mode & S_IROTH) != S_IROTH) ) {
+			logger.log("Failed to create vpd.db, no valid "
+				"permission\n", LOG_ERR);
+			return ret;
+		}
+		return 0;
 	}
 
 	int idx;
@@ -384,7 +397,6 @@ int ensureEnv( const string& env )
 		   S_IRGRP | S_IWGRP | S_IXGRP |
 		   S_IROTH | S_IXOTH ) != 0 )
 	{
-		Logger logger;
 		logger.log( "Failed to create directory for vpd db.", LOG_ERR );
 		return -1;
 	}
