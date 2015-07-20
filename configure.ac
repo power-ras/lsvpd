@@ -8,7 +8,7 @@ AC_CONFIG_HEADER([config/config.h])
 AC_SUBST(DATE, [`date`])
 AC_CONFIG_MACRO_DIR([m4])
 AC_CONFIG_AUX_DIR([config])
-AM_INIT_AUTOMAKE
+AM_INIT_AUTOMAKE([-Wall subdir-objects -Werror foreign])
 LT_INIT
 
 #programs
