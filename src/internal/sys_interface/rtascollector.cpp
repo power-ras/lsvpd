@@ -66,7 +66,7 @@ namespace lsvpd {
 		case RTAS_NO_LOWMEM:
 			return string("Kernel out of low memory");
 		case RTAS_FREE_ERR:
-			return string("Attempt to free nonexistant RMO buffer");
+			return string("Attempt to free nonexistent RMO buffer");
 		case RTAS_TIMEOUT:
 			return string("RTAS delay exceeded specified timeout");
 		case RTAS_IO_ASSERT:

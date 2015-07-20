@@ -194,7 +194,7 @@ namespace lsvpd
 			}
 
 			/*
-			 * Build a uniquie device ID and deviceTreeNode
+			 * Build a unique device ID and deviceTreeNode
 			 */
 			ostringstream os;
 			os << "/proc/device-tree/rtas/"  << c->getPhysicalLocation( );
