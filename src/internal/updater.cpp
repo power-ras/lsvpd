@@ -81,16 +81,17 @@ int main( int argc, char** argv )
 	char opts [] = "vahsp:";
 	bool done = false;
 	string idNode;
-	int index = 0;
-	int rc;
+	int index = 0, rc = 1;
 	bool limitSCSISize = false;
 	string platform = PlatformCollector::get_platform_name();
 
 	switch (PlatformCollector::platform_type) {
-	case PF_POWERKVM_PSERIES_GUEST:
+	case PF_POWERKVM_PSERIES_GUEST: /* Fall through */
+		rc = 0;
 	case PF_ERROR:
-		cout<< "vpdupdate is not supported on the " << platform << endl;
-		return 1;
+		cout<< "vpdupdate is not supported on the " <<
+			platform << " platform" << endl;
+		return rc;
 	default:
 		;
 	}

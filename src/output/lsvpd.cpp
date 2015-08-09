@@ -399,14 +399,16 @@ int main( int argc, char** argv )
 	System * root = NULL;
 	VpdRetriever* vpd = NULL;
 	int index, first = 1;
+	int rc = 1;
 
 	string platform = PlatformCollector::get_platform_name();
 
 	switch (PlatformCollector::platform_type) {
-	case PF_POWERKVM_PSERIES_GUEST:
+	case PF_POWERKVM_PSERIES_GUEST:	/* Fall through */
+		rc = 0;
 	case PF_ERROR:
 		cout<< "lsvpd is not supported on the " << platform << " platform" << endl;
-		return 1;
+		return rc;
 	default:
 		;
 	}
