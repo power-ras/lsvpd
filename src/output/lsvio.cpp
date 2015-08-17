@@ -219,8 +219,8 @@ int main( int argc, char** argv )
 	string platform = PlatformCollector::get_platform_name();
 
 	switch (PlatformCollector::platform_type) {
-	case PF_POWERKVM_PSERIES_GUEST:	/* Fall through */
-	case PF_POWERKVM_HOST: /* Fall through */
+	case PF_PSERIES_KVM_GUEST:	/* Fall through */
+	case PF_OPAL:		/* Fall through */
 		rc = 0;
 	case PF_NULL:	/* Fall through */
 	case PF_ERROR:

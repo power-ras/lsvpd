@@ -658,7 +658,7 @@ int getCPUModelName(System *root, string &name)
 	 * On PowerNV platform we get model name in device tree.
 	 * On pSeries we have to rely on static file.
 	 */
-	if (platform ==  PF_POWERKVM_HOST)
+	if (platform == PF_OPAL)
 		return OpalgetCPUModelName(root, name);
 	else
 		return getCPUModelNameFromList(root, name);
@@ -772,7 +772,7 @@ int main( int argc, char** argv )
 	string platform = PlatformCollector::get_platform_name();
 
 	switch (PlatformCollector::platform_type) {
-	case PF_POWERKVM_PSERIES_GUEST: /* Fall through */
+	case PF_PSERIES_KVM_GUEST: /* Fall through */
 		rc = 0;
 	case PF_ERROR:
 		cout<< argv[0] << " is not supported on the "

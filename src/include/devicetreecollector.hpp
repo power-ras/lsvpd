@@ -142,7 +142,7 @@ namespace lsvpd
 			/* Check whether we are on Opal based system */
 			inline bool isPlatformOPAL()
 			{
-				return (platForm == PF_POWERKVM_HOST);
+				return (platForm == PF_OPAL);
 			}
 
 			/**

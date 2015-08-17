@@ -86,7 +86,7 @@ int main( int argc, char** argv )
 	string platform = PlatformCollector::get_platform_name();
 
 	switch (PlatformCollector::platform_type) {
-	case PF_POWERKVM_PSERIES_GUEST: /* Fall through */
+	case PF_PSERIES_KVM_GUEST: /* Fall through */
 		rc = 0;
 	case PF_ERROR:
 		cout<< "vpdupdate is not supported on the " <<

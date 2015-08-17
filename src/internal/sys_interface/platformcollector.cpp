@@ -72,10 +72,10 @@ error:
 
 		while (getline(ifs, buf)) {
 			if (strstr(buf.c_str(), "PowerNV")) {
-				platform_type = PF_POWERKVM_HOST;
+				platform_type = PF_OPAL;
 				break;
 			} else if (strstr(buf.c_str(), "pSeries (emulated by qemu)")) {
-				platform_type = PF_POWERKVM_PSERIES_GUEST;
+				platform_type = PF_PSERIES_KVM_GUEST;
 				break;
 			} else if (strstr(buf.c_str(), "pSeries")) {
 				platform_type = PF_POWERVM_LPAR;
@@ -94,12 +94,12 @@ error:
 	{
 		get_platform();
 		switch(platform_type) {
-		case PF_POWERKVM_HOST:
-			return "PowerKVM Host";
+		case PF_OPAL:
+			return "OPAL";
 		case PF_POWERVM_LPAR:
 			return "PowerVM pSeries LPAR";
-		case PF_POWERKVM_PSERIES_GUEST:
-			return "PowerKVM pSeries Guest";
+		case PF_PSERIES_KVM_GUEST:
+			return "pSeries KVM Guest";
 		case PF_NULL:
 		case PF_ERROR:
 			return "Unknown";
