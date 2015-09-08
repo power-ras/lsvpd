@@ -386,9 +386,10 @@ namespace lsvpd
 	 */
 	System* Gatherer::getComponentTree(vector<Component*>& devs)
 	{
-		Component* root = new Component( );
-		System* ret = new System( );
+		Component* root;
+		System* ret;
 
+		root = new Component( );
 		if( root == NULL )
 		{
 			Logger l;
@@ -399,8 +400,10 @@ namespace lsvpd
 			throw ve;
 		}
 
+		ret = new System( );
 		if( ret == NULL )
 		{
+			delete root;
 			Logger l;
 			l.log( "Gatherer.getDeviceTree: Failed to build new System.",
 			       LOG_ERR );

@@ -165,6 +165,7 @@ namespace lsvpd {
 
 				if (!current->next) {
 					deleteList(list);
+					free(locCode);
 					return -ENOMEM;
 				}
 
@@ -182,12 +183,16 @@ namespace lsvpd {
 				 * for more than a threshold, we quit, than
 				 * looping forever.
 				 */
-				if (vpd_changed > VPD_CHANGED_THRESHOLD)
+				if (vpd_changed > VPD_CHANGED_THRESHOLD) {
+					free(locCode);
 					return -RTAS_ERROR;
+				}
 				seq = 1;
 				list = new rtas_buf_element;
-				if (!list)
+				if (!list) {
+					free(locCode);
 					return -ENOMEM;
+				}
 				list->size = 0;
 				list->next = NULL;
 				current = list;
