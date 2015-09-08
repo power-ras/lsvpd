@@ -1,42 +1,86 @@
-lsvpd 2.0
+lsvpd:
+-----
+The lsvpd package contains all of the lsvpd, lscfg and lsmcode commands.
+These commands, along with a scanning program called vpdupdate, constitute
+a hardware inventory system. The lsvpd command provides Vital Product Data
+(VPD) about hardware components to higher-level serviceability tools. The
+lscfg command provides a more human-readable format of the VPD, as well as
+some system-specific information. lsmcode lists microcode and firmware
+levels. lsvio lists virtual devices.
 
-Installation (briefly, For more detailed instructions please see ./INSTALL) :
-	# ./bootstrap.sh
-	# ./configure [--prefix=/usr/]
-	# make
-	# make install
+Source:
+-------
+http://linux-diag.sf.net/lsvpd.html
 
-Binary Dependencies
-	zlib
-	libvpd Development package
-	librtas (on POWER based systems only)
+Mailing list:
+-------------
+linux-diag-devel@lists.sourceforge.net
+Info/subscribe : https://lists.sourceforge.net/lists/listinfo/linux-diag-devel
 
-Compilation Dependencies
-	SCSI Utils Library (libsgutils.a) found in sg[3]_utils-dev 
-	 or built from source.  Some versions of the binary package will not 
-	 install sg_cmds.h.  In that case, you must build from source.
-	   http://sg.danny.cz/sg/sg3_utils.html
-	 
-	sqlite2* Base:
-	  http://rpmfind.net/linux/rpm2html/search.php?query=sqlite2
-	  or http://rpm.pbone.net/index.php3?stat=3&search=sqlite2&srodzaj=3
+License:
+--------
+See 'COPYING' file.
 
-	sqlite2-devel*:
-	  http://rpmfind.net/linux/rpm2html/search.php?query=sqlite2-devel
-	
-* Note: Though sqlite2 can be used we strongly encourage sqlite3 because of 
-improved error handling and reporting.
+Compilation dependencies:
+-------------------------
+- C and C++ compiler (gcc, g++)
+- GNU build tools (automake, autoconf, libtool, etc)
+- librtas-devel
+- libvpd-devel
+- sg3_utils-devel
+- zlib-devel
 
-------------------
-BUILDING RPMS
-------------------
+Binary dependencies:
+--------------------
+- iprutils
+- librtas
+- libvpd
+- sg3_utils
+- zlib
 
+Note:
+  Package name may differ slightly between Linux distributors. Ex: RedHat and
+  SLES ships development packages as "-devel" while Ubuntu ships it as "-dev"
+  package. Please check your linux distribution package naming convention and
+  make sure you have installed right packages.
+
+Building:
+---------
+You can build on Power Linux System.
+
+$ ./bootstrap.sh
+$ ./configure [--prefix=/usr/]
+$ make
+$ make install
+
+Building rpms:
+--------------
 To build a tarball to feed to rpmbuild, do
-	# make dist
 
-It is necessary to specify that the target architecture is 32 bit when 
-building the rpm for this package.  
+$ make dist-gzip
 
 As an example, we use a command similar to the following:
 
-> rpmbuild -ba --prefix=/usr --target=ppc --nodeps [PATH TO SPEC FILE]
+$ rpmbuild -ba [--target=ppc/ppc64] <path-to-spec-file>
+
+Hacking:
+--------
+All patches should be sent to the mailing list with linux-kernel style
+'Signed-Off-By'. The following git commands are your friends:
+- git commit -s
+- git format-patch
+
+You probably want to read the linux kernel Documentation/SubmittingPatches
+as much of it applies to lsvpd.
+
+Submitting patch:
+-----------------
+We use same mailing list for all Power Linux VPD and diagnostics projects
+(ppc64-diag, libvpd, lsvpd, [lib]servicelog). It is common convention to
+prefix your subject line with project name. This lets maintainer and other
+developers more easily identify patches from patches targeted to other
+projects. For example,
+
+  Subject: [lsvpd PATCH 01/10] Summary phrase
+
+--
