@@ -40,7 +40,6 @@
 #include <cerrno>
 #include <dirent.h>
 
-#define TMP_FILE "/tmp/dir_list.tmp"
 #define STRIT(x) #x
 #define TOSTRING(x) STRIT(x)
 
