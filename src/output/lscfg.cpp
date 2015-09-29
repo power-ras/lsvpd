@@ -75,6 +75,7 @@ string devName = "", path = "";
  * over those appearing later */
 string AIXNamePrefs[MAX_AIX_NAMES] =
 {
+	"en*",
 	"eth*",
 	"ehc*",
 	"ath*",
