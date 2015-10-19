@@ -198,25 +198,16 @@ int FSWalk::fs_getDirContents(string path_t, char type,
 {
 	DIR *dir = NULL;
 	Logger l;
-	string msg, msg2;
+	string msg;
+	string file_path;
 	struct dirent *dirent = NULL;
-	const char *path;
-	char file_path[SYSFS_PATH_MAX];
-	string absTargetPath;
 
 	if (!fs_isDir(path_t))
 		return -DIRECTORY_NOT_FOUND;
 
-	path = path_t.c_str();
-	if (NULL == path && rootDir.length() > 0)
-		path = rootDir.c_str();
-	else if(NULL == path) {
-		return -DIRECTORY_NOT_FOUND;
-	}
-
-	dir = opendir(path);
+	dir = opendir(path_t.c_str());
 	if (dir == NULL) {
-		msg = string("Error opening directory: ") + string(path) + "\n";
+		msg = string("Error opening directory: ") + path_t + "\n";
 		l.log( errmsg(msg), LOG_ERR );
 		return -1;
 	}
@@ -227,15 +218,7 @@ int FSWalk::fs_getDirContents(string path_t, char type,
 		if (0 == strcmp(dirent->d_name, ".."))
 			continue;
 
-		memset(file_path, 0, SYSFS_PATH_MAX);
-		strncpy(file_path, path, SYSFS_PATH_MAX - 1);
-
-		if (strlen(file_path) + 1 < SYSFS_PATH_MAX)
-			strncat(file_path, "/", 1);
-		if (strlen(file_path) + strlen(dirent->d_name) < SYSFS_PATH_MAX)
-			strncat(file_path, dirent->d_name, strlen(dirent->d_name));
-
-		file_path[SYSFS_PATH_MAX - 1] = '\0';
+		file_path = path_t + "/" + string(dirent->d_name);
 
 		if (type == 'f' && fs_isFile(file_path)) {
 			list.push_back(string(dirent->d_name));
