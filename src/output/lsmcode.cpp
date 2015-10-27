@@ -27,6 +27,8 @@
 #include <libvpd-2/component.hpp>
 #include <libvpd-2/dataitem.hpp>
 #include <libvpd-2/system.hpp>
+#include <libvpd-2/helper_functions.hpp>
+#include <libvpd-2/logger.hpp>
 
 #include <iostream>
 #include <string>
@@ -46,6 +48,10 @@
 #include <cstring>
 #include <cerrno>
 #include <iomanip>
+#include <limits.h>
+
+/* IPMI tool */
+#define CMD_IPMITOOL	"ipmitool"
 
 using namespace std;
 using namespace lsvpd;
@@ -85,8 +91,118 @@ void printVersion( )
 	cout << "lsmcode " << VPD_VERSION << endl;
 }
 
+/* Get ipmitool command path */
+static string get_ipmitool_path(void)
+{
+	const char *bin_dir_path[] = {
+		"/bin", "/usr/bin",
+		"/usr/local/bin", NULL };
+	int i = 0;
+	string ipmitool_path;
+
+	while (bin_dir_path[i] != NULL) {
+		ipmitool_path = string(bin_dir_path[i]) + "/" ;
+		ipmitool_path += string(CMD_IPMITOOL);
+
+		if (HelperFunctions::file_exists(ipmitool_path))
+			return ipmitool_path;
+
+		i++;
+	}
+
+	ostringstream err;
+	err << "ipmitool command not found. "
+		"Please install ipmitool and retry.";
+	Logger().log( err.str(), LOG_NOTICE);
+	cout << err.str() << endl;
+
+	return string();
+}
+
+/* Get System Firmware FRU information on BMC based system */
+static string bmc_get_fw_fru_info(string ipmitool)
+{
+	string cmd = ipmitool + " fru 2>/dev/null";
+	string fruData, fwData;
+	size_t start, end;
+
+	if (HelperFunctions::execCmd(cmd.c_str(), fruData)) {
+		cout << "Failed to execute ipmitool command" << endl;
+		return string();
+	}
+
+	start = fruData.find("System Firmware");
+	if (start == string::npos)
+		goto parse_err;
+
+	/* Discard header */
+	start = fruData.find("\n", start);
+	if (start == string::npos)
+		goto parse_err;
+
+	end = fruData.find("FRU Device Description", start);
+	if (end == string::npos)
+		goto parse_err;
+
+	fwData = fruData.substr(start, end - start - 1);
+	return fwData;
+
+parse_err:
+	cout << "Failed to get System Firmware information" << endl;
+	return string();
+}
+
+/* Get production version */
+static string bmc_get_product_version(string fwData)
+{
+	string pVersion;
+	size_t start, end;
+
+	start = fwData.find("Product Version");
+	if (start == string::npos)
+		return string();
+
+	start = fwData.find(": ", start);
+	if (start == string::npos)
+		return string();
+
+	end = fwData.find("\n", start);
+	if (end == string::npos)
+		return string();
+
+	pVersion = fwData.substr(start + 2, end - start);
+	return pVersion;
+}
+
 bool printSystem( const vector<Component*>& leaves )
 {
+	/* XXX On BMC based systems we use ipmitool command to get firmware
+	 * information. Format of this information is different than FSP
+	 * based system. Hence we don't store this information in VPD db.
+	 */
+	if (PlatformCollector::isBMCBasedSystem()) {
+		string ipmitool = get_ipmitool_path();
+		if (ipmitool.empty())
+			return false;
+
+		string fwData = bmc_get_fw_fru_info(ipmitool);
+		if (fwData.empty())
+			return false;
+
+		if ( all ) {
+			string pVersion = bmc_get_product_version(fwData);
+			if (pVersion.empty())
+				return false;
+
+			cout << "sys0!system: " << pVersion;
+			return true;
+		}
+
+		cout << "Version of System Firmware : ";
+		cout << fwData << endl;
+		return true;
+	}
+
 	vector<Component*>::const_iterator i, end;
 
 	for( i = leaves.begin( ), end = leaves.end( ); i != end; ++i )
