@@ -122,7 +122,7 @@ static string get_ipmitool_path(void)
 /* Get System Firmware FRU information on BMC based system */
 static string bmc_get_fw_fru_info(string ipmitool)
 {
-	string cmd = ipmitool + " fru 2>/dev/null";
+	string cmd = ipmitool + " fru";
 	string fruData, fwData;
 	size_t start, end;
 
@@ -170,7 +170,7 @@ static string bmc_get_product_version(string fwData)
 	if (end == string::npos)
 		return string();
 
-	pVersion = fwData.substr(start + 2, end - start);
+	pVersion = fwData.substr(start + 2, end - start - 1);
 	return pVersion;
 }
 
