@@ -14,6 +14,7 @@ using namespace std;
 
 namespace lsvpd {
 	platform PlatformCollector::platform_type = PF_NULL;
+	service_processor_type PlatformCollector::platform_sp_type = PF_SP_NULL;
 
 	static string extractTagValue(char *buf)
 	{
@@ -56,6 +57,28 @@ error:
 		return value;
 	}
 
+	void PlatformCollector::get_sp_type()
+	{
+		int rc;
+		struct stat sbuf;
+
+		/* Check for BMC node */
+		rc = stat(DT_NODE_BMC, &sbuf);
+		if (rc == 0) {
+			platform_sp_type = PF_SP_BMC;
+			return;
+		}
+
+		/* Check for FSP node */
+		rc = stat(DT_NODE_FSP, &sbuf);
+		if (rc == 0) {
+			platform_sp_type = PF_SP_FSP;
+			return;
+		}
+
+		platform_sp_type = PF_SP_ERROR;
+	}
+
 	void PlatformCollector::get_platform()
 	{
 		string buf;
@@ -88,6 +111,9 @@ error:
 			platform_type = PF_ERROR;
 
 		ifs.close();
+
+		/* Get Service processor type */
+		get_sp_type();
 	}
 
 	string PlatformCollector::get_platform_name()
@@ -110,5 +136,27 @@ error:
 	string PlatformCollector::getFirmwareName()
 	{
 		return getCpuInfoTag("firmware");
+	}
+
+	bool PlatformCollector::isBMCBasedSystem()
+	{
+		if (platform_sp_type == PF_SP_NULL)
+			get_sp_type();
+
+		if (platform_sp_type == PF_SP_BMC)
+			return true;
+
+		return false;
+	}
+
+	bool PlatformCollector::isFSPBasedSystem()
+	{
+		if (platform_sp_type == PF_SP_NULL)
+			get_sp_type();
+
+		if (platform_sp_type == PF_SP_FSP)
+			return true;
+
+		return false;
 	}
 }
