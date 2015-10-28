@@ -146,7 +146,7 @@ int FSWalk::fs_isLink(char *path)
 
 int FSWalk::fs_isDir(string path)
 {
-	int ret;
+	int ret = false;
 	struct stat astats;
 
 	if ((lstat(path.c_str(), &astats)) != 0)
@@ -160,7 +160,7 @@ int FSWalk::fs_isDir(string path)
 
 int FSWalk::fs_isFile(string path)
 {
-	int ret;
+	int ret = false;
 	struct stat astats;
 
 	if ((lstat(path.c_str(), &astats)) != 0)
@@ -173,7 +173,7 @@ int FSWalk::fs_isFile(string path)
 
 int FSWalk::fs_isLink(string path)
 {
-	int ret;
+	int ret = false;
 	struct stat astats;
 
 	if ((lstat(path.c_str(), &astats)) != 0)

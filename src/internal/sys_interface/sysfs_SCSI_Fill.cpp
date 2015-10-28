@@ -332,7 +332,7 @@ namespace lsvpd
 	 */
 	bool matches(string s1, string s2)
 	{
-		int beg = 0, end = s1.length();
+		int beg = 0, end;
 		int z;
 
 		//strings have matched to end - base case
