@@ -88,6 +88,7 @@ int main( int argc, char** argv )
 	switch (PlatformCollector::platform_type) {
 	case PF_PSERIES_KVM_GUEST: /* Fall through */
 		rc = 0;
+	case PF_NULL:	/* Fall through */
 	case PF_ERROR:
 		cout<< "vpdupdate is not supported on the " <<
 			platform << " platform" << endl;
