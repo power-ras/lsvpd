@@ -400,8 +400,10 @@ void printVPD( System* root )
 		cout << "-----------------------------" << endl;
 	}
 
-	if( device == "" )
-		printSystem( root->getLeaves( ) );
+	if( device == "" ) {
+		if (printSystem( root->getLeaves( ) ) != true)
+			return;
+	}
 
 	if( !all && device == "" )
 		return;
