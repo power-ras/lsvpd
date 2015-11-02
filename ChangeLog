@@ -1,3 +1,8 @@
+1.7.6: Vasant Hegde <hegdevasant@linux.vnet.ibm.com> - 06 Nov 2015
+- lsmcode is enhanced to support OpenPower systems
+- Fixed security issues like buffer overflow, memory allocation validation
+- Improved error handling
+
 1.7.5: Vasant Hegde <hegdevasant@linux.vnet.ibm.com> - 13 Aug 2014
 Added LE support
 Fixed couple of issues in build tools

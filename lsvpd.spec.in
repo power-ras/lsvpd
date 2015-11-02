@@ -20,8 +20,12 @@ Requires:	iprutils >= 2.3.12
 Requires(pre):	iprutils >= 2.3.12
 Requires(postun): iprutils >= 2.3.12
 
-BuildRequires:	libvpd-devel librtas-devel
-BuildRequires:	zlib-devel sg3_utils-devel automake libtool
+BuildRequires:	libvpd-devel >= 2.2.5
+BuildRequires:	librtas-devel
+BuildRequires:	zlib-devel
+BuildRequires:	sg3_utils-devel
+BuildRequires:	automake
+BuildRequires:	libtool
 
 %description
 The lsvpd package contains all of the lsvpd, lscfg and lsmcode commands.
@@ -72,6 +76,11 @@ exit 0
 
 
 %changelog
+* Fri Nov 06 2015 - Vasant Hegde <hegdevasant@linux.vnet.ibm.com> - 1.7.6
+- lsmcode is enhanced to support OpenPower systems
+- Fixed security issues like buffer overflow, memory allocation validation
+- Improved error handling
+
 * Wed Aug 13 2014 - Vasant Hegde <hegdevasant@linux.vnet.ibm.com> - 1.7.5
 - Added LE support
 - Fixed couple of issues in build tools
