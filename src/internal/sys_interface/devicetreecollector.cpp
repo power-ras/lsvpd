@@ -825,7 +825,7 @@ ERROR:
 
 	void DeviceTreeCollector::getRtasVPD(vector<Component*>& devs)
 	{
-		unsigned long int bufSize;
+		ssize_t bufSize;
 		char *rtasData = NULL;
 
 		bufSize = RtasCollector::rtasGetVPD("", &rtasData);

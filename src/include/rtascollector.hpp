@@ -12,6 +12,7 @@
 #include <string>
 #include <vector>
 #include <errno.h>
+#include <stdlib.h>
 
 
 
@@ -60,6 +61,6 @@ namespace lsvpd
 			 * @param data
 			 *   A pointer to the address of the buffer to hold requested VPD
 			 */
-			static unsigned long int rtasGetVPD(const string& yl, char** data);
+			static ssize_t rtasGetVPD(const string& yl, char** data);
 	};
 }
