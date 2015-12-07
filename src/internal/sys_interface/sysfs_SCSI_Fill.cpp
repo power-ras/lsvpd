@@ -67,6 +67,7 @@
 #include <cerrno>
 #include <cstdlib>
 #include <cstring>
+#include <limits.h>
 
 extern "C"
 {
@@ -797,43 +798,49 @@ namespace lsvpd
 	/**
 	 * Close a device that may have been opened for reading
 	 */
-	void device_close(int device_fd, int major, int minor, int mode)
+	void device_close(int device_fd, string& dev_path)
 	{
-		char name[256];
 		struct stat statbuf;
-		if (-1 != sprintf(name, "/tmp/node-%d-%d-%d",
-				  mode, major, minor)) {
-			if (stat(name, &statbuf) == 0) {
-				unlink(name);
-			}
-		}
 
+		if (stat(dev_path.c_str(), &statbuf) == 0) {
+			if(device_fd >= 0)
+				close(device_fd);
+			unlink(dev_path.c_str());
+		}
 	}
 
 	// Open a temp file through which we can ioctl() to device for reading
-	int device_open(int major, int minor, int mode)
+	int device_open(int major, int minor, int mode, string& dev_path)
 	{
-		char name[256];
+		char name[PATH_MAX];
+		/* Var is used to store unique name */
+		char template_d[] = "/tmp/node-XXXXXX";
 		int device_fd = 0;
 		int ret;
 		struct stat statbuf;
 
-		if (sprintf(name, "/tmp/node-%d-%d-%d", mode, major, minor) < 0) {
-			return -ERROR_ACCESSING_DEVICE;
-		}
+		device_fd = mkstemp(template_d);
+		if (device_fd  == -1)
+			return -1;
+		close(device_fd);
 
-		if (stat(name, &statbuf) == 0) {
-			unlink(name);
-		}
+		if (stat(template_d, &statbuf) == 0)
+			unlink(template_d);
+
+		if (snprintf(name, PATH_MAX - 1, "%s-%d-%d-%d",
+			     template_d, mode, major, minor) < 0)
+			return -ERROR_ACCESSING_DEVICE;
 
 		ret = mknod(name, 0760 | mode, makedev(major, minor));
-		if (ret != 0){
+		if (ret != 0)
 			return -UNABLE_TO_MKNOD_FILE;
-		}
+
+		/* Store temp device filename. It will be used in device_close */
+		dev_path = string(name);
 
 		device_fd = open(name, 0);
 		if (device_fd < 0) {
-			device_close(device_fd, major, minor, mode);
+			device_close(device_fd, dev_path);
 			return -UNABLE_TO_OPEN_FILE;
 		}
 
@@ -1437,6 +1444,7 @@ out:
 		int device_fd;
 		Logger logger;
 		string msg;
+		string dev_path;
 		/* Not a SCSI device */
 		if (fillMe->devBus.getValue() == "usb")
 			return;
@@ -1450,7 +1458,8 @@ out:
 			// Open Device for reading
 			device_fd = device_open(fillMe->devMajor,
 						fillMe->devMinor,
-						fillMe->devAccessMode);
+						fillMe->devAccessMode,
+						dev_path);
 			if (device_fd < 0) {
 				msg = string("vpdupdate: Failed opening device: ")
 					+ fillMe->idNode.getValue();
@@ -1460,10 +1469,7 @@ out:
 
 			collectVpd(fillMe, device_fd, limitSCSISize);
 
-			device_close(device_fd,
-				     fillMe->devMajor,
-				     fillMe->devMinor,
-				     fillMe->devAccessMode);
+			device_close(device_fd, dev_path);
 		}
 
 		fillIPRData( fillMe );
