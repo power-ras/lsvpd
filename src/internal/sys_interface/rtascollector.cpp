@@ -83,7 +83,7 @@ namespace lsvpd {
 	string RtasCollector::rtasSystemParm(int code)
 	{
 		char buf[RTAS_BUF_SIZE];
-		int ret = -1;
+		int ret;
 
 #ifdef DEBUGRTAS
 		printf("Collecting RTAS info: [%d] %s\n", __LINE__, __FILE__);

@@ -572,7 +572,6 @@ int initCPUModelList(const string& filename)
 	char tmp_line[512];
 	string line;
 	model_conv *tmp;
-	ostringstream err;
 	ifstream fin(filename.c_str());
 
 	if (fin.fail()) {
@@ -639,7 +638,6 @@ int OpalgetCPUModelName(System *root, string &name)
 
 int getCPUModelName(System *root, string &name)
 {
-	vector<model_conv *>::iterator i, end;
 	int platform = PlatformCollector::platform_type;
 
 	if (root->getMachineModel().length() <= 0) {

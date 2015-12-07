@@ -80,7 +80,6 @@ int main( int argc, char** argv )
 {
 	char opts [] = "vahsp:";
 	bool done = false;
-	string idNode;
 	int index = 0, rc = 1;
 	bool limitSCSISize = false;
 	string platform = PlatformCollector::get_platform_name();

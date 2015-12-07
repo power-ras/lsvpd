@@ -258,9 +258,9 @@ namespace lsvpd
 	 */
 	bool Gatherer::buildTree( vector<Component*>& devs, Component* root )
 	{
-		vector<Component*>::iterator i, end;
+		vector<Component*>::iterator i;
 		const vector<string> kids = root->getChildren( );
-		vector<string>::const_iterator cur, last;
+		vector<string>::const_iterator cur;
 		Component* next;
 		bool ret;
 
@@ -314,7 +314,7 @@ namespace lsvpd
 	{
 		vector<Component*>::iterator i, end;
 		const vector<string> kids = root->getChildren( );
-		vector<string>::const_iterator cur, last;
+		vector<string>::const_iterator cur;
 		Component* next;
 		bool ret;
 
@@ -496,7 +496,6 @@ namespace lsvpd
 		cout << "*** " << level << " ***" << endl;
 
 		level++;
-		vector<Component*> devsTmp;
 
 		if (cur == NULL)
 			return;
@@ -572,7 +571,6 @@ namespace lsvpd
 		cout << "*** " << level << " ***" << endl;
 
 		level++;
-		vector<Component*> devsTmp;
 
 		if (cur == NULL)
 			return;

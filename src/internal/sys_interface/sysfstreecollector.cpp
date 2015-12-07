@@ -210,7 +210,6 @@ namespace lsvpd
 						      Component* fillMe)
 	{
 		string classLink;
-		Logger l;
 		string msg;
 
 		/* Here we need to do any of the class specific filling necessary.
@@ -351,7 +350,7 @@ namespace lsvpd
 	{
 		vector <string> children;
 		vector <Component*>::iterator parent,tmp;
-		string devNode, devName;
+		string devName;
 
 		/* Remove duplicate devices */
 
@@ -861,7 +860,7 @@ namespace lsvpd
 		string newDevDir;
 		vector<string> listing;
 		Component *tmpDev;
-		string tmp, devName, parentDev;
+		string devName, parentDev;
 		char *parent;
 
 		parent = strdup(parentDir.c_str());
@@ -914,7 +913,7 @@ namespace lsvpd
 	void SysFSTreeCollector::findDevicePaths(vector<Component*>& devs)
 	{
 		vector<string> fullList;
-		string curPath, tmpDirName, linkName, filePath, devPath;
+		string curPath, devPath;
 		FSWalk fsw = FSWalk();
 
 		/* Full list of the various categories of devices */
@@ -1044,7 +1043,6 @@ namespace lsvpd
 		Logger logger;
 		struct dirent* entry;
 		DIR* d;
-		string link;
 		bool filled = false;
 
 		d = opendir( sysDir.c_str( ) );
@@ -1570,9 +1568,6 @@ namespace lsvpd
 
 	void SysFSTreeCollector::fillFirmware( Component* fillMe )
 	{
-		Logger l;
-		string msg;
-
 		string classNode = fillMe->getClassNode();
 		if (classNode.length() > 0) {
 			fillMe->mFirmwareVersion.setValue( getAttrValue( classNode,

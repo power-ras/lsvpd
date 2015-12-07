@@ -616,7 +616,6 @@ ERROR:
 	 */
 	void DeviceTreeCollector::cpyinto(Component *dest, Component *src)
 	{
-		vector<Component*>::iterator it, end;
 		vector<string> kids = src->getChildren( );
 		vector<string>::iterator vi, vend;
 
@@ -679,7 +678,6 @@ ERROR:
 	{
 		vector<string> kids = current->getChildren( );
 		vector<string>::iterator vi, vend;
-		vector<Component*>::iterator i, end;
 		Component *child, *parent;
 
 		for ( vi = kids.begin( ), vend = kids.end( ); vi != vend; ++vi ) {
@@ -732,18 +730,13 @@ ERROR:
 	Component * DeviceTreeCollector::findSCSIParent(Component *fillMe,
 							vector<Component*> devs)
 	{
-		string sysDev, devPath;
-		string parentSysFsName, pYL;
+		string sysDev;
 		vector<Component*>::iterator i, end;
 		const DataItem *devSpecific;
 		int loc;
 
 		devSpecific = fillMe->getDeviceSpecific("XB");
 		if (devSpecific != NULL) {
-			parentSysFsName = fillMe->devBus.dataValue
-				+ string("@")
-				+ devSpecific->dataValue;
-
 			sysDev = fillMe->sysFsLinkTarget.dataValue;
 			while (sysDev.length() > 1) {
 				if ((loc = sysDev.rfind("/", sysDev.length())) != (int) string::npos )
@@ -1185,7 +1178,7 @@ ERROR:
 	*/
 	void DeviceTreeCollector::fillSystem( System* sys )
 	{
-		string val = "";
+		string val;
 
 		sys->deviceTreeNode.setValue( "/proc/device-tree", 100,
 					      __FILE__, __LINE__);

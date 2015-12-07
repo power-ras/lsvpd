@@ -223,7 +223,6 @@ namespace lsvpd
 	string SysFSTreeCollector::make_basic_device_scsi_ds(Component *fillMe,
 							     string type, int subtype)
 	{
-		string ds;
 		int i, j;
 		string prefix;
 		string subtypeDS;
@@ -333,7 +332,6 @@ namespace lsvpd
 	bool matches(string s1, string s2)
 	{
 		int beg = 0, end;
-		int z;
 
 		//strings have matched to end - base case
 		if (s1 == s2)
@@ -370,7 +368,7 @@ namespace lsvpd
 
 			if ( (int) string::npos == (end = s1.find("*", beg))) {
 				//No more stars - base case
-				if ((int) string::npos != (z = s2.find(s1.substr(beg, end), 0))) {
+				if (string::npos != s2.find(s1.substr(beg, end), 0)) {
 					return true;
 				}
 			}
@@ -700,7 +698,6 @@ namespace lsvpd
 		string fieldName;
 		int fieldSize;
 		string dataVal;  //Data as read from data stream for single field
-		string str;
 
 		if (pageCode == 0)
 			dataCurLoc = 32; // Skip ll_inquiry standard header for base inquiry
@@ -789,7 +786,6 @@ namespace lsvpd
 					      string *subtypeDS)
 	{
 		string ds;
-		string dataTmp = string(data);
 		string z0;
 		Logger log;
 		string tmpStr, lvd;
@@ -1051,7 +1047,6 @@ namespace lsvpd
 		string line;
 		scsi_template *tmp;
 		int dev_count = 0;
-		string tmp_str;
 		ostringstream err;
 		ifstream fin(filename.c_str());
 
@@ -1112,15 +1107,12 @@ namespace lsvpd
 		int evpd;
 		int i, len = 0;
 		char buffer[MAXBUFSIZE];
-		string msg, pageCodeRefs;
 		struct sg_scsi_id sg_dat;
-		string rev, pro, ven;
 		int subtype, res, num;
 		const scsi_template *devTemplate = NULL; /* current dev's template */
 		string pageCode, pageFormat, pageTemp, subtypeDS;
 		int pageCodeInt;
 		int rc;
-		string str;
 		char vendor[32], model[32], firmware[32];
 
 		memset(vendor, '\0', 32);
@@ -1319,8 +1311,7 @@ namespace lsvpd
 		string str;
 		int tmp, useGeneric = 0;
 		int beg, end;
-		string devClass, link, genericPath;
-		vector<DataItem*>::const_iterator j, stop;
+		string devClass, genericPath;
 
 		if (fillMe->idNode.getValue().empty())
 			return -CLASS_NODE_UNDEFINED;
@@ -1482,10 +1473,7 @@ out:
 	 */
 	void SysFSTreeCollector::fillSCSIComponent( Component* fillMe, bool limitSCSISize = false)
 	{
-		int rc;
-		string data;
 		int device_fd;
-		ostringstream err;
 		Logger logger;
 		string msg;
 		/* Not a SCSI device */
@@ -1496,7 +1484,7 @@ out:
 		//		coutd << "Query SCSI dev at: " << fillMe->idNode.getValue() << endl;
 
 		/* Need major:minor codes to query device */
-		if (!(rc = get_mm_scsi(fillMe))) {
+		if (!get_mm_scsi(fillMe)) {
 
 			// Open Device for reading
 			device_fd = device_open(fillMe->devMajor,
