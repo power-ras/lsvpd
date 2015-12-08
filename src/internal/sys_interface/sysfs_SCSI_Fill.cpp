@@ -515,50 +515,6 @@ namespace lsvpd
 	}
 
 	/**
-	 * Retrieves a specified field in a comma-delimited list
-	 * @arg: num: Number of field to grab, starting with 0
-	 */
-	string retrieveField(char * data, int num)
-	{
-		int commaCount = 0;
-		int beg, end, curPos;
-		string str = data;
-
-		end = beg = curPos = 0;
-
-		//coutd << "Data: " << data << ", Len = " << strlen(data) <<  endl;
-
-		while ((commaCount <= num) && (data[curPos] != '\0')) {
-			if (str[curPos] == ',') {
-				commaCount++;
-				if (commaCount <= num)
-					beg = curPos + 1;
-				else
-					end = curPos;
-			}
-			if (str[curPos + 1] == '\0') {
-				end = curPos;
-			}
-			curPos++;
-
-		}
-
-		/*
-		 * Exceptions:  [02]IBM seems to be messing up
-		 *  - Note: Be as specific as possible here
-		 */
-		if (beg >= end)
-			return "";
-
-		while ((str[beg] == 2) && (beg < (int) strlen(data)) && (beg < end))
-			beg++;
-
-		str = str.substr(beg, end - beg);
-
-		return str;
-	}
-
-	/**
 	 * Takes a full format specifier template string, counts number of
 	 *	page codes within it
 	 *	Ex: ?0x0=RL:4,_:78,FN:12,EC:10,PN:12;?0x83=_:4,UM:8;
@@ -626,28 +582,33 @@ namespace lsvpd
 	int retrievePageCode(const string page_spec_template,
 			     string& page_code, string& format)
 	{
-		int i = 0, beg, end = 0;
+		string::size_type beg, end;
 
-		/* Get page code */
-		while (page_spec_template[i-1] != '0'
-		       && page_spec_template[i] != 'x'
-		       && i < (int) page_spec_template.length())
-			i++;
-		beg = i + 1;
-		while (page_spec_template[i] != '=' && i < (int) page_spec_template.length())
-			i++;
-		end = i;
-		if ((beg >= (int) page_spec_template.length())
-		    || (end >= (int) page_spec_template.length()))
+		try {
+			beg = page_spec_template.find("0x");
+			if (beg == string::npos)
+				throw string("Missing 0x");
+
+			end = page_spec_template.find("=", beg);
+			if (end == string::npos)
+				throw string("Missing =");
+
+			page_code = page_spec_template.substr(beg+2, end-beg-2);
+			beg = end;
+
+			end = page_spec_template.find(';', beg);
+			if (end == string::npos)
+				end = page_spec_template.length();
+
+			format =  page_spec_template.substr(beg+1, end-beg-1);
+		} catch (string err) {
+			Logger().log(err.c_str( ), LOG_ERR );
+			format.clear();
+			page_code.clear();
 			return -1;
-		page_code = page_spec_template.substr(beg, end - beg);
+		}
 
-		/* Get format string */
-		beg = end + 1;
-		while (page_spec_template[i] != ';' && i < (int) page_spec_template.length())
-			i++;
-		end = i;
-		format = page_spec_template.substr(beg, end - beg);return 0;
+		return 0;
 	}
 
 	/**
