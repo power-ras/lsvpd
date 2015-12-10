@@ -441,29 +441,34 @@ namespace lsvpd
 			 */
 			string link = string(devNode + "/device");
 			if (FSWalk::fs_isLink(link)) {
-				char target[512];
-				char *buf;
-				string targetDevPath;
+				char linkTarget[PATH_MAX];
 				Component *targetDev;
-				size_t n;
 
-				buf = strdup(link.c_str());
-				n = readlink(buf, target, 512);
-				if (n > 0 && n < 512) {
-					target[n] = 0;
-					targetDevPath = HelperFunctions::getAbsolutePath(target, buf);
-					targetDev = findComponent(devs, targetDevPath);
-					if (targetDev != NULL) {
-						/* get the device name */
-						char *tmp = strdup(devNode.c_str());
-						char *name = basename(tmp);
-
-						/* Add 'name' to the AIXName list for targetDev */
-						targetDev->addAIXName(name, 90);
-						free(tmp);
-					}
+				if (realpath( link.c_str(), linkTarget ) == NULL) {
+					string msg = string("realpath operation")
+					 + string(" got failed on ") + link;
+					Logger().log(msg, LOG_ERR);
+					continue;
 				}
-				free(buf);
+
+				string targetDevPath = string(linkTarget);
+				targetDev = findComponent(devs, targetDevPath);
+				if (targetDev != NULL) {
+					/* get the device name */
+					char *tmp = strdup(devNode.c_str());
+					if(tmp == NULL) {
+						string msg = string("strdup")
+						+ string(" failed on ")
+						+ devNode;
+						Logger().log(msg, LOG_ERR);
+						continue;
+					}
+
+					/* Add 'name' to the AIXName list
+					 * for targetDev */
+					targetDev->addAIXName(basename(tmp), 90);
+					free(tmp);
+				}
 			}
 
 		}
@@ -574,17 +579,17 @@ namespace lsvpd
 
 		/* Get bus name if available */
 		if (HelperFunctions::file_exists(link)) {
-
 			if (FSWalk::fs_isLink(link)) {
-				char *buf, linkTarget[512];
+                                char linkTarget[PATH_MAX];
 
-				buf = strdup(link.c_str());
-				int len = readlink(buf, linkTarget, sizeof(
-									   linkTarget));
-				linkTarget[len] = '\0';
-				absTargetPath = HelperFunctions::getAbsolutePath(linkTarget,
-										 buf);
-				free(buf);
+				if (realpath( link.c_str(), linkTarget ) == NULL) {
+					string msg = string("realpath operation")
+						+ string(" got failed on ")
+						+ link;
+                                        Logger().log(msg, LOG_ERR);
+					goto esc_subsystem_info;
+                                }
+                                string absTargetPath = string(linkTarget);
 
 				/* 
 				 * Grab last 2 parts of link.
@@ -659,6 +664,8 @@ namespace lsvpd
 			}
 		}
 
+esc_subsystem_info:
+
 		if (fillMe->mDescription.getValue() == "Virtual") {
 			fillMe->mDescription.setValue("Virtual Device",
 						      2, __FILE__, __LINE__);
@@ -672,29 +679,31 @@ namespace lsvpd
 		/* Looking for device driver link */
 		link = string (fillMe->sysFsNode.getValue() + "/driver");
 		if (HelperFunctions::file_exists(link)) {
-
 			if (FSWalk::fs_isLink(link)) {
-				char *buf, linkTarget[512];
+				char linkTarget[PATH_MAX];
 				string driver;
 
-				buf = strdup(link.c_str());
-				int len = readlink(buf, linkTarget, sizeof(
-									   linkTarget));
-				linkTarget[len] = '\0';
-				absTargetPath = HelperFunctions::getAbsolutePath(linkTarget,
-										 buf);
-				free(buf);
-				/* Now grab last part of link */
-				lastSlash = absTargetPath.rfind("/", absTargetPath.length()) + 1;
-				driver = absTargetPath.substr(lastSlash,
-							      absTargetPath.length() - lastSlash);
-				fillMe->devDriver.setValue(driver, INIT_PREF_LEVEL,
-							   __FILE__, __LINE__);
+				if (realpath( link.c_str(), linkTarget ) != NULL) {
+					string absTargetPath = string(linkTarget);
 
-				if (driver == "hvc_console") {
-					fillMe->addAIXName(driver,90);
-					fillMe->mDescription.setValue("Hypervisor Virtual Console",
-								      90, __FILE__, __LINE__);
+					/* Now grab last part of link */
+					lastSlash = absTargetPath.rfind("/",
+						absTargetPath.length()) + 1;
+					driver = absTargetPath.substr(lastSlash,
+							absTargetPath.length() - lastSlash);
+					fillMe->devDriver.setValue(driver,
+								   INIT_PREF_LEVEL,
+								   __FILE__, __LINE__);
+
+					if (driver == "hvc_console") {
+						fillMe->addAIXName(driver,90);
+						fillMe->mDescription.setValue("Hypervisor Virtual Console",
+								90, __FILE__, __LINE__);
+					}
+				} else {
+					string msg = string ("realpath operation")
+						+ string(" got failed on ") + link;
+					Logger().log(msg, LOG_ERR);
 				}
 			}
 		}
