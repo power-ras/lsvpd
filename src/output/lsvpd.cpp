@@ -512,6 +512,7 @@ int main( int argc, char** argv )
 				       S_IRGRP | S_IWUSR | S_IRUSR | S_IROTH );
 			if( fd < 0 )
 			{
+				gzclose( gzf );
 				cout << "Failed to open file for uncompressed database archive"
 					<< endl;
 				return 1;
