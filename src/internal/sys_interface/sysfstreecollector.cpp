@@ -1024,11 +1024,14 @@ esc_subsystem_info:
 			{
 				char *f, *p;
 				f = strdup( fname.c_str( ) );
-				if ( f == NULL )
+				if (f == NULL) {
+					closedir(d);
 					return NULL;
+				}
 				p = strdup( sysDir.c_str( ) );
 				if ( p == NULL ) {
 					free (f);
+					closedir(d);
 					return NULL;
 				}
 				link = HelperFunctions::getAbsolutePath( f, p );
