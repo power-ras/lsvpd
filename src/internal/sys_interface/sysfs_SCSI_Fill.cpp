@@ -250,7 +250,7 @@ namespace lsvpd
 
 		j = 0;
 		if ((device_scsi_types[i].key == -1)
-		    && (!cdrom_device_types[j].key != -1))
+		    && (cdrom_device_types[j].key != -1))
 			subtypeDS = cdrom_device_types[j].val;
 		else if (device_scsi_types[i].key == -1)
 			subtypeDS = "Unknown Device";
@@ -300,7 +300,7 @@ namespace lsvpd
 				       (cdtype != cdrom_device_types[i].key))
 					i++;
 
-				if (!cdrom_device_types[i].key != -1)
+				if (cdrom_device_types[i].key != -1)
 					subtypeDS = cdrom_device_types[i].val;
 				else
 					subtypeDS = SCSI_CDROM_DEFAULT;
@@ -1175,7 +1175,7 @@ namespace lsvpd
 			while ((device_scsi_types_short[i].key != -1)
 			       && (subtype != device_scsi_types_short[i].key))
 				i++;
-			if (!device_scsi_types_short[i].key != -1)
+			if (device_scsi_types_short[i].key != -1)
 				subtypeDS = device_scsi_types_short[i].val;
 			else
 				subtypeDS = "Unknown";
