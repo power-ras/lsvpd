@@ -715,12 +715,16 @@ esc_subsystem_info:
 			int len, start;
 			string name;
 
-			len = readlink(link.c_str(), linkTarget, sizeof(linkTarget));
-			linkTarget[len] = '\0';
+			len = readlink(link.c_str(), linkTarget,
+				       sizeof(linkTarget) - 1);
+			if (len > 0) {
+				linkTarget[len] = '\0';
 
-			name = string(linkTarget);
-			start = name.rfind("/", name.length()) + 1;
-			fillMe->addAIXName(name.substr(start, name.length() - start), 90);
+				name = linkTarget;
+				start = name.rfind("/", name.length()) + 1;
+				fillMe->addAIXName(name.substr(start,
+						name.length() - start), 90);
+			}
 		}
 
 
