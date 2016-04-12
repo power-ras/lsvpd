@@ -44,6 +44,7 @@
 #include <sys/sysmacros.h>
 #include <dirent.h>
 #include <libgen.h>		// for basename()
+#include <stdint.h>
 #include <unistd.h>
 #include <cerrno>
 #include <cstdlib>
@@ -221,6 +222,11 @@ namespace lsvpd
 			classLink = fillMe->getClassNode();
 			if (classLink.length() > 0)
 				fillNetClass( fillMe,  classLink);
+		} else if (devClass == "nvme")
+		{
+			classLink = fillMe->getClassNode();
+			if (classLink.length() > 0)
+				fillNvmeClass(fillMe);
 		}
 
 		return fillMe;
@@ -1272,6 +1278,115 @@ esc_subsystem_info:
 		}
 	}
 
+	unsigned int SysFSTreeCollector::parsePciVPDBuffer( Component* fillMe,
+						    char *buf, int size )
+	{
+		char key[ 3 ] = { '\0' };
+		/* Each VPD field will be at most 255 bytes long */
+		char val[ 256 ];
+		char *end;
+		unsigned char length;
+		uint16_t len;
+		string field;
+
+		/*
+		 * The format of the VPD Data is a series of sections, with
+		 * each section containing keyword followed by length as shown
+		 * below:
+		 *
+		 *   _ section start here
+		 *  |
+		 *  v
+		 *  ----------------------------------------------------------
+		 * | Section ID(1) | len(2) | data(len) | section1 tag(1) |   |
+		 *  ----------------------------------------------------------
+		 * | len (1) | key(2) | record_len(1) | data(record_len) |    |
+		 *  ----------------------------------------------------------
+		 * | key(2) | ....... | section2 tag(1) | len(1) | data(len)| |
+		 *  ----------------------------------------------------------
+		 * |.....| sectionN tag (1) | len(1) | data(len) | end tag(1) |
+		 *  ----------------------------------------------------------
+		 */
+
+		if (*buf != 0x82)
+			return 0;
+
+		/* Increment buffer to point to offset 1 to read Product
+		 * Name length
+		 */
+		buf++;
+
+		/* Data length is 2 bytes (byte 1 LSB, byte 2 MSB) */
+		len = *buf | (buf[1] << 8);
+
+		/* Increment buffer to point to read Product Name */
+		buf += 2;
+
+		/* Increment buffer to point to VPD R Tag */
+		buf += len;
+
+		/* Increment buffer to point to VPD R Tag data length */
+		buf++;
+
+		/* Increment buffer to point to first VPD keyword */
+		/* Increment by 2 because data length is of size 2 bytes */
+		buf += 2;
+
+		end = buf + size;
+
+		while( buf < end && *buf != 0x78 && *buf != 0x79 )
+		{
+			memset( key, '\0', 3 );
+			memset( val, '\0', 256 );
+
+			if( buf + 3 > end )
+			{
+				goto ERROR;
+			}
+
+			key[ 0 ] = buf[ 0 ];
+			key[ 1 ] = buf[ 1 ];
+			length = buf[ 2 ];
+			buf += 3;
+
+			if( buf + length > end )
+			{
+				goto ERROR;
+			}
+
+			memcpy( val, buf, length );
+			buf += length;
+
+			field = sanitizeVPDField(val, length);
+			setVPDField( fillMe, key, field, __FILE__, __LINE__ );
+		}
+
+		return size;
+ERROR:
+		Logger logger;
+		logger.log( "Attempting to parse corrupt VPD buffer.", LOG_WARNING );
+		return 0;
+	}
+
+	/* Parse VPD file */
+	void SysFSTreeCollector::fillPciDevVpd( Component* fillMe )
+	{
+		char *vpdData;
+		int size;
+		string path;
+
+		path = fillMe->sysFsNode.getValue() + "/vpd";
+		if (HelperFunctions::file_exists(path) != true)
+			return;
+
+		size = getBinaryData(path, &vpdData);
+		if (size == 0)
+			return;
+
+		parsePciVPDBuffer( fillMe, vpdData, size );
+		delete [] vpdData;
+	}
+
 	void SysFSTreeCollector::fillPCIDev( Component* fillMe,
 					     const string& sysDir )
 	{
@@ -1362,6 +1477,9 @@ esc_subsystem_info:
 
 		fillPCIDS( fillMe );
 
+		/* Fill PCI device VPD info */
+		fillPciDevVpd(fillMe);
+
 		// Read the pci config file for Device Specific (YC)
 		os.str( "" );
 		os << fillMe->sysFsNode.dataValue << "/config";
@@ -1438,6 +1556,9 @@ esc_subsystem_info:
 		else if( val == "tty" )
 			fillMe->mDescription.setValue( "Serial Device", 20,
 						       __FILE__, __LINE__ );
+		else if( val == "nvme" )
+			fillMe->mDescription.setValue( "NVMe Device", 20,
+						       __FILE__, __LINE__ );
 	}
 
 	void SysFSTreeCollector::fillUSBDev( Component* fillMe,
@@ -1493,6 +1614,83 @@ esc_subsystem_info:
 #ifndef SIOCETHTOOL
 #define SIOCETHTOOL     0x8946
 #endif
+
+	/**
+	 * Fills NVMe device info
+	 */
+	void SysFSTreeCollector::fillNvmeClass( Component* fillMe )
+	{
+		FSWalk fsw = FSWalk();
+		vector<string> listing;
+		string dev_syspath;
+		string dev_childname;
+		size_t start;
+		int beg, end;
+		string str;
+		string newDevDir;
+		bool dev_found = false;
+		int device_fd;
+		string dev_path;
+		string msg;
+
+		dev_syspath = fillMe->sysFsNode.getValue();
+		fsw.fs_getDirContents(dev_syspath, 'd', listing);
+		if (listing.size() <= 0) {
+			Logger().log("fillNvmeClass: NVMe dev not found.",
+				     LOG_WARNING);
+			return;
+		}
+
+		while (listing.size() > 0) {
+			dev_childname = listing.back();
+			listing.pop_back();
+			start = dev_childname.find("nvme");
+			if (start != string::npos) {
+				dev_found = true;
+				break;
+			}
+		}
+
+		if (dev_found != true) {
+			Logger().log("fillNvmeClass: NVMe dev matching failed.",
+				     LOG_WARNING);
+			return;
+		}
+
+		/**
+		 * Get major/minor number
+		 */
+		newDevDir = dev_syspath + "/" + dev_childname;
+		str = getAttrValue( newDevDir, "dev" );
+		beg = end = 0;
+		while (end < (int) str.length() && str[end] != ':')
+			end++;
+
+		fillMe->devMajor = atoi(str.substr(beg, end).c_str());
+
+		beg = end + 1;
+		end = beg;
+		while (end < (int) str.length() && str[end] != ':') {
+			end++;
+		}
+
+		fillMe->devMinor = atoi(str.substr(beg, end).c_str());
+		fillMe->devAccessMode = S_IFBLK;
+
+		device_fd = device_open(fillMe->devMajor, fillMe->devMinor,
+					fillMe->devAccessMode, dev_path);
+		if (device_fd < 0) {
+			msg = string("vpdupdate: Failed opening device: ")
+				+ fillMe->idNode.getValue();
+			Logger().log( msg, LOG_WARNING );
+			return;
+		}
+
+		collectVpd(fillMe, device_fd, false);
+		device_close(device_fd, dev_path);
+		return;
+	}
+
 	void SysFSTreeCollector::fillNetClass( Component* fillMe,
 					       const string& classDir )
 	{

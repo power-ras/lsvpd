@@ -1096,9 +1096,12 @@ namespace lsvpd
 				return -SCSI_FILL_TEMPLATE_LOADING;
 		}
 
-		res = ioctl(device_fd, SG_GET_SCSI_ID, &sg_dat);
-		if (res < 0) {
-			return -SGUTILS_IOCTL_FAILED;
+		/* Check for scsi devices */
+		if (fillMe->devBus.getValue() == "scsi") {
+			res = ioctl(device_fd, SG_GET_SCSI_ID, &sg_dat);
+			if (res < 0) {
+				return -SGUTILS_IOCTL_FAILED;
+			}
 		}
 
 		memset(buffer, '\0', MAXBUFSIZE);

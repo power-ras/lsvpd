@@ -202,6 +202,14 @@ namespace lsvpd
 			 */
 			void fillUSBDev( Component* fillMe, const string& sysDir );
 
+
+			/**
+			 * Fill a NVMe device.
+			 *
+			 * @param fillMe
+			 */
+			void fillNvmeClass( Component* fillMe );
+
 			/**
 			 * Fill a Net device.  At the moment, all this method does is fill
 			 * the NetAddr field.
@@ -228,7 +236,26 @@ namespace lsvpd
 			 *   The Component to fill
 			 */
 			void fillIDEDev( Component* fillMe );
+
+			/**
+			 * Gather PCI device specific vpd info.
+			 *
+			 * @param fillMe
+			 *   The Component to fill
+			 */
+			void fillPciDevVpd( Component* fillMe );
+
+			/**
+			 * Parse device info in two parts : key & data.
+			 *
+			 * @param fillMe
+			 * @param buf: vpd key and data list
+			 * @param size : buffer size
+			 */
+			unsigned int parsePciVPDBuffer( Component* fillMe,
+						        char * buf , int size );
 	};
+
 	/**
 	 * device_open
 	 */
