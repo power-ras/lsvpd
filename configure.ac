@@ -35,6 +35,7 @@ AC_HEADER_STDC
 AC_CHECK_HEADERS([arpa/inet.h fcntl.h stdlib.h string.h sys/ioctl.h sys/param.h syslog.h unistd.h ctype.h regex.h])
 AC_CHECK_HEADER([scsi/sg_cmds.h], ,[AC_MSG_ERROR([sg_utils header files are required for building lsvpd])])
 AC_CHECK_HEADER([sqlite3.h],,[AC_MSG_ERROR([sqlite header files are required for building lsvpd])])
+AC_CHECK_HEADER([zlib.h],,[AC_MSG_ERROR([zlib header files are required for building lsvpd])])
 AC_CHECK_HEADER([libvpd-2/lsvpd.hpp],,[AC_MSG_ERROR([libvpd header files required for building lsvpd])])
 
 #libraries
