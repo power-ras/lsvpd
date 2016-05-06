@@ -117,7 +117,7 @@ exit 0
 - "lscfg -vpl sysplaner0" ouptut alignment fix
 - Display "Machine Model" information in lscfg output
 
-* Fri Jan 28 2013 - Harsh P Bora <harsh@linux.vnet.ibm.com> - 1.7.1
+* Mon Jan 28 2013 - Harsh P Bora <harsh@linux.vnet.ibm.com> - 1.7.1
 - Support for device listing using location code with lsvpd -l
 - Added man page for invscout
 - Man pages updated to remove license info.
@@ -142,7 +142,7 @@ exit 0
 * Tue Mar 4 2008 - Eric Munson <ebmunson@us.ibm.com> - 1.6.2-1
 - Updating for lsvpd-1.6.2
 
-* Tue Mar 3 2008 - Eric Munson <ebmunson@us.ibm.com> - 1.6.1-1
+* Mon Mar 3 2008 - Eric Munson <ebmunson@us.ibm.com> - 1.6.1-1
 - Updating for lsvpd-1.6.1
 
 * Sat Feb 2 2008 - Eric Munson <ebmunson@us.ibm.com> - 1.6.0-1
@@ -170,5 +170,5 @@ exit 0
 - Removing #! from the beginning of the file.
 - Fixes requested by Fedora Community
 
-* Wed Oct 30 2007 - Eric Munson <ebmunson@us.ibm.com> - 1.3.5-1
+* Tue Oct 30 2007 - Eric Munson <ebmunson@us.ibm.com> - 1.3.5-1
 - Remove calls to ldconfig
