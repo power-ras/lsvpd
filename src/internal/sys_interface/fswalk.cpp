@@ -106,82 +106,44 @@ int FSWalk::fs_isDir(char *path)
 {
 	struct stat astats;
 
-	if ((lstat(path, &astats)) != 0) {
-		return false;
-	}
-	if (S_ISDIR(astats.st_mode))
-		return true;
-	return false;
-
+	return (lstat(path, &astats) == 0) && S_ISDIR(astats.st_mode);
 }
 
 int FSWalk::fs_isFile(char *path)
 {
 	struct stat astats;
 
-	if ((lstat(path, &astats)) != 0) {
-		return false;
-	}
-	if (S_ISREG(astats.st_mode))
-		return true;
-	return false;
+	return (lstat(path, &astats) == 0) && S_ISREG(astats.st_mode);
 }
 
 int FSWalk::fs_isLink(char *path)
 {
 	struct stat astats;
 
-	if ((lstat(path, &astats)) != 0) {
-		return false;
-	}
-
-	if (S_ISLNK((astats.st_mode))) {
-		return true;
-	}
-
-	return false;
+	return (lstat(path, &astats) == 0) && S_ISLNK(astats.st_mode);
 }
 
 /* String versions */
 
 int FSWalk::fs_isDir(string path)
 {
-	int ret = false;
 	struct stat astats;
 
-	if ((lstat(path.c_str(), &astats)) != 0)
-		ret = false;
-	if (S_ISDIR(astats.st_mode))
-		ret = true;
-
-	return ret;
-
+	return (lstat(path.c_str(), &astats) == 0) && S_ISDIR(astats.st_mode);
 }
 
 int FSWalk::fs_isFile(string path)
 {
-	int ret = false;
 	struct stat astats;
 
-	if ((lstat(path.c_str(), &astats)) != 0)
-		ret = false;
-	if (S_ISREG(astats.st_mode))
-		ret = true;
-
-	return ret;
+	return (lstat(path.c_str(), &astats) == 0) && S_ISREG(astats.st_mode);
 }
 
 int FSWalk::fs_isLink(string path)
 {
-	int ret = false;
 	struct stat astats;
 
-	if ((lstat(path.c_str(), &astats)) != 0)
-		ret = false;
-	if (S_ISLNK(astats.st_mode))
-		ret = true;
-
-	return ret;
+	return (lstat(path.c_str(), &astats) == 0) && S_ISLNK(astats.st_mode);
 }
 
 /* getDirContents(char * path, char type, char **dirList)
