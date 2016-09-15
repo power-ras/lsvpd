@@ -236,8 +236,13 @@ namespace lsvpd
 
 			prefix = device_scsi_ds_prefixes[i].val;
 		}
-		if (prefix.empty())
-			prefix = "SCSI";
+
+		if (prefix.empty()) {
+			if (fillMe->getDevClass() == "nvme")
+				prefix = "NVMe";
+			else
+				prefix = "SCSI";
+		}
 
 		i = 0;
 		// Lookup device subtype
