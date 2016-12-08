@@ -57,6 +57,7 @@ namespace lsvpd {
 			int fs_getDirContents(string path_t,
 					char type,
 					vector<string>& list);
+			static string get_cmd_path(const char *);
 
 	};
 

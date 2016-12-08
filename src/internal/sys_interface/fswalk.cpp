@@ -39,6 +39,7 @@
 #include <sys/stat.h>
 #include <cerrno>
 #include <dirent.h>
+#include <unistd.h>
 
 #define STRIT(x) #x
 #define TOSTRING(x) STRIT(x)
@@ -198,4 +199,23 @@ int FSWalk::fs_getDirContents(string path_t, char type,
 
 	closedir(dir);
 	return list.size( );
+}
+
+/*
+ * func   : get_cmd_path
+ * return : In success, absolute path of command. In failure, empty string.
+ */
+string FSWalk::get_cmd_path(const char *cmd)
+{
+	string path_elem;
+	const char * const envpath(getenv("PATH"));
+	istringstream stream(envpath ? envpath : "");
+
+	while (getline(stream, path_elem, ':')) {
+		string cmd_path = path_elem + "/" + cmd;
+		if (!access(cmd_path.c_str(), F_OK | X_OK))
+			return cmd_path;
+	}
+
+	return "";
 }

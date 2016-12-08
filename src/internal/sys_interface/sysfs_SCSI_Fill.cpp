@@ -1421,6 +1421,7 @@ namespace lsvpd
 		string sg, output;
 		char *devSg;
 		string cmd;
+		string cmd_path;
 
 		if (path == "")
 			return;
@@ -1433,7 +1434,11 @@ namespace lsvpd
 		if (sg == "")
 			goto out;
 
-		cmd = "/usr/sbin/iprconfig -c show-details " + sg;
+		cmd_path = FSWalk::get_cmd_path("iprconfig");
+		if (cmd_path.empty())
+			goto out;
+
+		cmd = cmd_path + " -c show-details " + sg;
 		if (HelperFunctions::execCmd(cmd.c_str(), output))
 			goto out;
 
