@@ -1235,7 +1235,7 @@ esc_subsystem_info:
 			}
 		}
 
-		os.str(HelperFunctions::findAIXFSEntry(fillMe->getAIXNames(), "/dev"));
+		os.str(HelperFunctions::findAIXFSEntry(fillMe->getAIXNames(), "/dev/"));
 		struct hd_driveid id;
 		memset( &id, 0, sizeof( struct hd_driveid ) );
 		int fd = open( os.str( ).c_str( ), O_RDONLY | O_NONBLOCK );
