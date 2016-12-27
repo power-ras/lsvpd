@@ -1310,6 +1310,8 @@ esc_subsystem_info:
 		if (*buf != 0x82)
 			return 0;
 
+		end = buf + size;
+
 		/* Increment buffer to point to offset 1 to read Product
 		 * Name length
 		 */
@@ -1330,8 +1332,6 @@ esc_subsystem_info:
 		/* Increment buffer to point to first VPD keyword */
 		/* Increment by 2 because data length is of size 2 bytes */
 		buf += 2;
-
-		end = buf + size;
 
 		while( buf < end && *buf != 0x78 && *buf != 0x79 )
 		{
