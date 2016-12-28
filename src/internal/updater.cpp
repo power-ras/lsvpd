@@ -169,8 +169,9 @@ bool isRoot()
 void archiveDB( const string& fullPath )
 {
 	DIR * pDBdir = NULL;
-
+	Logger logger;
 	struct stat st;
+
 	if( stat( fullPath.c_str( ), &st ) == 0 )
 	{
 		/*
@@ -179,6 +180,13 @@ void archiveDB( const string& fullPath )
 		 */
 		struct dirent*  ent;
 		pDBdir = opendir( env.c_str( ) );
+		if (pDBdir == NULL) {
+			ostringstream os;
+			os << "Error opening directory " << env << endl;
+			logger.log( os.str( ), LOG_WARNING );
+			return;
+		}
+
 		while( ( ent = readdir( pDBdir ) ) != NULL )
 		{
 			string fname = ent->d_name;
