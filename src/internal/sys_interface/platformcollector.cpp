@@ -25,6 +25,10 @@ namespace lsvpd {
 		buf++;
 		/* skip spaces */
 		while (isspace(*buf)) buf++;
+
+		if (!*buf)
+			return string();
+
 		return string(buf);
 	}
 
