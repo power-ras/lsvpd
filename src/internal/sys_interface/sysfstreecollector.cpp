@@ -961,7 +961,6 @@ esc_subsystem_info:
 		const char *buf;
 		char buf2[512];
 		FILE *fi;
-		int i;
 
 		HelperFunctions::fs_fixPath(sysPath);
 		sysPath += "/devspec";
@@ -973,18 +972,18 @@ esc_subsystem_info:
 
 		// Read Results
 		fi = fopen(buf , "r");
-		if (fi != NULL) {
-			if (fgets(buf2, 512, fi) != NULL) {
-				i = 0;
-				while (buf2[i] != '\0') {
-					if (buf2[i] == '\n')
-						buf2[i] = '\0';
-					i++;
-				}
-			}
+		if (!fi)
+			return string("");
+
+		if (!fgets(buf2, sizeof(buf2), fi)) {
 			fclose(fi);
+			return string("");
 		}
 
+		if (buf2[strlen(buf2) - 1] == '\n')
+			buf2[strlen(buf2) - 1] = '\0';
+
+		fclose(fi);
 		// cleanup
 		return string(buf2);
 	}
