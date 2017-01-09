@@ -1363,7 +1363,7 @@ esc_subsystem_info:
 		return size;
 ERROR:
 		Logger logger;
-		logger.log( "Attempting to parse corrupt VPD buffer.", LOG_WARNING );
+		logger.log( "Attempting to parse corrupt VPD buffer.", LOG_NOTICE );
 		return 0;
 	}
 
