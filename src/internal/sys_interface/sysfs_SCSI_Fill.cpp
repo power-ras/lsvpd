@@ -494,7 +494,8 @@ namespace lsvpd
 	 */
 	int getFieldValue(string pattern)
 	{
-		int i, eon, value; //End of name field
+		int i, eon; //End of name field
+		long int value;
 		string str;
 		char **endptr = NULL;
 
@@ -514,6 +515,12 @@ namespace lsvpd
 
 		str = pattern.substr(eon, pattern.length() - eon);
 		value = strtol(str.c_str(), endptr, 0);
+		if (!value || (value == LONG_MAX) || (value == LONG_MIN))
+			return -1;
+
+		if (*endptr == str.c_str())
+			return -1;
+
 		//cout << "GetValue() Pattern = " << pattern << ", str = "
 		//<< str << ", eon = " << eon << "Value = " << value << endl;
 
