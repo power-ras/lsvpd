@@ -1316,29 +1316,39 @@ esc_subsystem_info:
 		 * Name length
 		 */
 		buf++;
+		if (buf >= end)
+			return 0;
 
 		/* Data length is 2 bytes (byte 1 LSB, byte 2 MSB) */
 		len = *buf | (buf[1] << 8);
 
 		/* Increment buffer to point to read Product Name */
 		buf += 2;
+		if (buf >= end)
+			return 0;
 
 		/* Increment buffer to point to VPD R Tag */
 		buf += len;
+		if (buf >= end)
+			return 0;
 
 		/* Increment buffer to point to VPD R Tag data length */
 		buf++;
+		if (buf >= end)
+			return 0;
 
 		/* Increment buffer to point to first VPD keyword */
 		/* Increment by 2 because data length is of size 2 bytes */
 		buf += 2;
+		if (buf >= end)
+			return 0;
 
 		while( buf < end && *buf != 0x78 && *buf != 0x79 )
 		{
 			memset( key, '\0', 3 );
 			memset( val, '\0', 256 );
 
-			if( buf + 3 > end )
+			if( buf + 3 >= end )
 			{
 				goto ERROR;
 			}
@@ -1348,7 +1358,7 @@ esc_subsystem_info:
 			length = buf[ 2 ];
 			buf += 3;
 
-			if( buf + length > end )
+			if( buf + length >= end )
 			{
 				goto ERROR;
 			}
