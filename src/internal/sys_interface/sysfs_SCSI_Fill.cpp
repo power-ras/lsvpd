@@ -518,7 +518,7 @@ namespace lsvpd
 		if (!value || (value == LONG_MAX) || (value == LONG_MIN))
 			return -1;
 
-		if (*endptr == str.c_str())
+		if (endptr && (*endptr == str.c_str()))
 			return -1;
 
 		//cout << "GetValue() Pattern = " << pattern << ", str = "
