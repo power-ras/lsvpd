@@ -406,6 +406,7 @@ int main( int argc, char** argv )
 		catch( VpdException& ve )
 		{
 			cout << "Error reading VPD DB: " << ve.what( ) << endl;
+			cout << "Please run vpdupdate command, before running lsvio." << endl;
 			delete vpd;
 			return 1;
 		}

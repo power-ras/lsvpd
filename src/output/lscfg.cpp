@@ -913,6 +913,7 @@ int main( int argc, char** argv )
 		catch( exception& e )
 		{
 			cout << "Unable to process vpd DB " << path << ". Possibly corrupted DB" <<endl;
+			cout << "Please run vpdupdate command, before running lscfg." << endl;
 			return 1;
 		}
 	}
@@ -944,6 +945,7 @@ int main( int argc, char** argv )
 		catch( VpdException& ve )
 		{
 			cout << "Error reading VPD DB: " << ve.what( ) << endl;
+			cout << "Please run vpdupdate command, before running lscfg." << endl;
 			delete vpd;
 			return 1;
 		}

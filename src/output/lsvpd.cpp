@@ -559,6 +559,7 @@ int main( int argc, char** argv )
 		catch( exception& e )
 		{
 			cout << "Unable to process vpd DB " << path << ". Possibly corrupted DB" <<endl;
+			cout << "Please run vpdupdate command, before running lsvpd." << endl;
 			return 1;
 		}
 	}
