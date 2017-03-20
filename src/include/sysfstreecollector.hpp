@@ -253,7 +253,7 @@ namespace lsvpd
 			 * @param size : buffer size
 			 */
 			unsigned int parsePciVPDBuffer( Component* fillMe,
-						        char * buf , int size );
+						        const char * buf , int size );
 	};
 
 	/**

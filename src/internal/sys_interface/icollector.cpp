@@ -37,7 +37,6 @@ using namespace std;
 
 namespace lsvpd
 {
-
 	/**
 	 * Read a device attribute, given dev path and attribute name
 	 * @var path Full path to device in sysfs
@@ -97,54 +96,25 @@ namespace lsvpd
 	}
 
 	/*
-	 * Read a binary blob from given @path and store it in *data.
-	 * Allocates enough memory @*data, which has to be freed by the
-	 * caller.
-	 * @return : Size of the blob read.
+	 * Read a binary blob from given @path and store it in a string.
+	 * The string is returned by-value to the caller, and thus does
+	 * not need to be freed. RAII takes care of its destruction at
+	 * the end of the caller.
+	 * @return : string read from the blob.
 	 */
-	int ICollector::getBinaryData( const string& path, char **data )
+	string ICollector::getBinaryData( const string& path )
 	{
-		int size = 0, rc = 0;
-		struct stat info;
-		char *buf;
-		int fd = -1;
+		ifstream fi(path.c_str(), ios::binary);
+		string str;
 
-		if (stat(path.c_str(), &info) != 0)
-		{
-			*data = NULL;
-			goto out;
-		}
+		str.assign(istreambuf_iterator<char>(fi),
+			   istreambuf_iterator<char>());
+		if (fi.bad())
+			return "";
 
-		fd = open(path.c_str(), O_RDONLY);
-		if (fd < 0)
-			goto out;
-
-		buf = *data = new char [ info.st_size ];
-		if (!*data)
-			goto out;
-
-		while(size < info.st_size)
-		{
-			rc = read(fd, buf + size, info.st_size - size);
-			if (rc <= 0)
-				break;
-			size += rc;
-		}
-
-out:
-		if (rc < 0)
-			size = 0;
-		if (fd >= 0)
-			close(fd);
-
-		if (size == 0 && *data)
-		{
-			delete [] *data;
-			*data = NULL;
-		}
-
-		return size;
+		return str;
 	}
+
 	/* Convert a string to its hexDump */
 	static string hexDump(char *arr, int len)
 	{

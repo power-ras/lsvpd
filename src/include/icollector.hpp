@@ -120,12 +120,13 @@ namespace lsvpd
 					const string& attrName );
 
 				/**
-				 * Read a binary blob from given @path and store it in *data.
-				 * Allocates enough memory @*data, which has to be freed by the
-				 * caller.
-				 * @return : Size of the blob read.
+				 * Read a binary blob from given @path and store it in a string.
+				 * The string is returned by-value to the caller, and thus does
+				 * not need to be freed. RAII takes care of its destruction at
+				 * the end of the caller.
+				 * @return : string read from the blob.
 				 */
-				int getBinaryData( const string& path, char **data );
+				string getBinaryData( const string& path );
 
 				/**
 				 * Sanitize a VPD value

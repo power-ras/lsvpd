@@ -1278,12 +1278,12 @@ esc_subsystem_info:
 	}
 
 	unsigned int SysFSTreeCollector::parsePciVPDBuffer( Component* fillMe,
-						    char *buf, int size )
+						    const char *buf, int size )
 	{
 		char key[ 3 ] = { '\0' };
 		/* Each VPD field will be at most 255 bytes long */
 		char val[ 256 ];
-		char *end;
+		const char *end;
 		unsigned char length;
 		uint16_t len;
 		string field;
@@ -1380,20 +1380,20 @@ ERROR:
 	/* Parse VPD file */
 	void SysFSTreeCollector::fillPciDevVpd( Component* fillMe )
 	{
-		char *vpdData;
 		int size;
-		string path;
+		string path, vpdDataStr;
 
 		path = fillMe->sysFsNode.getValue() + "/vpd";
 		if (HelperFunctions::file_exists(path) != true)
 			return;
 
-		size = getBinaryData(path, &vpdData);
-		if (size == 0)
+		vpdDataStr = getBinaryData(path);
+		if ((size = vpdDataStr.length()) == 0)
 			return;
 
-		parsePciVPDBuffer( fillMe, vpdData, size );
-		delete [] vpdData;
+		//Use data() and not c_str() as the binary data might
+		//contain '\0' characters.
+		parsePciVPDBuffer( fillMe, vpdDataStr.data(), size );
 	}
 
 	void SysFSTreeCollector::fillPCIDev( Component* fillMe,

@@ -307,14 +307,18 @@ namespace lsvpd
 	 */
 	void DeviceTreeCollector::fillIBMVpd( Component* fillMe )
 	{
-		string path;
+		string path, vpdDataStr;
 		char *vpdData;
 		int size;
 
 		path = fillMe->deviceTreeNode.dataValue + "/ibm,vpd";
-		size = getBinaryData(path, &vpdData);
-		if (size == 0)
+		vpdDataStr = getBinaryData(path);
+		if ((size = vpdDataStr.length()) == 0)
 			return;
+
+		vpdData =  new char[size];
+		vpdDataStr.copy( vpdData, size );
+
 		parseVPDBuffer( fillMe, vpdData );
 
 		delete [] vpdData;
@@ -1153,12 +1157,16 @@ ERROR:
 		char *vpdData;
 		unsigned int size;
 		string sysVpd = string(OPAL_SYS_VPD_DIR) + string("/ibm,vpd");
+		string vpdDataStr;
 
 		getOpalSystemLocationCode( sys );
 
-		size = getBinaryData(sysVpd, &vpdData);
-		if (size == 0)
+		vpdDataStr = getBinaryData(sysVpd);
+		if ((size = vpdDataStr.length()) == 0)
 			return;
+
+		vpdData =  new char[size];
+		vpdDataStr.copy( vpdData, size );
 
 		parseSysVPD(vpdData, sys);
 		delete [] vpdData;
