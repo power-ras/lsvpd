@@ -807,54 +807,40 @@ namespace lsvpd
 		return 0;
 	}
 
-	/**
-	 * Close a device that may have been opened for reading
+	/*
+	 * device_open function opens device node under
+	 * /dev using AIXName of device.
+	 * return   : file descriptor in success, and -ERRNO in failure.
 	 */
-	void device_close(int device_fd, string& dev_path)
+	int device_open(Component* fillMe)
 	{
+		bool found = false;
+		int device_fd = -1;
 		struct stat statbuf;
+		string dev_path;
 
-		if (stat(dev_path.c_str(), &statbuf) == 0) {
-			if(device_fd >= 0)
-				close(device_fd);
-			unlink(dev_path.c_str());
+		vector <DataItem*> aixNames = fillMe->getAIXNames();
+		vector<DataItem*>::const_iterator i, end;
+
+		i = aixNames.begin();
+		end = aixNames.end();
+
+		while (i != end) {
+			dev_path = "/dev/" + (*i)->getValue();
+			i++;
+
+			if (stat(dev_path.c_str(), &statbuf) == 0) {
+				found = true;
+				break;
+			}
 		}
-	}
 
-	// Open a temp file through which we can ioctl() to device for reading
-	int device_open(int major, int minor, int mode, string& dev_path)
-	{
-		char name[PATH_MAX];
-		/* Var is used to store unique name */
-		char template_d[] = "/tmp/node-XXXXXX";
-		int device_fd = 0;
-		int ret;
-		struct stat statbuf;
-
-		device_fd = mkstemp(template_d);
-		if (device_fd  == -1)
-			return -1;
-		close(device_fd);
-
-		if (stat(template_d, &statbuf) == 0)
-			unlink(template_d);
-
-		if (snprintf(name, PATH_MAX - 1, "%s-%d-%d-%d",
-			     template_d, mode, major, minor) < 0)
-			return -ERROR_ACCESSING_DEVICE;
-
-		ret = mknod(name, 0760 | mode, makedev(major, minor));
-		if (ret != 0)
-			return -UNABLE_TO_MKNOD_FILE;
-
-		/* Store temp device filename. It will be used in device_close */
-		dev_path = string(name);
-
-		device_fd = open(name, 0);
-		if (device_fd < 0) {
-			device_close(device_fd, dev_path);
+		if (!found)
 			return -UNABLE_TO_OPEN_FILE;
-		}
+
+		device_fd = open(dev_path.c_str(), 0);
+		if (device_fd < 0)
+			return -UNABLE_TO_OPEN_FILE;
 
 		return device_fd;
 	}
@@ -1467,7 +1453,6 @@ out:
 		int device_fd;
 		Logger logger;
 		string msg;
-		string dev_path;
 		/* Not a SCSI device */
 		if (fillMe->devBus.getValue() == "usb")
 			return;
@@ -1479,10 +1464,7 @@ out:
 		if (!get_mm_scsi(fillMe)) {
 
 			// Open Device for reading
-			device_fd = device_open(fillMe->devMajor,
-						fillMe->devMinor,
-						fillMe->devAccessMode,
-						dev_path);
+			device_fd = device_open(fillMe);
 			if (device_fd < 0) {
 				msg = string("vpdupdate: Failed opening device: ")
 					+ fillMe->idNode.getValue();
@@ -1492,7 +1474,7 @@ out:
 
 			collectVpd(fillMe, device_fd, limitSCSISize);
 
-			device_close(device_fd, dev_path);
+			close(device_fd);
 		}
 
 		fillIPRData( fillMe );

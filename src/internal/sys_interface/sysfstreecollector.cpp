@@ -1639,7 +1639,6 @@ ERROR:
 		string newDevDir;
 		bool dev_found = false;
 		int device_fd;
-		string dev_path;
 		string msg;
 
 		dev_syspath = fillMe->sysFsNode.getValue();
@@ -1686,8 +1685,7 @@ ERROR:
 		fillMe->devMinor = atoi(str.substr(beg, end).c_str());
 		fillMe->devAccessMode = S_IFBLK;
 
-		device_fd = device_open(fillMe->devMajor, fillMe->devMinor,
-					fillMe->devAccessMode, dev_path);
+		device_fd = device_open(fillMe);
 		if (device_fd < 0) {
 			msg = string("vpdupdate: Failed opening device: ")
 				+ fillMe->idNode.getValue();
@@ -1696,7 +1694,7 @@ ERROR:
 		}
 
 		collectVpd(fillMe, device_fd, false);
-		device_close(device_fd, dev_path);
+		close(device_fd);
 		return;
 	}
 

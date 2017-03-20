@@ -259,12 +259,7 @@ namespace lsvpd
 	/**
 	 * device_open
 	 */
-	int device_open(int major, int minor, int mode, string& dev_path);
-
-	/**
-	 * device_close
-	 */
-	void device_close(int device_fd, string& dev_path);
+	int device_open(Component* fillMe);
 
 }
 #endif
