@@ -1099,6 +1099,9 @@ namespace lsvpd
 		memset(model, '\0', 32);
 		memset(firmware, '\0', 32);
 
+		if ((fillMe->devBus.getValue()).empty())
+			return -1;
+
 		if (scsi_templates.size() == 0) {
 			rc = load_scsi_templates(SCSI_TEMPLATES_FILE);
 			if (rc != 0)
