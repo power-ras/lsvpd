@@ -1452,7 +1452,6 @@ out:
 	{
 		int device_fd;
 		Logger logger;
-		string msg;
 		/* Not a SCSI device */
 		if (fillMe->devBus.getValue() == "usb")
 			return;
@@ -1465,12 +1464,8 @@ out:
 
 			// Open Device for reading
 			device_fd = device_open(fillMe);
-			if (device_fd < 0) {
-				msg = string("vpdupdate: Failed opening device: ")
-					+ fillMe->idNode.getValue();
-				logger.log( msg, LOG_WARNING );
+			if (device_fd < 0)
 				return;
-			}
 
 			collectVpd(fillMe, device_fd, limitSCSISize);
 

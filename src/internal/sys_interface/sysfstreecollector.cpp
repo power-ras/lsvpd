@@ -1639,7 +1639,6 @@ ERROR:
 		string newDevDir;
 		bool dev_found = false;
 		int device_fd;
-		string msg;
 
 		dev_syspath = fillMe->sysFsNode.getValue();
 		fsw.fs_getDirContents(dev_syspath, 'd', listing);
@@ -1686,12 +1685,8 @@ ERROR:
 		fillMe->devAccessMode = S_IFBLK;
 
 		device_fd = device_open(fillMe);
-		if (device_fd < 0) {
-			msg = string("vpdupdate: Failed opening device: ")
-				+ fillMe->idNode.getValue();
-			Logger().log( msg, LOG_WARNING );
+		if (device_fd < 0)
 			return;
-		}
 
 		collectVpd(fillMe, device_fd, false);
 		close(device_fd);
