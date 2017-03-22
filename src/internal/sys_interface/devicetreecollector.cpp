@@ -388,7 +388,8 @@ error:
 
 		type = *buf++;
 		if (type != OPAL_VPD_TYPE)
-			goto error;
+			return 0;
+
 		/* Read the size of the buffer */
 		size = *buf++;
 		size |= (*buf++) << 8;
@@ -401,12 +402,6 @@ error:
 
 		/* Total size of the buffer */
 		return size + 3;
-error:
-		Logger log;
-		ostringstream os;
-		os << "Attempting to parse VPD buffer of unsupported type " << (int)type;
-		log.log(os.str(), LOG_WARNING);
-		return 0;
 	}
 
 	unsigned int DeviceTreeCollector::parseVPDHeader( char *buf,
