@@ -1,11 +1,15 @@
-+* Tue Apr 12 2016 - Vasant Hegde <hegdevasant@linux.vnet.ibm.com> - 1.7.7
-+- Support for NVMe devices
-+- Few minor bug fixes
+1.7.8: Vasant Hegde <hegdevasant@linux.vnet.ibm.com> - Wed Mar 22 2017
+- Remove temporary block file creation under /tmp
+- Various bug fixes
+
+1.7.7: Vasant Hegde <hegdevasant@linux.vnet.ibm.com> - Tue Apr 12 2016
+Support for NVMe devices
+Few minor bug fixes
 
 1.7.6: Vasant Hegde <hegdevasant@linux.vnet.ibm.com> - 06 Nov 2015
-- lsmcode is enhanced to support OpenPower systems
-- Fixed security issues like buffer overflow, memory allocation validation
-- Improved error handling
+lsmcode is enhanced to support OpenPower systems
+Fixed security issues like buffer overflow, memory allocation validation
+Improved error handling
 
 1.7.5: Vasant Hegde <hegdevasant@linux.vnet.ibm.com> - 13 Aug 2014
 Added LE support

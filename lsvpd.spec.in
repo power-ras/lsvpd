@@ -76,6 +76,10 @@ exit 0
 
 
 %changelog
+* Wed Mar 22 2017 - Vasant Hegde <hegdevasant@linux.vnet.ibm.com> - 1.7.8
+- Remove temporary block file creation under /tmp
+- Various bug fixes
+
 * Tue Apr 12 2016 - Vasant Hegde <hegdevasant@linux.vnet.ibm.com> - 1.7.7
 - Support for NVMe devices
 - Few minor bug fixes
