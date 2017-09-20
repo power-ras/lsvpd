@@ -104,6 +104,17 @@ namespace lsvpd
 	 */
 	string ICollector::getBinaryData( const string& path )
 	{
+		struct stat sbuf;
+
+		/*
+		 * Check file existence and size before calling ifstream
+		 *
+		 * Workaround for libstdc++ issue.
+		 * https://gcc.gnu.org/viewcvs/gcc?view=revision&revision=250545
+		 */
+		if ((stat(path.c_str(), &sbuf) != 0) || (sbuf.st_size == 0))
+			return "";
+
 		ifstream fi(path.c_str(), ios::binary);
 		string str;
 
