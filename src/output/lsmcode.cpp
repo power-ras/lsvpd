@@ -23,6 +23,7 @@
 
 #include <rtascollector.hpp>
 #include <platformcollector.hpp>
+#include <devicetreecollector.hpp>
 #include <libvpd-2/vpdretriever.hpp>
 #include <libvpd-2/component.hpp>
 #include <libvpd-2/dataitem.hpp>
@@ -39,6 +40,7 @@
 #define _GNU_SOURCE // for getopt_long
 #endif
 
+#include <dirent.h>
 #include <unistd.h>
 #include <getopt.h>
 #include <zlib.h>
@@ -49,6 +51,9 @@
 #include <cerrno>
 #include <iomanip>
 #include <limits.h>
+
+/* Firmware information device tree node on PowerNV system */
+#define FW_VERSION_DT_NODE DEVTREEPATH"/ibm,firmware-versions/"
 
 /* IPMI tool */
 #define CMD_IPMITOOL	"ipmitool"
@@ -152,6 +157,117 @@ parse_err:
 	return string();
 }
 
+static string read_dt_property(const string& path, const string& attrName)
+{
+	struct stat info;
+	string fullPath;
+	string ret = "";
+
+	ostringstream os;
+	os << path << "/" << attrName;
+	fullPath = os.str( );
+
+	if (stat(fullPath.c_str( ), &info) != 0) {
+		ostringstream os;
+		if (errno != ENOENT) {
+			os << "Error statting " << fullPath << ", errno: " << errno;
+			Logger().log( os.str( ), LOG_ERR );
+		}
+		return ret;
+	}
+
+	ifstream attrIn;
+	attrIn.exceptions ( std::ifstream::failbit | std::ifstream::badbit );
+	try {
+		attrIn.open( fullPath.c_str( ) );
+	}
+	catch (std::ifstream::failure e) {
+		ostringstream os;
+		os << "Error opening " << fullPath;
+		Logger().log(os.str( ), LOG_WARNING);
+		return ret;
+	}
+
+	if (attrIn) {
+		char * strBuf;
+		try
+		{
+			strBuf = new char [ info.st_size + 1 ];
+		}
+		catch (exception& e)
+		{
+			return ret;
+		}
+		memset( strBuf, '\0', info.st_size + 1 );
+		attrIn.read( strBuf, info.st_size );
+		ret = strBuf;
+		attrIn.close( );
+		delete [] strBuf;
+	}
+	return ret;
+}
+
+/* Get system firmware information on BMC based system via device tree */
+static string bmc_get_fw_dt_info(void)
+{
+	string fwdata, tag, val, prod_ver = "", prod_extra = "";
+	struct dirent *ent;
+	DIR * pDBdir = NULL;
+	/* Properties to ignore from DT/ibm,firmware-versions node */
+	const char *ignore_dt[] = {"phandle", "name"};
+	int i;
+	bool ignore_dt_flag = false;
+
+	pDBdir = opendir(FW_VERSION_DT_NODE);
+	if (pDBdir == NULL) {
+		stringstream os;
+		os << "Error opening directory " << FW_VERSION_DT_NODE << endl;
+		Logger().log(os.str( ), LOG_ERR);
+		return string("");
+	}
+
+	fwdata = string("\n Product Name          : OpenPOWER Firmware\n");
+	while ((ent = readdir( pDBdir )) != NULL) {
+		string fname = ent->d_name;
+		for (i = 0; i < (int)(sizeof(ignore_dt)/sizeof(char *)); i++) {
+			if (fname.compare(string(ignore_dt[i])) == 0) {
+				ignore_dt_flag = true;
+				break;
+			}
+		}
+
+		if (ignore_dt_flag == true) {
+			ignore_dt_flag = false;
+			continue;
+		}
+
+		/*
+		 * Looks like some system has open-power property and some
+		 * other has "IBM" property. Lets use one of these property
+		 * for Product Version.
+		 */
+		if (fname.compare("IBM") == 0 || fname.compare("open-power") == 0) {
+			if (prod_ver == string("")) {
+				tag = string(" Product Version       : ");
+				prod_ver = read_dt_property(string(FW_VERSION_DT_NODE), fname);
+				if (prod_ver == string(""))
+					continue;
+				prod_ver = tag + fname + string("-") + prod_ver + string("\n");
+				continue;
+			}
+		}
+
+		tag = string(" Product Extra         : \t");
+		val = read_dt_property(string(FW_VERSION_DT_NODE), fname);
+		if (val == string(""))
+			continue;
+		prod_extra = prod_extra + tag + fname + string("-") +  val + string("\n");
+	}
+
+	fwdata = fwdata + prod_ver + prod_extra;
+	return fwdata;
+}
+
 /* Get production version */
 static string bmc_get_product_version(string fwData)
 {
@@ -181,13 +297,20 @@ bool printSystem( const vector<Component*>& leaves )
 	 * based system. Hence we don't store this information in VPD db.
 	 */
 	if (PlatformCollector::isBMCBasedSystem()) {
-		string ipmitool = get_ipmitool_path();
-		if (ipmitool.empty())
-			return false;
+		string fwData;
+		if (!access(FW_VERSION_DT_NODE, F_OK | R_OK)) {
+			fwData = bmc_get_fw_dt_info();
+			if (fwData.empty())
+				return false;
+		} else {
+			string ipmitool = get_ipmitool_path();
+			if (ipmitool.empty())
+				return false;
 
-		string fwData = bmc_get_fw_fru_info(ipmitool);
-		if (fwData.empty())
-			return false;
+			fwData = bmc_get_fw_fru_info(ipmitool);
+			if (fwData.empty())
+				return false;
+		}
 
 		if ( all ) {
 			string pVersion = bmc_get_product_version(fwData);
