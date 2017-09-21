@@ -125,16 +125,14 @@ static string get_ipmitool_path(void)
 }
 
 /* Get System Firmware FRU information on BMC based system */
-static string bmc_get_fw_fru_info(string ipmitool)
+static string bmc_get_fw_fru_info(string ipmitool, string interface)
 {
-	string cmd = ipmitool + " fru";
+	string cmd = ipmitool + interface;
 	string fruData, fwData;
 	size_t start, end;
 
-	if (HelperFunctions::execCmd(cmd.c_str(), fruData)) {
-		cout << "Failed to execute ipmitool command" << endl;
+	if (HelperFunctions::execCmd(cmd.c_str(), fruData))
 		return string();
-	}
 
 	start = fruData.find("System Firmware");
 	if (start == string::npos)
@@ -153,7 +151,6 @@ static string bmc_get_fw_fru_info(string ipmitool)
 	return fwData;
 
 parse_err:
-	cout << "Failed to get System Firmware information" << endl;
 	return string();
 }
 
@@ -307,9 +304,19 @@ bool printSystem( const vector<Component*>& leaves )
 			if (ipmitool.empty())
 				return false;
 
-			fwData = bmc_get_fw_fru_info(ipmitool);
-			if (fwData.empty())
-				return false;
+			/*
+			 * AMI BMC stack supports usb interface. If usb interface
+			 * is available use that, else fall back to inband interface.
+			 */
+			fwData = bmc_get_fw_fru_info(ipmitool, string(" -I usb fru"));
+			if (fwData.empty()) {
+				fwData = bmc_get_fw_fru_info(ipmitool, string(" fru"));
+				if (fwData.empty()) {
+					cerr << "Failed to get System Firmware \
+						information" << endl;
+					return false;
+				}
+			}
 		}
 
 		if ( all ) {
