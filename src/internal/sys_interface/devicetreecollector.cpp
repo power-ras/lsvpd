@@ -765,7 +765,7 @@ ERROR:
 	{
 		Component *parent;
 		ostringstream val;
-		const DataItem *target, *lun, *bus;
+		const DataItem *target, *lun, *bus, *host;
 
 		/* Build up a distinct YL based on parents YL - for device such as
 		 *	scsi, ide, usb, etc that do not generate ibm,loc-code
@@ -778,7 +778,9 @@ ERROR:
 				target = fillMe->getDeviceSpecific("XT");
 				lun = fillMe->getDeviceSpecific("XL");
 				bus = fillMe->getDeviceSpecific("XB");
-				if (target != NULL && lun != NULL && bus != NULL) {
+				host = fillMe->getDeviceSpecific("XH");
+				if (host != NULL && target != NULL &&
+				    lun != NULL && bus != NULL) {
 					if (fillMe->mPhysicalLocation.dataValue != "")
 						val << fillMe->mPhysicalLocation.dataValue;
 					else if
@@ -787,8 +789,8 @@ ERROR:
 					else
 						val << getAttrValue( parent->deviceTreeNode.dataValue,
 								     "ibm,loc-code" );
-					val << "-B" << bus->dataValue << "-T" << target->dataValue
-						<< "-L" << lun->dataValue;
+					val << "H" << host->dataValue << "-B" << bus->dataValue
+						<< "-T" << target->dataValue << "-L" << lun->dataValue;
 					fillMe->mPhysicalLocation.setValue( val.str( ), 60 ,
 									    __FILE__, __LINE__ );
 				}
