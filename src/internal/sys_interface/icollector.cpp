@@ -241,6 +241,14 @@ namespace lsvpd
 		else if ( key == "ME" )
 			fillMe->addDeviceSpecific( key, "Update Access Key Exp"
 						   " Date", val, 90 );
+		else if ( key == "CE" )
+			fillMe->addDeviceSpecific( key, "CCIN Extension",
+						   val, 90 );
+		else if ( key == "CT" )
+			fillMe->addDeviceSpecific( key, "Card Type", val, 90 );
+		else if ( key == "HW" )
+			fillMe->addDeviceSpecific( key, "Hardware Version",
+						   val, 90 );
 		else if( key[ 0 ] == 'U' )
 			fillMe->addUserData( key, "User Data", val, 90, true );
 		else if( key[ 0 ] == 'Z' )
