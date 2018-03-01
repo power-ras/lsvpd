@@ -1669,6 +1669,9 @@ ERROR:
 		 */
 		newDevDir = dev_syspath + "/" + dev_childname;
 		str = getAttrValue( newDevDir, "dev" );
+		if (str.empty())
+			return;
+
 		beg = end = 0;
 		while (end < (int) str.length() && str[end] != ':')
 			end++;
