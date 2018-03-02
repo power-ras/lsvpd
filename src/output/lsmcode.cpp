@@ -531,8 +531,7 @@ void printVPD( System* root )
 	}
 
 	if( device == "" ) {
-		if (printSystem( root->getLeaves( ) ) != true)
-			return;
+		printSystem( root->getLeaves( ) );
 	}
 
 	if( !all && device == "" )
