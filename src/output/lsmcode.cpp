@@ -207,11 +207,13 @@ static string read_dt_property(const string& path, const string& attrName)
 /* Get system firmware information on BMC based system via device tree */
 static string bmc_get_fw_dt_info(void)
 {
-	string fwdata, tag, val, prod_ver = "", prod_extra = "";
+	string fwdata, tag, val, prod_ver = "", prod_extra = "", prop_ver = "";
 	struct dirent *ent;
 	DIR * pDBdir = NULL;
 	/* Properties to ignore from DT/ibm,firmware-versions node */
 	const char *ignore_dt[] = {"phandle", "name"};
+	/* Properties to look for version string */
+	const char *version_prop[] = {"version", "IBM", "open-power", "buildroot"};
 	int i;
 	bool ignore_dt_flag = false;
 
@@ -223,7 +225,36 @@ static string bmc_get_fw_dt_info(void)
 		return string("");
 	}
 
+	/* Get the version property */
+        for (i = 0; i < (int)(sizeof(version_prop)/sizeof(char *)); i++) {
+                string path = FW_VERSION_DT_NODE + string(version_prop[i]);
+                if (HelperFunctions::file_exists(path)) {
+                        prop_ver = version_prop[i];
+                        break;
+                }
+        }
+
 	fwdata = string("\n Product Name          : OpenPOWER Firmware\n");
+
+	/*
+	 * Different BMCs uses different device tree property to display
+	 * product name. On P9 system OPAL firmware takes care of parsing
+	 * and it will add version property under device tree. But on older
+	 * systems will have IBM or open-power or buildroot depending on
+	 * who builds firmware image.
+	 */
+	if (prop_ver != string("")) {
+		tag = string(" Product Version       : ");
+		prod_ver = read_dt_property(string(FW_VERSION_DT_NODE), prop_ver);
+		if (prod_ver != string("")) {
+			if (prop_ver.compare("version") == 0)
+				prod_ver = tag + prod_ver + string("\n");
+			else
+				prod_ver = tag + prop_ver + string("-") + prod_ver + string("\n");
+		}
+	}
+
+	/* Form the product extra items using remaining properties */
 	while ((ent = readdir( pDBdir )) != NULL) {
 		string fname = ent->d_name;
 		for (i = 0; i < (int)(sizeof(ignore_dt)/sizeof(char *)); i++) {
@@ -238,20 +269,9 @@ static string bmc_get_fw_dt_info(void)
 			continue;
 		}
 
-		/*
-		 * Looks like some system has open-power property and some
-		 * other has "IBM" property. Lets use one of these property
-		 * for Product Version.
-		 */
-		if (fname.compare("IBM") == 0 || fname.compare("open-power") == 0) {
-			if (prod_ver == string("")) {
-				tag = string(" Product Version       : ");
-				prod_ver = read_dt_property(string(FW_VERSION_DT_NODE), fname);
-				if (prod_ver == string(""))
-					continue;
-				prod_ver = tag + fname + string("-") + prod_ver + string("\n");
+		if (prop_ver != string("")) {
+			if (fname.compare(prop_ver) == 0)
 				continue;
-			}
 		}
 
 		tag = string(" Product Extra         : \t");
