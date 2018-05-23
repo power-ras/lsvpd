@@ -197,13 +197,15 @@ namespace lsvpd
 			fillMe->mEngChangeLevel.setValue( val, 90, file, lineNum );
 		else if( key == "FN" )
 			fillMe->mFRU.setValue( val, 90, file, lineNum );
-		else if( key == "PN" )
+		// OPFR uses VP for part number
+		else if( key == "PN" || key == "VP" )
 			fillMe->mPartNumber.setValue( val, 90, file, lineNum );
 		else if( key == "RL" )
 			fillMe->mFirmwareLevel.setValue( val, 90, file, lineNum );
 		else if( key == "RM" )
 			fillMe->mFirmwareVersion.setValue( val, 90, file, lineNum );
-		else if( key == "SN" )
+		// OPFR uses VS for serial number
+		else if( key == "SN" || key == "VS" )
 			fillMe->mSerialNumber.setValue( val, 90, file, lineNum );
 		else if( key == "MN" )
 			fillMe->mManufacturerID.setValue( val, 90, file, lineNum );
@@ -225,6 +227,8 @@ namespace lsvpd
 			fillMe->plantMfg.setValue( val, 90, file, lineNum );
 		else if( key == "VK" )
 			fillMe->mKeywordVersion.setValue( val, 90, file, lineNum );
+		else if ( key == "DR" )
+			fillMe->mDescription.setValue( val, 90, file, lineNum );
 		else if( key == "SZ" )
 			fillMe->addDeviceSpecific( key, "Size", val, 90 );
 		else if( key == "CC" )
@@ -249,6 +253,10 @@ namespace lsvpd
 		else if ( key == "HW" )
 			fillMe->addDeviceSpecific( key, "Hardware Version",
 						   val, 90 );
+		else if ( key == "VN" )
+			fillMe->addDeviceSpecific( key, "Vendor", val, 90 );
+		else if ( key == "MB" )
+			fillMe->addDeviceSpecific( key, "Build Date", val, 90 );
 		else if( key[ 0 ] == 'U' )
 			fillMe->addUserData( key, "User Data", val, 90, true );
 		else if( key[ 0 ] == 'Z' )
