@@ -42,6 +42,7 @@
 #include <unistd.h>
 #include <fcntl.h>
 #include <zlib.h>
+#include <cstdlib>
 
 #include <libvpd-2/component.hpp>
 #include <libvpd-2/system.hpp>
@@ -161,6 +162,46 @@ int main( int argc, char** argv )
 bool isRoot()
 {
 	return (geteuid() == 0);
+}
+
+/**
+ * Method to remove old DB archives.
+ */
+void removeOldArchiveDB(void)
+{
+	int n, fp;
+	struct dirent **namelist;
+	Logger logger;
+
+	n = scandir(env.c_str(), &namelist, NULL, alphasort);
+	if (n <= 0) {
+		ostringstream os;
+		os << "Error scanning directory : " << env.c_str() << endl;
+		logger.log( os.str( ), LOG_INFO );
+		return;
+        }
+
+	for (int i = 0; i < n; i++)
+	{
+		string fname = string(namelist[i]->d_name);
+		string pathname = env + "/" + fname;
+
+		if ((fname.find("vpd.db.") == std::string::npos) &&
+		    (fname.find(".gz") == std::string::npos)) {
+			free(namelist[i]);
+			continue;
+		}
+		unlink(pathname.c_str());
+		free(namelist[i]);
+	}
+
+	fp = open(env.c_str(), O_RDWR);
+	if (fp >= 0) {
+		fsync(fp);
+		close(fp);
+	}
+
+	free(namelist);
 }
 
 /**
@@ -292,6 +333,7 @@ int initializeDB( bool limitSCSI )
 
 	string fullPath = env + "/" + file;
 
+	removeOldArchiveDB( );
 	archiveDB( fullPath );
 
 	Gatherer info( limitSCSI );
