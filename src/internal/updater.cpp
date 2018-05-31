@@ -499,6 +499,7 @@ void __lsvpdFini()
 
 void lsvpdSighandler(int sig)
 {
+	int fp;
 	struct sigaction sigact;
 
 	switch (sig) {
@@ -514,6 +515,15 @@ void lsvpdSighandler(int sig)
 		sigact.sa_handler = SIG_DFL;
 		sigemptyset(&sigact.sa_mask);
 		sigaction(sig, &sigact, NULL);
+
+		/* Remove temporary file */
+		unlink((env + "/" + file).c_str());
+		fp = open(env.c_str(), O_RDWR);
+		if (fp >= 0) {
+			fsync(fp);
+			close(fp);
+		}
+
 		__lsvpdFini();
 		raise(sig);
 		break;
