@@ -76,6 +76,12 @@ exit 0
 
 
 %changelog
+* Tue Jun 12 2018 - Vasant Hegde <hegdevasant@linux.vnet.ibm.com> - 1.7.9
+- vpdupdate: Remove old archive db
+- Add support to parse OPFR record format
+- lsmcode: Add product version string to firmware information
+- lsmcode: Support firmware info on BMC based Power9 system
+
 * Wed Mar 22 2017 - Vasant Hegde <hegdevasant@linux.vnet.ibm.com> - 1.7.8
 - Remove temporary block file creation under /tmp
 - Various bug fixes

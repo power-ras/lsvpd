@@ -1,6 +1,13 @@
+1.7.9: Vasant Hegde <hegdevasant@linux.vnet.ibm.com> - Tue Jun 12 2018
+vpdupdate: Remove old archive db
+Add support to parse OPFR record format
+lsmcode: Add product version string to firmware information
+lsmcode: Support firmware info on BMC based Power9 system
+Fixed regression issues
+
 1.7.8: Vasant Hegde <hegdevasant@linux.vnet.ibm.com> - Wed Mar 22 2017
-- Remove temporary block file creation under /tmp
-- Various bug fixes
+Remove temporary block file creation under /tmp
+Various bug fixes
 
 1.7.7: Vasant Hegde <hegdevasant@linux.vnet.ibm.com> - Tue Apr 12 2016
 Support for NVMe devices
