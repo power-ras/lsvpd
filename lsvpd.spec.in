@@ -71,6 +71,7 @@ exit 0
 %{_mandir}/man8/lsvio.8.gz
 %{_mandir}/man8/lsmcode.8.gz
 %config %{_sysconfdir}/lsvpd/scsi_templates.conf
+%config %{_sysconfdir}/lsvpd/nvme_templates.conf
 %config %{_sysconfdir}/lsvpd/cpu_mod_conv.conf
 %dir %{_sysconfdir}/lsvpd
 

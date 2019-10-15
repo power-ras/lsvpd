@@ -29,6 +29,7 @@
 #include <devicelookup.hpp>
 
 #define SCSI_TEMPLATES_FILE "/etc/lsvpd/scsi_templates.conf"
+#define NVME_TEMPLATES_FILE "/etc/lsvpd/nvme_templates.conf"
 
 #include <string>
 
@@ -48,6 +49,23 @@ namespace lsvpd
 	#define DEVICE_SCSI_SG_DEFAULT_EVPD_LEN 252
 	#define DEVICE_SCSI_SG_DEFAULT_STD_LEN 36
 	#define MAXBUFSIZE 4096
+
+
+	/*
+	 * NVME admin command opcode for getting the log page as defined in
+	 * linux header file (nvme.h).
+	 */
+	#define NVME_ADMIN_GET_LOG_PAGE		0x02
+
+	/* NVME device ioctl return values */
+	#define NVME_RC_SUCCESS			0x0
+	#define NVME_RC_NS_NOT_READY		0x82
+	#define NVME_RC_INVALID_LOG_PAGE	0x109
+
+	#define NVME_NSID_ALL			0xffffffff
+
+	/* NVME f1h log page VPD size */
+	#define NVME_VPD_INFO_SIZE		199
 
 	/**
 	 * SysFSTreeCollector contains the logic for device discovery and VPD
@@ -103,6 +121,10 @@ namespace lsvpd
 			DeviceLookup* mPciTable;
 			DeviceLookup* mUsbTable;
 			bool mLimitSCSISize;
+
+			// nvme specific
+		        int load_nvme_templates(const string& filename);
+			int interpretNVMEf1hLogPage(Component *fillMe, char *data);
 
 			// scsi specific
 			int load_scsi_templates(const string&);

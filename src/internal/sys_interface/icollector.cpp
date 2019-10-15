@@ -279,6 +279,12 @@ namespace lsvpd
 			fillMe->addDeviceSpecific( key, "Device Specific", val, 90 );
 		else if( key[ 0 ] == 'P' )
 			fillMe->addDeviceSpecific( key, "Device Specific", val, 90 );
+		else if( key == "AN" )
+			fillMe->addDeviceSpecific( key, "Final Assembly PN", val, 90 );
+		else if( key == "ID" )
+			fillMe->addDeviceSpecific( key, "Device Specific", val, 90 );
+		else if( key == "FR" )
+			fillMe->addDeviceSpecific( key, "Device Specific", val, 90 );
 
 	}
 

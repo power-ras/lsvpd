@@ -59,6 +59,7 @@
 #include <scsi/scsi.h>
 #include <sys/types.h>
 #include <linux/types.h>
+#include <linux/nvme_ioctl.h>
 #include <stdint.h>
 #include <fcntl.h>
 #include <sys/stat.h>
@@ -109,6 +110,12 @@ namespace lsvpd
 	};
 
 	static vector<scsi_template*> scsi_templates;
+
+	struct nvme_template {
+		string log_page_version;
+		string format_str; // The format followed by f1h log page
+	};
+	static vector<nvme_template*> nvme_templates;
 
 	typedef struct my_scsi_idlun {
 		int dev_id;
@@ -394,6 +401,20 @@ namespace lsvpd
 		else {
 			return false;
 		}
+	}
+
+	const nvme_template *findNVMeTemplate(string version)
+	{
+		vector<nvme_template*>::iterator i, end;
+
+		for (i = nvme_templates.begin(), end = nvme_templates.end(); i != end; ++i) {
+			if (!matches((*i)->log_page_version, version))
+				continue;
+
+			return *i;
+		}
+
+		return NULL;
 	}
 
 	/**
@@ -1046,6 +1067,164 @@ namespace lsvpd
 		return 0;
 	}
 
+	int SysFSTreeCollector::load_nvme_templates(const string& filename)
+	{
+		char tmp_line[512]; // version 0001 has 136 characters, good size for future
+		string line;
+		nvme_template *tmp;
+		ostringstream err;
+		Logger logger;
+		ifstream fin(filename.c_str());
+
+		if (fin.fail()) {
+			err << "Error opening NVMe template file : "
+				<< filename;
+			logger.log(err.str( ), LOG_NOTICE);
+			return -ENOENT;
+		}
+
+		while(!fin.eof()) {
+			tmp = new nvme_template;
+			if (tmp == NULL) {
+				err << "Cannot allocate memory for NVMe templates";
+				logger.log(err.str( ), LOG_NOTICE);
+				return -ENOMEM;
+			}
+
+			fin.getline(tmp_line, 512);
+			line = string(tmp_line);
+
+			HelperFunctions::parseString(line, 1, tmp->log_page_version);
+			HelperFunctions::parseString(line, 2, tmp->format_str);
+
+			nvme_templates.push_back(tmp);
+		}
+		return 0;
+	}
+
+        int SysFSTreeCollector::interpretNVMEf1hLogPage(Component *fillMe, char *data)
+	{
+		int eof[50]; // version 0001 has 24 ',' separated fields, more for future
+		int fieldTotal = 0;
+		int fieldNum;
+		int tempCurLoc, dataCurLoc;
+		string fieldTemplate;
+		string fieldName;
+		int fieldSize;
+		string dataVal;  // Data as read from data stream for single field
+		ostringstream err;
+		Logger logger;
+		int rc;
+
+		if (nvme_templates.size() == 0) {
+			rc = load_nvme_templates(NVME_TEMPLATES_FILE);
+			if (rc)
+				return rc;
+		}
+
+		// The first 4 characters specify the version
+		string version = strdupTrim(data, 4);
+		if (version.c_str() == NULL) {
+			err << "Failed to allocate memory";
+			logger.log(err.str(), LOG_NOTICE);
+			return -1;
+		}
+
+		const nvme_template *logPageTemplate = findNVMeTemplate(version);
+		// No template - unknown device
+		if (logPageTemplate == NULL) {
+			err << "No template found for NVMe f1h logpage version: "
+				<< version << " in the template file";
+			logger.log(err.str( ), LOG_NOTICE);
+			return -1;
+		}
+
+		string *format = new string(logPageTemplate->format_str);
+		if (format == NULL) {
+			err << "Cannot allocate memory for NVMe format string";
+			logger.log(err.str( ), LOG_NOTICE);
+			return -ENOMEM;
+		}
+
+		for (int i = 0; i < (int) (*format).length(); i++) {
+			if ((*format)[i] == ',') {
+				eof[fieldTotal] = i;
+				fieldTotal++;
+			}
+		}
+
+		if (fieldTotal > 0) {
+			eof[fieldTotal] = logPageTemplate->format_str.length();
+			fieldTotal++;
+		}
+
+		// Walk each field in the template, grabbing data as we go
+		tempCurLoc = 4; // Skip the version specifier, ie "_:4,"
+		dataCurLoc = 4; // Skip the version string which 4 characters wide
+		fieldNum = 1;
+		while (fieldNum < fieldTotal) {
+			fieldTemplate = (*format).substr(tempCurLoc,
+							eof[fieldNum] - tempCurLoc);
+
+			fieldName = getFieldName(fieldTemplate);
+			fieldSize = getFieldValue(fieldTemplate);
+
+			dataVal = strdupTrim(data + dataCurLoc, fieldSize);
+			if (dataVal.c_str() == NULL )  {
+				delete format;
+				return -ENOMEM;
+			}
+
+			dataCurLoc += fieldSize;
+			tempCurLoc = eof[fieldNum] + 1;
+			fieldNum++;
+			if (dataVal.length() == 0) {
+				continue;
+			}
+
+			setVPDField(fillMe, fieldName, dataVal , __FILE__, __LINE__);
+		}
+
+		delete format;
+		return 0;
+	}
+
+
+        int nvme_read_vpd(int device_fd, void *buf)
+	{
+		int rc, ret = -1;
+		nvme_admin_cmd *cmd = new nvme_admin_cmd();
+		ostringstream err;
+		__u32 numd = (NVME_VPD_INFO_SIZE >> 2) - 1;
+		__u16 numdl = numd & 0xffff;
+		Logger logger;
+
+		if (cmd == NULL) {
+			err << "Cannot allocate memory for NVMe command";
+			logger.log(err.str( ), LOG_NOTICE);
+			return -ENOMEM;
+		}
+
+		cmd->opcode = NVME_ADMIN_GET_LOG_PAGE;
+		cmd->nsid = NVME_NSID_ALL;
+		cmd->addr = (__u64)(uintptr_t) buf;
+		cmd->data_len = NVME_VPD_INFO_SIZE;
+		cmd->cdw10 = 0xf1 | (numdl << 16);
+
+		rc = ioctl(device_fd, NVME_IOCTL_ADMIN_CMD, cmd);
+		/* Page is optional so, present if NVME_RC_SUCCESS, or
+		 * NVME_RC_INVALID_LOG_PAGE if page is not there. NVME_RC_NS_NOT_READY may
+		 * be a valid return asking for retry after 127 seconds. Not retrying here
+		 * as we do lazy run.
+		 */
+		if (rc == NVME_RC_SUCCESS) {
+			ret = 0; // we have valid data
+		}
+
+		delete cmd;
+		return ret;
+	}
+
 	/********************************************************************
 	 * @brief: High-level data collection call, using ioctl and doSGQuery
 	 * 	to collect relevant data which is returned for interpretation.
@@ -1081,12 +1260,27 @@ namespace lsvpd
 		int rc;
 		char vendor[32], model[32], firmware[32];
 
+		if ((fillMe->devBus.getValue()).empty()) {
+			if ((fillMe->getDevClass() == "nvme")) {
+				char data[NVME_VPD_INFO_SIZE];
+
+				rc = nvme_read_vpd(device_fd, data);
+				if (rc)
+					return rc;
+
+				rc = interpretNVMEf1hLogPage(fillMe, data);
+				if (rc)
+					return rc;
+
+				return 0;
+			}
+
+			return -1;
+		}
+
 		memset(vendor, '\0', 32);
 		memset(model, '\0', 32);
 		memset(firmware, '\0', 32);
-
-		if ((fillMe->devBus.getValue()).empty())
-			return -1;
 
 		if (scsi_templates.size() == 0) {
 			rc = load_scsi_templates(SCSI_TEMPLATES_FILE);

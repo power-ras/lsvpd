@@ -84,7 +84,10 @@ AM_CXXFLAGS = -DDEST_DIR='"${exec_prefix}"' -DVPD_VERSION='"@VERSION@"'
 install-exec-hook:
 	install -D --mode=644 scsi_templates.conf \
 		${DESTDIR}/etc/lsvpd/scsi_templates.conf
+	install -D --mode=644 nvme_templates.conf \
+		${DESTDIR}/etc/lsvpd/nvme_templates.conf
 	install -D --mode=644 cpu_mod_conv.conf \
 		${DESTDIR}/etc/lsvpd/cpu_mod_conv.conf
 
-EXTRA_DIST = $(man8_MANS) bootstrap.sh scsi_templates.conf cpu_mod_conv.conf
+EXTRA_DIST = $(man8_MANS) bootstrap.sh scsi_templates.conf cpu_mod_conv.conf \
+	     nvme_templates.conf
