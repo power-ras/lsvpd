@@ -77,6 +77,10 @@ exit 0
 
 
 %changelog
+* Thu Oct 24 2019 - Vasant Hegde <hegdevasant@linux.vnet.ibm.com> - 1.7.10
+- vpdupdate: Delete vpd.db when program gets aborted
+- Enable NVME f1h log page VPD information parsing
+
 * Tue Jun 12 2018 - Vasant Hegde <hegdevasant@linux.vnet.ibm.com> - 1.7.9
 - vpdupdate: Remove old archive db
 - Add support to parse OPFR record format
