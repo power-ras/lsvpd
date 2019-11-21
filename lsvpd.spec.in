@@ -13,8 +13,8 @@ Group:		Applications/System
 License:	GPLv2+
 Vendor:		IBM Corp.
 ExclusiveArch:	ppc64 ppc ppc64le
-URL:		http://linux-diag.sf.net/Lsvpd.html
-Source:		http://downloads.sourceforge.net/linux-diag/files/%{name}-new/%{version}/%{name}-%{version}.tar.gz
+URL:		https://github.com/power-ras/lsvpd
+Source:		https://github.com/power-ras/lsvpd.git
 
 Requires:	iprutils >= 2.3.12
 Requires(pre):	iprutils >= 2.3.12

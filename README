@@ -10,12 +10,7 @@ levels. lsvio lists virtual devices.
 
 Source:
 -------
-http://linux-diag.sf.net/lsvpd.html
-
-Mailing list:
--------------
-linux-diag-devel@lists.sourceforge.net
-Info/subscribe : https://lists.sourceforge.net/lists/listinfo/linux-diag-devel
+https://github.com/power-ras/lsvpd
 
 License:
 --------
@@ -63,24 +58,32 @@ As an example, we use a command similar to the following:
 
 $ rpmbuild -ba [--target=ppc/ppc64] <path-to-spec-file>
 
+Reporting issue:
+----------------
+Create a GitHub issue if you have any request for change, assuming one does
+not already exist. Clearly describe the issue including steps to reproduce
+if it is a bug.
+
+How to contribute:
+------------------
+If you plan to submit the changes, submit a pull request based on top of
+master. Include a descriptive commit message. Changes contributed should
+focus on a single issue at a time to the extent possible.
+
 Hacking:
 --------
-All patches should be sent to the mailing list with linux-kernel style
-'Signed-Off-By'. The following git commands are your friends:
-- git commit -s
-- git format-patch
+The following workflow should work for you:
+- Fork the repository on GitHub into your account.
+- Create a topic branch from where you want to base your work.
+  This is usually the master branch.
+- Make sure you have added the necessary tests for your changes and make sure
+  all tests pass.
+- Push your changes to the topic branch in your fork of the repository.
+- Include a descriptive commit message, and each commit should have
+  linux-kernel style 'Signed-Off-By'.
+- Submit a pull request to this repository.
 
 You probably want to read the linux kernel Documentation/SubmittingPatches
 as much of it applies to lsvpd.
-
-Submitting patch:
------------------
-We use same mailing list for all Power Linux VPD and diagnostics projects
-(ppc64-diag, libvpd, lsvpd, [lib]servicelog). It is common convention to
-prefix your subject line with project name. This lets maintainer and other
-developers more easily identify patches from patches targeted to other
-projects. For example,
-
-  Subject: [lsvpd PATCH 01/10] Summary phrase
 
 --
