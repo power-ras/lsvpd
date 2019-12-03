@@ -14,7 +14,7 @@ License:	GPLv2+
 Vendor:		IBM Corp.
 ExclusiveArch:	ppc64 ppc ppc64le
 URL:		https://github.com/power-ras/lsvpd
-Source:		https://github.com/power-ras/lsvpd.git
+Source:		https://github.com/power-ras/%{name}/archive/v%{version}.tar.gz
 
 Requires:	iprutils >= 2.3.12
 Requires(pre):	iprutils >= 2.3.12
