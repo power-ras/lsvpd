@@ -168,25 +168,9 @@ void printVPD( Component* root )
 					root->getDescription( );
 				string val = string( root->getCD( ) );
 
-				if( val != "" )
-				{
-					char s1, s2;
-					s1 = val[ 0 ];
-					s2 = val[ 1 ];
-					val[ 0 ] = val[ 2 ];
-					val[ 1 ] = val[ 3 ];
-					val[ 2 ] = s1;
-					val[ 3 ] = s2;
-
-					s1 = val[ 4 ];
-					s2 = val[ 5 ];
-					val[ 4 ] = val[ 6 ];
-					val[ 5 ] = val[ 7 ];
-					val[ 6 ] = s1;
-					val[ 7 ] = s2;
-
+				if ( val != "" )
 					cout << " (" << val << ")";
-				}
+
 				cout << endl;
 			}
 
