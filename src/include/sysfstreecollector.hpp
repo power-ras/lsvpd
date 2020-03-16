@@ -65,7 +65,7 @@ namespace lsvpd
 	#define NVME_NSID_ALL			0xffffffff
 
 	/* NVME f1h log page VPD size */
-	#define NVME_VPD_INFO_SIZE		199
+	#define NVME_VPD_INFO_SIZE		1024
 
 	/**
 	 * SysFSTreeCollector contains the logic for device discovery and VPD
