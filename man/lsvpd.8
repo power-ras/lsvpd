@@ -24,7 +24,17 @@ lsvpd \- list Vital Product Data (VPD)
 .ad l
 .hy 0
 .HP 6
-\fBlsvpd\fR  [\fB\-l<device>\fR | \fB\-\-list=<device>\fR] [\fB\-m\fR | \fB\-\-mark\fR] [\fB\-s<serial#>\fR | \fB\-\-serial=<serial#>\fR] [\fB\-t<type/model#>\fR | \fB\-\-type=<type/model#>\fR] [\fB\-p<database\-directory>\fR | \fB\-\-path=<database\-directory>\fR] [\fB\-z<database\-archive>\fR | \fB\-\-zip=<database\-archive>\fR] [\fB\-h\fR | \fB\-\-help\fR]
+\fBlsvpd\fR  [\fB\-l<device>\fR | \fB\-\-list=<device>\fR]
+ [\fB\-m\fR | \fB\-\-mark\fR]
+ [\fB\-s<serial#>\fR | \fB\-\-serial=<serial#>\fR]
+ [\fB\-t<type/model#>\fR | \fB\-\-type=<type/model#>\fR]
+ [\fB\-p<database\-directory>\fR | \fB\-\-path=<database\-directory>\fR]
+ [\fB\-z<database\-archive>\fR | \fB\-\-zip=<database\-archive>\fR]
+ [\fB\-D\fR | \fB\-\-debug\fR]
+.HP 6
+\fBlsvpd\fR  [\fB\-v\fR | \fB\-\-version\fR]
+.HP 6
+\fBlsvpd\fR  [\fB\-h\fR | \fB\-\-help\fR]
 .ad
 .hy
 
@@ -67,6 +77,14 @@ Use <database\-archive> as the hardware inventory database, rather than the defa
 This option is useful for producing output for old hardware inventory databases that have been archived by the system\&.
 
 .TP
+\-D|\-\-debug
+Use this option to print extra information about devices (sysfs locations, etc)\&.
+
+.TP
+\-v|\-\-version
+Print the version of the command and exit.
+
+.TP
 \-h|\-\-help
 Display a help screen and quit\&.
 
@@ -87,5 +105,5 @@ lscfg(8), lsmcode(8), lsvio(8), vpdupdate(8)
 Eric Munson <ebmunson@us\&.ibm\&.com>\&. Brad Peters <bpeters@us\&.ibm\&.com>\&.
 
 .PP
-Copyright (c) 2002 - 2013 IBM\&.
+Copyright (c) 2002 - 2020 IBM\&.
 
