@@ -77,6 +77,10 @@ exit 0
 
 
 %changelog
+* Mon Apr 06 2020 - Vasant Hegde <hegdevasant@linux.vnet.ibm.com> - 1.7.11
+- Add Travis build support
+- Add NVME f1h log page version 0002 support
+
 * Thu Oct 24 2019 - Vasant Hegde <hegdevasant@linux.vnet.ibm.com> - 1.7.10
 - vpdupdate: Delete vpd.db when program gets aborted
 - Enable NVME f1h log page VPD information parsing
