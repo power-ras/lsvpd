@@ -27,6 +27,8 @@ BuildRequires:	sg3_utils-devel
 BuildRequires:	automake
 BuildRequires:	libtool
 
+Recommends:     hwdata
+
 %description
 The lsvpd package contains all of the lsvpd, lscfg and lsmcode commands.
 These commands, along with a scanning program called vpdupdate, constitute
