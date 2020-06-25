@@ -9,6 +9,7 @@ services: docker
 env:
     matrix:
     - RUN_ON_CONTAINER=fedora-rawhide
+    - RUN_ON_CONTAINER=ubuntu-20.04
 
 install:
     - docker build --pull -t ${RUN_ON_CONTAINER} -f lsvpd-ci/Dockerfile-${RUN_ON_CONTAINER} .

@@ -1,0 +1,8 @@
+FROM ubuntu:20.04
+ENV DEBIAN_FRONTEND    noninteractive
+RUN apt-get update -qq
+RUN apt-get update -qq && apt-get install -y automake libtool git make g++ libstdc++-7-dev
+RUN apt-get update -qq && apt-get install -y libsqlite3-dev zlib1g-dev iprutils libsgutils2-dev
+RUN apt-get update -qq && apt-get install -y librtas-dev librtasevent-dev libvpd-dev
+COPY . /build/
+WORKDIR /build
