@@ -10,6 +10,15 @@ env:
     matrix:
     - RUN_ON_CONTAINER=fedora-rawhide
 
+install:
+    - docker build --pull -t ${RUN_ON_CONTAINER} -f lsvpd-ci/Dockerfile-${RUN_ON_CONTAINER} .
+
 script:
-    - docker build --pull -t ${RUN_ON_CONTAINER} -f lsvpd-ci/Dockerfile-${RUN_ON_CONTAINER} . &&
-      docker run --volume $HOME/.ccache:/root/.ccache --volume `pwd`:/build --rm -t $RUN_ON_CONTAINER bash -c "./lsvpd-ci/build-${RUN_ON_CONTAINER}.sh";
+    - >
+      docker run
+      --security-opt seccomp=unconfined
+      --volume $HOME/.ccache:/root/.ccache
+      --volume `pwd`:/build
+      --tmpfs /tmp/
+      --rm -t $RUN_ON_CONTAINER
+      bash -c "./lsvpd-ci/build-${RUN_ON_CONTAINER}.sh";
