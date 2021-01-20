@@ -1215,6 +1215,12 @@ ERROR:
 				sys->mSerialNum2.setValue( val, 80 , __FILE__, __LINE__ );
 		}
 
+		val = getAttrValue("/proc/device-tree", "ibm,partition-uuid" );
+		if( val != "" )
+		{
+			setVPDField( sys, string("MU"), val, __FILE__, __LINE__ );
+		}
+
 		getSystemVPD(sys);
 	}
 

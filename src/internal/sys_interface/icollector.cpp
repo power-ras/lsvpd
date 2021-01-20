@@ -313,6 +313,8 @@ namespace lsvpd
 		else if( key == "SE" ) {
 			sys->mSerialNum1.setValue( val, 70, file, lineNum );
 			sys->mProcessorID.setValue( val, 70, file, lineNum );
+		} else if ( key == "MU" ) {
+			sys->addDeviceSpecific( key, "UUID", val, 90 );
 		} else
 			/* XXX: Un-recognized key */
 			sys->addDeviceSpecific( key, "System Specific", val, 90 );
