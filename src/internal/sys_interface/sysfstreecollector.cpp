@@ -1794,6 +1794,9 @@ ERROR:
 
 			fillMe->mFirmwareLevel.setValue( getAttrValue( classNode,
 					"fwrev" ), 30, __FILE__, __LINE__ );
+
+			fillMe->mFirmwareVersion.setValue( getAttrValue( classNode,
+					"firmware_rev" ), 30, __FILE__, __LINE__ );
 		}
 	}
 
