@@ -1434,7 +1434,8 @@ ERROR:
 		if( mPciTable != NULL )
 		{
 			// Fill Manufacturer Name
-			if( subMan == UNKNOWN_ID )
+			if( subMan == UNKNOWN_ID ||
+			    (mPciTable->getName( subMan ) == "Unknown") )
 			{
 				if( manID != UNKNOWN_ID )
 				{
