@@ -1,3 +1,9 @@
+1.7.12: Vasant Hegde <hegdevasant@linux.vnet.ibm.com> - Thu May 13 2021
+- sysvpd: Add UUID property
+- nvme: Populate NVMe firmware version
+- sysfs: Fix PCI device manufacturer parsing logic
+- lsvpd: Add Recommends clause to lsvpd configuration file
+
 1.7.11: Vasant Hegde <hegdevasant@linux.vnet.ibm.com> - Mon Apr 06 2020
 - Add Travis build support
 - Add NVME f1h log page version 0002 support
