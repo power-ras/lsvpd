@@ -206,6 +206,10 @@ namespace lsvpd
 
 			Component * findSCSIParent(Component *fillMe,
 				vector<Component*> devs);
+
+			string fillLocCode(Component *gParent, Component *gGParent,
+							   Component *gGGParent);
+
 			void buildSCSILocCode(Component *fillMe, vector<Component*> devs);
 
 			void getComponentsVector( vector<Component*>& devs );

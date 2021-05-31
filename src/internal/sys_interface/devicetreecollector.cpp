@@ -42,6 +42,7 @@
 #include <fcntl.h>
 #include <string>
 #include <unistd.h>
+#include <libgen.h>
 #include <cstdlib>
 #include <cstring>
 #include <cerrno>
@@ -735,7 +736,9 @@ ERROR:
 		int loc;
 
 		devSpecific = fillMe->getDeviceSpecific("XB");
-		if (devSpecific != NULL) {
+		if (devSpecific != NULL ||
+			fillMe->devBus.dataValue == "scsi" ||
+			fillMe->devBus.dataValue == "usb" ) {
 			sysDev = fillMe->sysFsLinkTarget.dataValue;
 			while (sysDev.length() > 1) {
 				if ((loc = sysDev.rfind("/", sysDev.length())) != (int) string::npos )
@@ -752,6 +755,152 @@ ERROR:
 		return NULL;
 	}
 
+	/*
+	 * @brief fillLocCode tries to parse the device-tree and find
+	 *		  the loc-code based on port numbers.
+	 * @args:
+	 * gParent: two level higher in the sysfs path of the device (required for
+	 *                  finding devices in the same root hub USB 2.0)
+	 * gGParent: three level higher in the sysfs path of the device (required to
+	 *                                      calculate raw port number)
+	 * gGGParent: Four level higher in the sysfs path of the device (required for
+	 *                  findging devices in the sibling root hub USB 3.0)
+	 *
+	 * Example:
+	 *
+	 * device:    /sys/devices/pci0019:01/0019:01:00.0/usb2/2-2/2-2:1.0/host0/target0:0:0/0:0:0:0
+	 * parent:    /sys/devices/pci0019:01/0019:01:00.0/usb2/2-2/2-2:1.0/host0
+	 * gParent:   /sys/devices/pci0019:01/0019:01:00.0/usb2/2-2/2-2:1.0
+	 * gGparent:  /sys/devices/pci0019:01/0019:01:00.0/usb2/2-2
+	 * gGGparent: /sys/devices/pci0019:01/0019:01:00.0/usb2
+
+	 */
+	string DeviceTreeCollector::fillLocCode(Component *gParent, Component *gGParent,
+						Component *gGGParent)
+	{
+		string devTreeDir, devName, rawPortS, locCode;
+		vector<string> listing, list;
+		char busNum[10], portNum[10];
+		int maxChild, rawPort = 0;
+		FSWalk fsw = FSWalk();
+		char *baseName;
+		int i = 0, j;
+
+		/*
+		 * First part of this function, tries to find the port
+		 * number assigned to the device under the USB
+		 * controller.  The algorithm used to construct the
+		 * rawport (the term used in the Linux Kernel USB device
+		 * driver code) is the parse the bus and port number
+		 * from the last directory level of the device sysfs path
+		 * and then find the maximum number of ports available
+		 * under the USB hub, to connect devices in the hub.
+		 * Applying the formula:
+		 * - bus number * child of all the hubs, with bus number
+		 *   lesser than the current bus + current device port
+		 *   number.
+		 *   i.e., if the device gets assigned to port 2 of the
+		 *   root hub number 2, here 2 is the bus number, assigned
+		 *   by the USB controller and as maxchild of 4 or in other
+		 *   words maximum available ports on the root hub is 4.
+		 *   We assume that the same USB controller will host 4
+		 *   ports for both root hubs (USB 2.0 and USB 3.0).
+		 *   When the algorithm is applied to the above example:
+		 *   bus number (2) * (1 * 4) (1 is bus lesser than current
+		 *   one and 4 is maxchild/ports available) = port number 6.
+		 *   We need to search for devices ending with @6, under the
+		 *   root hub to find the  location code.
+		 */
+		baseName  = basename((char *)(string(gGParent->sysFsNode.dataValue).c_str()));
+		if (baseName == NULL)
+			return string("");
+
+		for (i = 0; baseName[i] != '\0' && baseName[i] != '-'; i++)
+			busNum[i] = baseName[i];
+		busNum[i] = '\0';
+
+		if (strlen(busNum) == 0)
+			return string("");
+
+		for (i+=1, j=0; baseName[i] != '\0'; i++, j++)
+			portNum[j] = baseName[i];
+		portNum[j] = '\0';
+
+		if (strlen(portNum) == 0)
+			return string("");
+
+		maxChild  = atoi(string(getAttrValue
+				( gGGParent->sysFsNode.dataValue.c_str(), "/maxchild")).c_str());
+
+		i = atoi(busNum);
+		if ( i > 1 ) {
+			rawPort = i - 1;
+			rawPort *= maxChild;
+		}
+		rawPort += atoi(portNum);
+		rawPortS = "@" + to_string(rawPort);
+
+		/*
+		 * for the USB 2.0 devices, device-tree association of root
+		 * hub under which they are connected, is read from devspec
+		 * or of_node in the sysfs path of the /sys/devices/. So we
+		 * just search for the devices ending with the port number
+		 * calculated above in the device (root hub) device-tree
+		 * node.
+		 */
+		fsw.fs_getDirContents(gParent->deviceTreeNode.dataValue, 'd', listing);
+		while (listing.size() > 0) {
+
+			string devDir = listing.back();
+			if (devDir.compare(devDir.length() - rawPortS.length(),
+					rawPortS.length(), rawPortS) == 0) {
+
+				devTreeDir = gParent->deviceTreeNode.dataValue + "/" + listing.back();
+				locCode = getAttrValue( devTreeDir.c_str(), "/ibm,loc-code");
+				return locCode;
+			}
+			listing.pop_back();
+		}
+
+		/*
+		 * this logic is same as above but we are searching one
+		 * level higher in the /proc/device-tree hierarchy, the
+		 * search path includes all of the root hubs connected to
+		 * this USB controller and use the same logic as above to
+		 * find the device ending with the @portnumber in every
+		 * root hub.
+		 */
+		fsw.fs_getDirContents(gGGParent->deviceTreeNode.dataValue, 'd', listing);
+		while (listing.size() > 0) {
+
+			devTreeDir = gGGParent->deviceTreeNode.dataValue + "/" + listing.back();
+			devName = getAttrValue( devTreeDir.c_str(), "/name");
+
+			if (devName.compare("hub") == 0) {
+
+				fsw.fs_getDirContents(devTreeDir.c_str(), 'd', list);
+				while (list.size() > 0) {
+
+					string devDir = list.back();
+					string _devTreeDir;
+
+					if ( devDir.compare(devDir.length() - rawPortS.length(),
+						rawPortS.length(), rawPortS) == 0) {
+
+						_devTreeDir =  devTreeDir + "/" + list.back();
+						locCode = getAttrValue( _devTreeDir.c_str(),
+								"/ibm,loc-code");
+						return locCode;
+					}
+					list.pop_back();
+				}
+			}
+			listing.pop_back();
+		}
+
+		return string("");
+}
+
 	/* @brief Collect Location Code information for devices that do not
 	 * give us a nice ibm,loc-code
 	 * @arg devs - device tree discovered devices
@@ -763,9 +912,10 @@ ERROR:
 	void DeviceTreeCollector::buildSCSILocCode(Component *fillMe,
 						   vector<Component*> devs)
 	{
-		Component *parent;
-		ostringstream val;
+		Component *parent, *gParent, *gGParent, *gGGParent;
 		const DataItem *target, *lun, *bus, *host;
+		ostringstream val;
+		string locCode;
 
 		/* Build up a distinct YL based on parents YL - for device such as
 		 *	scsi, ide, usb, etc that do not generate ibm,loc-code
@@ -793,6 +943,71 @@ ERROR:
 			val << getAttrValue( parent->deviceTreeNode.dataValue,
 						 "ibm,loc-code" );
 
+		/*
+		 * fillQuickVPD failure, doesn't always attribute to the missing
+		 * device-tree entry associated with the sysfs device path.
+		 * There are also configurations like USB hubs, to which the
+		 * SCSI devices gets connected with special device-tree layout.
+		 * A USB controller, that supports both USB 3.0 and USB 2.0
+		 * devices will create two USB hubs for communicating with
+		 * devices. Where one hub controllers devices with speeds
+		 * ranging upto  480M (USB 2.0) and another for devices operating
+		 * at the  5000M (USB 3.0). The layout might be little complex
+		 * when the USB 3.0 devices are internal on board ones and 2.0
+		 * is an external device.
+		 *
+		 *			     root hub
+		 *		        /		 \
+		 *		   USB hub 1        USB hub 2
+		 *		    (2.0)	      (3.0)
+		 *		      |	          /	      \
+		 *		  External    Internal     Internal
+		 *		   device     device1      device2
+		 *
+		 * the populated device-tree adds both of the internal devices
+		 * under the hub1, that hosts the slower external device, with
+		 * the layout:
+		 * usb@1
+		 * |_ hub@1
+		 *	|_ cdrom@1 (USB 2.0)
+		 *	|_ usb-scsi@6 (USB 3.0, internal device 1)
+		 *	|_ usb-scsi@8 (USB 3.0, internal device 2)
+		 *
+		 * the logic below finds the location code for such SCSI devices
+		 * connected to USB hubs in a mix and match of external and
+		 * internal devices.
+		 */
+		gParent = findSCSIParent(parent, devs);
+		if (gParent != NULL) {
+
+			gGParent = findSCSIParent(gParent, devs);
+			if (gGParent != NULL) {
+
+				gGGParent = findSCSIParent(gGParent, devs);
+				if (gGGParent != NULL &&
+				    gGGParent->devBus.dataValue == "usb" ) {
+
+					/*
+					 * walk up to the hub controller sysfs
+					 * directory to find the device-tree
+					 * association.
+					 */
+					locCode  = fillLocCode
+						    (gParent, gGParent, gGGParent);
+				}
+			}
+		}
+
+		if (locCode.length() > 0) {
+			fillMe->mPhysicalLocation.setValue( locCode.c_str( ), 60 ,
+						__FILE__, __LINE__ );
+			return;
+		}
+
+		/*
+		 * if we fail to find the loation code, then fallback to old
+		 * method of constructing an unique code.
+		 */
 		val << "H" << host->dataValue << "-B" << bus->dataValue
 			<< "-T" << target->dataValue << "-L" << lun->dataValue;
 
