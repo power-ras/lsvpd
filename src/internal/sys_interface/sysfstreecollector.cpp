@@ -957,15 +957,43 @@ esc_subsystem_info:
 	 */
 	string SysFSTreeCollector::getDevTreePath(string sysPath)
 	{
+		string sysFsPath, procDtPath, firmwareDtBase;
 		struct stat astats;
 		const char *buf;
 		char buf2[512];
 		FILE *fi;
 
 		HelperFunctions::fs_fixPath(sysPath);
-		sysPath += "/devspec";
+		sysFsPath = sysPath + "/devspec";
+		procDtPath = sysPath + "/of_node";
+		firmwareDtBase = "/sys/firmware/devicetree/base";
 
-		buf = sysPath.c_str();
+		/*
+		 * Check for existence of of_node symlink and return the path it
+		 * points to.  devspec is obsolete now, most of the devices
+		 * populate of_node and devspec too. Prefer of_node over
+		 * devspec, where it exist and fall back to older logic, in case
+		 * of of_node not populated.
+		 */
+		buf = procDtPath.c_str();
+		if ((lstat(buf, &astats)) == 0) {
+			// of_node is symlink, follow the link
+			realpath( buf, buf2 );
+			if ( buf2 == NULL ) {
+				return string ("");
+			}
+
+			/*
+			 * Trim the leading "/sys/firmware/devicetree/base" from the real
+			 * path to match the assumption from devspec format, while used
+			 * with /proc/devicetree.
+			 */
+			procDtPath = string(buf2);
+			procDtPath.replace(0, firmwareDtBase.length(), "");
+			return procDtPath;
+		}
+
+		buf = sysFsPath.c_str();
 		if ((lstat(buf, &astats)) != 0) {
 			return string("");
 		}
