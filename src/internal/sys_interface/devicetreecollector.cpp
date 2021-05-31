@@ -771,31 +771,33 @@ ERROR:
 		 *	scsi, ide, usb, etc that do not generate ibm,loc-code
 		 *	files for easy grabbing
 		 */
-		if (fillMe->devBus.dataValue == "scsi") {
-			parent = findSCSIParent(fillMe, devs);
+		if (fillMe->devBus.dataValue != "scsi")
+			return;
 
-			if (parent != NULL) {
-				target = fillMe->getDeviceSpecific("XT");
-				lun = fillMe->getDeviceSpecific("XL");
-				bus = fillMe->getDeviceSpecific("XB");
-				host = fillMe->getDeviceSpecific("XH");
-				if (host != NULL && target != NULL &&
-				    lun != NULL && bus != NULL) {
-					if (fillMe->mPhysicalLocation.dataValue != "")
-						val << fillMe->mPhysicalLocation.dataValue;
-					else if
-						(parent->mPhysicalLocation.dataValue != "")
-							val << parent->mPhysicalLocation.dataValue;
-					else
-						val << getAttrValue( parent->deviceTreeNode.dataValue,
-								     "ibm,loc-code" );
-					val << "H" << host->dataValue << "-B" << bus->dataValue
-						<< "-T" << target->dataValue << "-L" << lun->dataValue;
-					fillMe->mPhysicalLocation.setValue( val.str( ), 60 ,
-									    __FILE__, __LINE__ );
-				}
-			}
-		}
+		parent = findSCSIParent(fillMe, devs);
+		if (parent == NULL)
+			return;
+
+		target = fillMe->getDeviceSpecific("XT");
+		lun = fillMe->getDeviceSpecific("XL");
+		bus = fillMe->getDeviceSpecific("XB");
+		host = fillMe->getDeviceSpecific("XH");
+		if (host == NULL || target == NULL || lun == NULL || bus == NULL)
+				return;
+
+		if (fillMe->mPhysicalLocation.dataValue != "")
+			val << fillMe->mPhysicalLocation.dataValue;
+		else if	(parent->mPhysicalLocation.dataValue != "")
+			val << parent->mPhysicalLocation.dataValue;
+		else
+			val << getAttrValue( parent->deviceTreeNode.dataValue,
+						 "ibm,loc-code" );
+
+		val << "H" << host->dataValue << "-B" << bus->dataValue
+			<< "-T" << target->dataValue << "-L" << lun->dataValue;
+
+		fillMe->mPhysicalLocation.setValue( val.str( ), 60 ,
+					__FILE__, __LINE__ );
 	}
 
 	void DeviceTreeCollector::getRtasSystemParams(vector<Component*>& devs)
