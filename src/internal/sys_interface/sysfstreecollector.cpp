@@ -985,7 +985,10 @@ esc_subsystem_info:
 
 		fclose(fi);
 		// cleanup
-		return string(buf2);
+		if (strcmp(buf2, "(null)"))
+			return string(buf2);
+
+		return string("");
 	}
 
 	/* Collects devices on system, then returns how many were found.
