@@ -178,7 +178,7 @@ static string read_dt_property(const string& path, const string& attrName)
 	try {
 		attrIn.open( fullPath.c_str( ) );
 	}
-	catch (std::ifstream::failure e) {
+	catch (std::ifstream::failure &e) {
 		ostringstream os;
 		os << "Error opening " << fullPath;
 		Logger().log(os.str( ), LOG_WARNING);
