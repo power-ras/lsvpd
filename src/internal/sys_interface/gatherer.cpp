@@ -378,7 +378,7 @@ namespace lsvpd
 	}
 
 	/**
-	 * Contruct complete collection of devices on system,
+	 * Construct complete collection of devices on system,
 	 * by calling 'getComponents()' on each specific collector type
 	 *
 	 * @arg devs: a Component* vector, which will be filled with the
