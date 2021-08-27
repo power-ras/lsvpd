@@ -978,8 +978,7 @@ esc_subsystem_info:
 		buf = procDtPath.c_str();
 		if ((lstat(buf, &astats)) == 0) {
 			// of_node is symlink, follow the link
-			realpath( buf, buf2 );
-			if ( buf2 == NULL ) {
+			if ( realpath( buf, buf2 ) == NULL ) {
 				return string ("");
 			}
 
