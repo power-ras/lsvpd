@@ -960,7 +960,7 @@ esc_subsystem_info:
 		string sysFsPath, procDtPath, firmwareDtBase;
 		struct stat astats;
 		const char *buf;
-		char buf2[512];
+		char buf2[PATH_MAX];
 		FILE *fi;
 
 		HelperFunctions::fs_fixPath(sysPath);
