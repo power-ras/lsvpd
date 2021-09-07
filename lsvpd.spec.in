@@ -79,6 +79,9 @@ exit 0
 
 
 %changelog
+* Thu Sep 9 2021 - Vasant Hegde <hegdevasant@linux.vnet.ibm.com> - 1.7.13
+- Add support for SCSI loc code
+
 * Thu May 13 2021 - Vasant Hegde <hegdevasant@linux.vnet.ibm.com> - 1.7.12
 - sysvpd: Add UUID property
 - nvme: Populate NVMe firmware version
