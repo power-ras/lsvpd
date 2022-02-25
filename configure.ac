@@ -3,7 +3,7 @@
 AC_PREREQ([2.69])
 
 #base
-AC_INIT([lsvpd],[1.7.13],[hegdevasant@linux.vnet.ibm.com, kamalesh@linux.vnet.ibm.com])
+AC_INIT([lsvpd],[1.7.14],[mahesh@linux.ibm.com,sv@linux.ibm.com])
 AC_CONFIG_HEADER([config/config.h])
 AC_SUBST(DATE, [`date`])
 AC_CONFIG_MACRO_DIR([m4])

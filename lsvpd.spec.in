@@ -20,7 +20,7 @@ Requires:	iprutils >= 2.3.12
 Requires(pre):	iprutils >= 2.3.12
 Requires(postun): iprutils >= 2.3.12
 
-BuildRequires:	libvpd-devel >= 2.2.5
+BuildRequires:	libvpd-devel >= 2.2.9
 BuildRequires:	librtas-devel
 BuildRequires:	zlib-devel
 BuildRequires:	sg3_utils-devel
@@ -79,6 +79,9 @@ exit 0
 
 
 %changelog
+* Fri Feb 25 2022 - Mahesh Salgaonkar <mahesh@linux.ibm.com> - 1.7.14
+- Prevent corruption of database file when running vpdupdate
+
 * Thu Sep 9 2021 - Vasant Hegde <hegdevasant@linux.vnet.ibm.com> - 1.7.13
 - Add support for SCSI loc code
 

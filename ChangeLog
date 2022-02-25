@@ -1,3 +1,6 @@
+1.7.14: Mahesh Salgaonkar <mahesh@linux.ibm.com> - Fri Feb 25 2022
+- Prevent corruption of database file when running vpdupdate
+
 1.7.13: Vasant Hegde <hegdevasant@linux.vnet.ibm.com> - Thu Sep 9 2021
 - Add support for SCSI loc code
 
