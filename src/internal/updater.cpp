@@ -62,9 +62,9 @@ int storeComponents( System* root, VpdDbEnv& db );
 int storeComponents( Component* root, VpdDbEnv& db );
 void printUsage( );
 void printVersion( );
-int ensureEnv( const string& env );
+int ensureEnv( const string& env, const string& file );
 void archiveDB( const string& fullPath );
-int __lsvpdInit(string env, string file);
+int __lsvpdInit( VpdDbEnv::UpdateLock *lock );
 void __lsvpdFini(void);
 void lsvpdSighandler(int sig);
 
@@ -74,6 +74,7 @@ const string BASE( "/sys/bus" );
 
 bool isRoot(void);
 VpdDbEnv *db;
+VpdDbEnv::UpdateLock *dblock;
 
 string env = DB_DIR, file = DB_FILENAME;
 
@@ -83,6 +84,7 @@ int main( int argc, char** argv )
 	bool done = false;
 	int index = 0, rc = 1;
 	bool limitSCSISize = false;
+	VpdDbEnv::UpdateLock *lock;
 	string platform = PlatformCollector::get_platform_name();
 
 	switch (PlatformCollector::platform_type) {
@@ -127,7 +129,9 @@ int main( int argc, char** argv )
 			return 0;
 
 		case 'a':
+			lock = new VpdDbEnv::UpdateLock(env, file, false);
 			archiveDB( env + '/' + file );
+			delete lock;
 			return 0;
 
 		case -1:
@@ -151,12 +155,9 @@ int main( int argc, char** argv )
 
 	l.log( "vpdupdate: Constructing full devices database", LOG_NOTICE );
 	rc = initializeDB( limitSCSISize );
-	if (rc) {
-		__lsvpdFini();
-		return rc;
-	}
 
 	__lsvpdFini();
+	return rc;
 }
 
 bool isRoot()
@@ -325,23 +326,28 @@ ZDONE:;
  */
 int initializeDB( bool limitSCSI )
 {
+	VpdDbEnv::UpdateLock *lock;
 	System * root;
 	int ret;
 
-	if( ensureEnv( env ) != 0 )
+	if( ensureEnv( env, file ) != 0 )
 		return -1;
 
 	string fullPath = env + "/" + file;
 
+	lock = new VpdDbEnv::UpdateLock(env, file, false);
 	removeOldArchiveDB( );
 	archiveDB( fullPath );
+	/* The db is now archived so when signal handler runs it should remove
+	 * any db it finds */
+	dblock = lock;
 
 	Gatherer info( limitSCSI );
-	ret = __lsvpdInit(env, file);
+	ret = __lsvpdInit(lock);
 
 	if ( ret != 0 ) {
 		Logger l;
-		l.log( " Could not allocate memory for the VPD database.", LOG_ERR);
+		l.log( "Could not allocate memory for the VPD database.", LOG_ERR);
 		return ret;
 	}
 
@@ -358,11 +364,10 @@ int initializeDB( bool limitSCSI )
 	{
 		Logger l;
 		l.log( "Saving components to database failed.", LOG_ERR );
-		return ret;
 	}
 
 	delete root;
-	return 0;
+	return ret;
 }
 
 /**
@@ -409,7 +414,7 @@ int storeComponents( System* root, VpdDbEnv& db )
 	return 0;
 }
 
-int ensureEnv( const string& env )
+int ensureEnv( const string& env, const string& file )
 {
 	struct stat info;
 	int ret = -1;
@@ -418,14 +423,14 @@ int ensureEnv( const string& env )
 	if( stat( env.c_str( ), &info ) == 0 )
 	{
 		if (!S_ISDIR(info.st_mode & S_IFMT)) {
-			logger.log("/var/lib/lsvpd is not a directory\n", LOG_ERR);
+			logger.log(env + " is not a directory\n", LOG_ERR);
 			return ret;
 		}
 
 		if ( ((info.st_mode & S_IRWXU) != S_IRWXU) ||
 		     ((info.st_mode & S_IRGRP) != S_IRGRP) ||
 		     ((info.st_mode & S_IROTH) != S_IROTH) ) {
-			logger.log("Failed to create vpd.db, no valid "
+			logger.log("Failed to create " + file + ", no valid "
 				"permission\n", LOG_ERR);
 			return ret;
 		}
@@ -438,7 +443,7 @@ int ensureEnv( const string& env )
 		return ret;
 	}
 
-	if( ( ret = ensureEnv( env.substr( 0, idx ) ) ) != 0 )
+	if( ( ret = ensureEnv( env.substr( 0, idx ) , env.substr( idx + 1 ) ) ) != 0 )
 	{
 		return ret;
 	}
@@ -448,7 +453,7 @@ int ensureEnv( const string& env )
 		   S_IRGRP | S_IWGRP | S_IXGRP |
 		   S_IROTH | S_IXOTH ) != 0 )
 	{
-		logger.log( "Failed to create directory for vpd db.", LOG_ERR );
+		logger.log( "Failed to create directory " + env + " for vpd db.", LOG_ERR );
 		return -1;
 	}
 	return ret;
@@ -458,7 +463,7 @@ int ensureEnv( const string& env )
  * @brief initializes data base access, sets up signal handling
  * to ensure proper cleanup if process if prematurely aborted
  */
-int __lsvpdInit(string env, string file)
+int __lsvpdInit( VpdDbEnv::UpdateLock *lock )
 {
 	struct sigaction sigact;
 
@@ -475,7 +480,7 @@ int __lsvpdInit(string env, string file)
 	sigaction(SIGQUIT, &sigact, NULL);
 	sigaction(SIGTERM, &sigact, NULL);
 
-	db = new VpdDbEnv( env, file, false );
+	db = new VpdDbEnv( *lock );
 	if ( db == NULL )
 		return -1;
 	else
@@ -491,6 +496,7 @@ void __lsvpdFini()
 	if (db != NULL) {
 		try {
 			delete db;
+			dblock = NULL;
 		} catch (VpdException & ve) {  }
 	} /* if */
 
@@ -499,7 +505,6 @@ void __lsvpdFini()
 
 void lsvpdSighandler(int sig)
 {
-	int fp;
 	struct sigaction sigact;
 
 	switch (sig) {
@@ -516,12 +521,9 @@ void lsvpdSighandler(int sig)
 		sigemptyset(&sigact.sa_mask);
 		sigaction(sig, &sigact, NULL);
 
-		/* Remove temporary file */
-		unlink((env + "/" + file).c_str());
-		fp = open(env.c_str(), O_RDWR);
-		if (fp >= 0) {
-			fsync(fp);
-			close(fp);
+		if (dblock != NULL) {
+			/* Remove temporary file */
+			unlink((env + "/" + file).c_str());
 		}
 
 		__lsvpdFini();
