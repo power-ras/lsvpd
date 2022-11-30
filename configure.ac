@@ -54,8 +54,8 @@ AC_CHECK_LIB(sgutils2,sg_lib_version, [SGUTILS_LIB="sgutils2"],[])
 #AM_COND_IF([SGUTIL0], [], [
 #			echo "sgutils library is required for lsvpd"
 #			exit 1 ])
-AM_CONDITIONAL([SGUTIL1], [ test x$SGUTILS_LIB == xsgutils ])
-AM_CONDITIONAL([SGUTIL2], [ test x$SGUTILS_LIB == xsgutils2 ])
+AM_CONDITIONAL([SGUTIL1], [ test x$SGUTILS_LIB = xsgutils ])
+AM_CONDITIONAL([SGUTIL2], [ test x$SGUTILS_LIB = xsgutils2 ])
 PKG_CHECK_MODULES([LIBVPD2], [libvpd_cxx-2 >= 2.2.9],[],[
 			echo "VPD library(libvpd) version 2.2.9 is required for lsvpd"
 			exit 1])
