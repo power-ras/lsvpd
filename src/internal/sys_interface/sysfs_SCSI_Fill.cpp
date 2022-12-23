@@ -1225,6 +1225,22 @@ namespace lsvpd
 		return ret;
 	}
 
+	int SysFSTreeCollector::collectNvmeVpd(Component *fillMe, int device_fd)
+	{
+		int rc;
+		char data[NVME_VPD_INFO_SIZE];
+
+		rc = nvme_read_vpd(device_fd, data);
+		if (rc)
+			return rc;
+
+		rc = interpretNVMEf1hLogPage(fillMe, data);
+		if (rc)
+			return rc;
+
+		return 0;
+	}
+
 	/********************************************************************
 	 * @brief: High-level data collection call, using ioctl and doSGQuery
 	 * 	to collect relevant data which is returned for interpretation.

@@ -139,6 +139,7 @@ namespace lsvpd
 			void process_template(Component *fillMe, string *deviceType,
 									char *data, int dataSize, string *format,
 									int pageCode);
+			int collectNvmeVpd(Component *fillMe, int device_fd);
 
 			int collectVpd(Component *fillMe, int device_fd, bool limitSCSISize);
 			void fillSCSIComponent( Component* fillMe, bool limitSCSISize);
@@ -224,7 +225,6 @@ namespace lsvpd
 			 */
 			void fillUSBDev( Component* fillMe, const string& sysDir );
 
-
 			/**
 			 * Fill a NVMe device.
 			 *
@@ -258,6 +258,15 @@ namespace lsvpd
 			 *   The Component to fill
 			 */
 			void fillIDEDev( Component* fillMe );
+
+			/**
+			 * Fill a NVME device by reading and interpreting f1h log page
+			 * information
+			 *
+			 * @param fillMe
+			 *   The Component to fill
+			 */
+			void fillPciNvmeVpd( Component* fillMe);
 
 			/**
 			 * Gather PCI device specific vpd info.

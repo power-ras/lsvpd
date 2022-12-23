@@ -1407,6 +1407,22 @@ ERROR:
 		return 0;
 	}
 
+	void SysFSTreeCollector::fillPciNvmeVpd( Component* fillMe )
+	{
+		int device_fd;
+		struct stat myDir;
+		string path;
+		path = fillMe->sysFsNode.getValue() + "/nvme";
+		if (stat(path.c_str(), &myDir) < 0)
+			return;
+		device_fd = device_open(fillMe);
+		if (device_fd < 0)
+			return;
+		collectNvmeVpd(fillMe, device_fd);
+		close(device_fd);
+		return;
+	}
+
 	/* Parse VPD file */
 	void SysFSTreeCollector::fillPciDevVpd( Component* fillMe )
 	{
@@ -1519,6 +1535,9 @@ ERROR:
 
 		/* Fill PCI device VPD info */
 		fillPciDevVpd(fillMe);
+
+		/* Fill NVME device VPD info using f1h log page */
+		fillPciNvmeVpd(fillMe);
 
 		// Read the pci config file for Device Specific (YC)
 		os.str( "" );
