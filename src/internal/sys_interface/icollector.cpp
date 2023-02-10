@@ -32,11 +32,46 @@
 #include <fstream>
 #include <cstring>
 #include <bitset>
+#include <iostream>
+#include <dirent.h>
+#include <string.h>
 
 using namespace std;
 
 namespace lsvpd
 {
+
+	string ICollector::searchFile( const string& path, const string& attrName )
+	{
+		DIR *dir;
+		struct dirent *entry;
+
+		if ((dir = opendir(path.c_str())) == NULL)
+			return "";
+
+		while ((entry = readdir(dir)) != NULL) {
+			if (entry->d_type == DT_DIR) {
+				// Found a directory, but ignore . and ..
+				if (strcmp(entry->d_name, ".") == 0 || strcmp(entry->d_name, "..") == 0)
+					continue;
+				string newPath = path + "/" + entry->d_name;
+				string result = searchFile(newPath, attrName);
+				if (result != "") {
+					closedir(dir);
+					return result;
+				}
+			}
+			else {
+				if (entry->d_name == attrName) {
+					closedir(dir);
+					return path;
+				}
+			}
+		}
+		closedir(dir);
+		return "";
+	}
+
 	/**
 	 * Read a device attribute, given dev path and attribute name
 	 * @var path Full path to device in sysfs

@@ -116,6 +116,25 @@ namespace lsvpd
 			virtual ~ICollector( ){}
 
 			protected:
+				/** Recursively search for attrName within a given path.
+				 *
+				 * @param path
+				 *   Directory path to search for filename.
+				 *
+				 * @param attrName
+				 *   Filename to search for.
+				 *
+				 * @return
+				 *   Path in which attrName file exists.
+				 *
+				 *   If attrName is fwrev, and is found at
+				 *   /sys/devices/pci0020:01/0020:01:00.1/host4/scsi_host/host4/fwrev,
+				 *   searchFile() will return
+				 *   /sys/devices/pci0020:01/0020:01:00.1/host4/scsi_host/host4.
+				 */
+				string searchFile( const string& path,
+						const string& attrName );
+
 				string getAttrValue( const string& path,
 					const string& attrName );
 

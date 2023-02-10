@@ -1837,6 +1837,10 @@ ERROR:
 
 	void SysFSTreeCollector::fillFirmware( Component* fillMe )
 	{
+		string result = "";
+		string path = fillMe->getID();
+		const string firmwareAttributes[] = {"fw_version", "firmware_rev"};
+		const size_t firmwareAttributesSize = sizeof(firmwareAttributes) / sizeof(firmwareAttributes[0]);
 		string classNode = fillMe->getClassNode();
 		if (classNode.length() > 0) {
 			fillMe->mFirmwareVersion.setValue( getAttrValue( classNode,
@@ -1847,6 +1851,23 @@ ERROR:
 
 			fillMe->mFirmwareVersion.setValue( getAttrValue( classNode,
 					"firmware_rev" ), 30, __FILE__, __LINE__ );
+		}
+
+		if (fillMe->mFirmwareLevel.dataValue.empty()) {
+			result = searchFile(path, "fwrev");
+			if (!result.empty()) {
+				fillMe->mFirmwareLevel.setValue( getAttrValue( result,
+							"fwrev" ), 30, __FILE__, __LINE__ );
+			}
+		}
+
+		for (size_t i = 0; i < firmwareAttributesSize && fillMe->mFirmwareVersion.dataValue.empty(); i++) {
+			result = searchFile(path, firmwareAttributes[i]);
+			if (!result.empty()) {
+				fillMe->mFirmwareVersion.setValue( getAttrValue( result,
+							firmwareAttributes[i]), 30, __FILE__, __LINE__ );
+				break;
+			}
 		}
 	}
 
