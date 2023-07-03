@@ -316,8 +316,10 @@ namespace lsvpd
 			fillMe->addDeviceSpecific( key, "Device Specific", val, 90 );
 		else if( key == "AN" )
 			fillMe->addDeviceSpecific( key, "Final Assembly PN", val, 90 );
-		else if( key == "ID" )
+		else if( key == "ID" ) {
+			fillMe->mDescription.setValue( val, 90, file, lineNum );
 			fillMe->addDeviceSpecific( key, "Device Specific", val, 90 );
+		}
 		else if( key == "FR" )
 			fillMe->addDeviceSpecific( key, "Device Specific", val, 90 );
 
