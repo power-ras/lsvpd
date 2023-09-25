@@ -79,6 +79,11 @@ exit 0
 
 
 %changelog
+* Mon Sep 25 2023 - Mahesh Salgaonkar <mahesh@linux.ibm.com> - 1.7.15
+- Display additional VPD information for NVMe devices
+- Report correct microcode information for I/O devices
+- Fix travis CI failures
+
 * Fri Feb 25 2022 - Mahesh Salgaonkar <mahesh@linux.ibm.com> - 1.7.14
 - Prevent corruption of database file when running vpdupdate
 
