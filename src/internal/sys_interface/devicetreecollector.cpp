@@ -1433,15 +1433,28 @@ ERROR:
 			}
 		}
 
-		val = getAttrValue("/proc/device-tree", "system-id" );
+		val = getAttrValue("/proc/device-tree", "ibm,vendor-system-id" );
 		if( val != "" )
 		{
 			sys->mSerialNum1.setValue( val, 80, __FILE__, __LINE__ );
 			sys->mProcessorID.setValue( val, 80, __FILE__, __LINE__ );
-			if( !val.compare(0, 4, "IBM,") )
+			if( !val.compare(0, 4, "IPS,") )
 				sys->mSerialNum2.setValue( val.substr( 6 ), 80, __FILE__, __LINE__ );
 			else
 				sys->mSerialNum2.setValue( val, 80 , __FILE__, __LINE__ );
+		}
+		else
+		{
+			val = getAttrValue("/proc/device-tree", "system-id" );
+			if( val != "")
+			{
+				sys->mSerialNum1.setValue( val, 80, __FILE__, __LINE__ );
+				sys->mProcessorID.setValue( val, 80, __FILE__, __LINE__ );
+				if( !val.compare(0, 4, "IBM,") )
+					sys->mSerialNum2.setValue( val.substr( 6 ), 80, __FILE__, __LINE__ );
+				else
+					sys->mSerialNum2.setValue( val, 80 , __FILE__, __LINE__ );
+			}
 		}
 
 		val = getAttrValue("/proc/device-tree", "ibm,partition-uuid" );
