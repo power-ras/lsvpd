@@ -1411,14 +1411,26 @@ ERROR:
 		if( val != "" )
 			sys->mArch.setValue( val, 100, __FILE__, __LINE__ );
 
-		val = getAttrValue( "/proc/device-tree", "model" );
+		val = getAttrValue( "/proc/device-tree", "ibm,vendor-model" );
 		if( val != "" )
 		{
 			sys->mMachineType.setValue( val, 80, __FILE__, __LINE__ );
-			if ( !val.compare (0, 4, "IBM,") )
+			if ( !val.compare (0, 4, "IPS,") )
 				sys->mMachineModel.setValue( val.substr( 4 ), 80, __FILE__, __LINE__ );
 			else
 				sys->mMachineModel.setValue( val, 80, __FILE__, __LINE__ );
+		}
+		else
+		{
+			val = getAttrValue( "/proc/device-tree", "model" );
+			if( val != "")
+			{
+				sys->mMachineType.setValue( val, 80, __FILE__, __LINE__ );
+				if ( !val.compare (0, 4, "IBM,") )
+					sys->mMachineModel.setValue( val.substr( 4 ), 80, __FILE__, __LINE__ );
+				else
+					sys->mMachineModel.setValue( val, 80, __FILE__, __LINE__ );
+			}
 		}
 
 		val = getAttrValue("/proc/device-tree", "system-id" );
