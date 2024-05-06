@@ -70,6 +70,9 @@
 #include <cstring>
 #include <limits.h>
 
+#include <vector>
+#include <algorithm>
+
 extern "C"
 {
 #include <scsi/sg_cmds.h>
@@ -1275,6 +1278,7 @@ namespace lsvpd
 		int pageCodeInt;
 		int rc;
 		char vendor[32], model[32], firmware[32];
+		std::vector<int> byteValues;
 
 		if ((fillMe->devBus.getValue()).empty()) {
 			if ((fillMe->getDevClass() == "nvme")) {
@@ -1367,6 +1371,19 @@ namespace lsvpd
 
 		}
 
+		/* Check supported page codes using page code 0
+		 * evpd set
+		 */
+
+		memset(buffer, '\0', MAXBUFSIZE);
+		len = doSGQuery(device_fd, buffer, MAXBUFSIZE, 1, 0, 0);
+		if (len > 0) {
+			for (int i = 4; i < len; ++i) {
+				int byteValue = (int)buffer[i];
+				byteValues.push_back(byteValue);
+			}
+		}
+
 		/* SG Utils Inquiry
 		 * Can device be quieried?  Initial Query
 		 */
@@ -1428,8 +1445,9 @@ namespace lsvpd
 						evpd = 0;
 					else evpd = 1;
 
-					len = doSGQuery( device_fd, buffer, MAXBUFSIZE, evpd,
-							 pageCodeInt, RECEIVE_DIAGNOSTIC );
+					if (std::find(byteValues.begin(), byteValues.end(), pageCodeInt) != byteValues.end())
+						len = doSGQuery( device_fd, buffer, MAXBUFSIZE, evpd,
+								 pageCodeInt, RECEIVE_DIAGNOSTIC );
 				}
 				else
 				{
@@ -1447,7 +1465,8 @@ namespace lsvpd
 					// Query this page
 					memset(buffer, '\0', MAXBUFSIZE);
 					//					coutd << "Attempting query, evpd = " << evpd << ", pageCodeInt = " << pageCodeInt <<endl;
-					len = doSGQuery(device_fd, buffer, MAXBUFSIZE, evpd, pageCodeInt, 0);
+					if (std::find(byteValues.begin(), byteValues.end(), pageCodeInt) != byteValues.end())
+						len = doSGQuery(device_fd, buffer, MAXBUFSIZE, evpd, pageCodeInt, 0);
 				}
 
 				if (len < 0) {
@@ -1468,9 +1487,10 @@ namespace lsvpd
 				 printf("%d:%c  ", s, buffer[s]);
 				 printf("\n");*/
 
-				//Interpret this page
-				interpretPage(fillMe, buffer, len, pageCodeInt, &pageFormat,
-					      subtype, &subtypeDS);
+				//Interpret only the pages that are supported
+				if (std::find(byteValues.begin(), byteValues.end(), pageCodeInt) != byteValues.end())
+					interpretPage(fillMe, buffer, len, pageCodeInt, &pageFormat,
+						      subtype, &subtypeDS);
 			}
 		}
 
