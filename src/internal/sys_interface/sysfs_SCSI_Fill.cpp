@@ -1413,7 +1413,7 @@ namespace lsvpd
 				pageTemp = retrievePageTemplate(devTemplate->format_str, i);
 				retrievePageCode(pageTemp, pageCode, pageFormat);
 
-				if( pageCode == "0xDIAG" )
+				if( pageCode == "DIAG" )
 				{
 					/*
 					 * Special case to retrieve Physical locations using
