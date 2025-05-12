@@ -169,7 +169,7 @@ void printVPD( Component* root )
 				string val = string( root->getCD( ) );
 
 				if ( val != "" )
-					cout << " (" << val << ")";
+					cout << " " << val;
 
 				cout << endl;
 			}

@@ -337,7 +337,7 @@ void printVPD( Component* root )
 
 			if( val != "" )
 			{
-				os << " (" << val << ")";
+				os << " " << val;
 			}
 
 			if(	val.length( ) + root->getDescription( ).length( ) <= 35 )

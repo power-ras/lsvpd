@@ -1490,7 +1490,6 @@ ERROR:
 						fillMe->mManufacturer.setValue( val,
 							50, __FILE__, __LINE__ );
 
-					os << hex << setw( 4 ) << setfill( '0' ) << manID;
 				}
 			}
 			else
@@ -1500,7 +1499,6 @@ ERROR:
 					fillMe->mManufacturer.setValue( val, 50,
 							__FILE__, __LINE__ );
 
-				os << hex << setw( 4 ) << setfill( '0' ) << subMan;
 			}
 
 			// Fill Device Model
@@ -1509,7 +1507,6 @@ ERROR:
 			{
 				if( manID != UNKNOWN_ID )
 				{
-					os << hex << setw( 4 ) << setfill( '0' )<< devID;
 					val = mPciTable->getName( manID, devID );
 					if( val != "" )
 						fillMe->mModel.setValue( val, 80,
@@ -1518,7 +1515,6 @@ ERROR:
 			}
 			else
 			{
-				os << hex << setw( 4 ) << setfill( '0' )<< subID;
 				val = mPciTable->getName( manID, devID, subID );
 				if( val != "" )
 					fillMe->mModel.setValue( val, 80, __FILE__, __LINE__ );
@@ -1527,7 +1523,12 @@ ERROR:
 					fillMe->mDescription.setValue( val, 80, __FILE__, __LINE__ );
 			}
 
-			if( os.str( ) != "ffffffff" )
+			os << "(" << hex << setw(4) << setfill('0') << manID << ","
+				<< hex << setw(4) << setfill('0') << devID << "), ("
+				<< hex << setw(4) << setfill('0') << subMan << ","
+				<< hex << setw(4) << setfill('0') << subID << ")";
+
+			if( os.str( ) != "(ffff,ffff), (ffff,ffff)" )
 				fillMe->mCDField.setValue( os.str( ), 100, __FILE__, __LINE__ );
 		}
 
