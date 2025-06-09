@@ -35,6 +35,7 @@
 #include <libvpd-2/debug.hpp>
 #include <libvpd-2/logger.hpp>
 #include <libvpd-2/lsvpd.hpp>
+#include <libvpd-2/vpddbenv.hpp>
 
 #include <linux/vfio.h>
 #include <sys/mman.h>
@@ -69,9 +70,14 @@
 #define ECID1 0x080588
 #define MNIMI_DATA 0x0802C0
 
+std::map<std::string, bool> g_deviceAccessible;
+
 extern int errno;
 
 using namespace std;
+using namespace lsvpd;
+
+extern VpdDbEnv *spyreDb;
 
 namespace lsvpd
 {
@@ -1477,7 +1483,51 @@ ERROR:
 		/* Open the VFIO Group */
 		snprintf(path_buf, sizeof(path_buf), "/dev/vfio/%s", group_name);
 		group_fd = open(path_buf, O_RDWR);
+
+		g_deviceAccessible[fillMe->getID()] = true;
 		if (group_fd < 0) {
+
+			Logger l;
+			l.log("Failed to open VFIO group " + string(path_buf) + " for " + fillMe->getID(), LOG_NOTICE);
+			g_deviceAccessible[fillMe->getID()] = false;
+
+			if (spyreDb != nullptr) {
+
+				Component* spyreComp = spyreDb->fetch(fillMe->getID());
+				if (spyreComp != nullptr) {
+					if (!spyreComp->mManufacturer.dataValue.empty()) {
+						fillMe->mManufacturer.setValue(spyreComp->mManufacturer.getValue(), 80, __FILE__, __LINE__);
+					}
+					if (!spyreComp->mModel.dataValue.empty()) {
+						fillMe->mModel.setValue(spyreComp->mModel.getValue(), 80, __FILE__, __LINE__);
+					}
+					if (!spyreComp->mEngChangeLevel.dataValue.empty()) {
+						fillMe->mEngChangeLevel.setValue(spyreComp->mEngChangeLevel.getValue(), 80, __FILE__, __LINE__);
+					}
+					if (!spyreComp->mSerialNumber.dataValue.empty()) {
+						fillMe->mSerialNumber.setValue(spyreComp->mSerialNumber.getValue(), 80, __FILE__, __LINE__);
+					}
+					if (!spyreComp->mPartNumber.dataValue.empty()) {
+						fillMe->mPartNumber.setValue(spyreComp->mPartNumber.getValue(), 80, __FILE__, __LINE__);
+					}
+					if (!spyreComp->mPhysicalLocation.dataValue.empty()) {
+						fillMe->mPhysicalLocation.setValue(spyreComp->mPhysicalLocation.getValue(), 80, __FILE__, __LINE__);
+					}
+					if (!spyreComp->mDescription.dataValue.empty()) {
+						fillMe->mDescription.setValue(spyreComp->mDescription.getValue(), 80, __FILE__, __LINE__);
+					}
+					if (!spyreComp->mCDField.dataValue.empty()) {
+						fillMe->mCDField.setValue(spyreComp->mCDField.getValue(), 80, __FILE__, __LINE__);
+					}
+					if (!spyreComp->mFirmwareLevel.dataValue.empty()) {
+						fillMe->mFirmwareLevel.setValue(spyreComp->mFirmwareLevel.getValue(), 80, __FILE__, __LINE__);
+					}
+
+				delete spyreComp;
+				}
+			}
+
+			close(group_fd);
 			close(container_fd);
 			return;
 		}
@@ -1507,6 +1557,7 @@ ERROR:
 
 		device_fd = ioctl(group_fd, VFIO_GROUP_GET_DEVICE_FD,
 				fillMe->getID().substr(fillMe->getID().rfind("/") + 1).c_str());
+
 		if (device_fd < 0) {
 			close(group_fd);
 			close(container_fd);

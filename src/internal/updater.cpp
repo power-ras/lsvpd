@@ -25,6 +25,7 @@
 #include <string>
 #include <iostream>
 #include <sstream>
+#include <map>
 
 #ifndef _GNU_SOURCE
 #define _GNU_SOURCE // for getopt_long
@@ -72,11 +73,50 @@ const string DB_DIR( "/var/lib/lsvpd" );
 const string DB_FILENAME( "vpd.db" );
 const string BASE( "/sys/bus" );
 
+/* Global variables for spyre.db access */
+const string SPYRE_DB_FILENAME("spyre.db");
+VpdDbEnv *spyreDb = nullptr;
+VpdDbEnv::UpdateLock *spyreDbLock = nullptr;
+
 bool isRoot(void);
 VpdDbEnv *db;
 VpdDbEnv::UpdateLock *dblock;
 
 string env = DB_DIR, file = DB_FILENAME;
+
+extern std::map<std::string, bool> g_deviceAccessible;
+
+/**
+ * @brief Cleans up resources allocated by __spyreDbInit()
+ */
+void __spyreDbFini()
+{
+       if (spyreDb != NULL) {
+               try {
+                       delete spyreDb;
+                       spyreDbLock = NULL;
+               } catch (VpdException & ve) {  }
+       } /* if */
+       spyreDb = NULL;
+}
+
+/**
+ * @brief Cleanup Spyre-related files
+ */
+void cleanupSpyreFiles(const string& env)
+{
+        __spyreDbFini();
+
+        string spyreDbPath = env + "/" + SPYRE_DB_FILENAME;
+        if (access(spyreDbPath.c_str(), F_OK) == 0) {
+                unlink(spyreDbPath.c_str());
+        }
+
+        string spyreLockPath = env + "/" + SPYRE_DB_FILENAME + "-updatelock";
+        if (access(spyreLockPath.c_str(), F_OK) == 0) {
+                unlink(spyreLockPath.c_str());
+        }
+}
 
 int main( int argc, char** argv )
 {
@@ -157,6 +197,7 @@ int main( int argc, char** argv )
 	rc = initializeDB( limitSCSISize );
 
 	__lsvpdFini();
+	cleanupSpyreFiles(env);
 	return rc;
 }
 
@@ -320,9 +361,89 @@ ZDONE:;
 }
 
 /**
+ * @brief Check if a component is a Spyre device
+ */
+bool isSpyreDevice(Component* comp)
+{
+       if (!comp)
+               return false;
+
+       string id = comp->getID();
+       string deviceFile = id + "/device";
+       ifstream deviceStream(deviceFile.c_str());
+       if (deviceStream) {
+               string deviceId;
+               getline(deviceStream, deviceId);
+               deviceStream.close();
+
+               if (deviceId == "0x06a7" || deviceId == "0x06a8") {
+                       Logger l;
+                       l.log("Found Spyre device at: " + id, LOG_NOTICE);
+                       return true;
+               }
+       }
+       return false;
+}
+
+/**
+ * @brief Extract spyre device data from existing vpd.db
+ */
+void extractSpyreData()
+{
+       if (spyreDb == NULL) {
+               return;
+       }
+
+       string vpdDbPath = env + "/" + file;
+       if (access(vpdDbPath.c_str(), F_OK) != 0) {
+               return;
+       }
+
+       VpdDbEnv::UpdateLock* mainLock = new VpdDbEnv::UpdateLock(env, file, true);
+       VpdDbEnv mainDb(*mainLock);
+
+       vector<string> allKeys = mainDb.getKeys();
+       for (const string& key : allKeys) {
+               if (key.empty() || key == "/sys/bus") {
+                       continue;
+               }
+
+               Component* comp = mainDb.fetch(key);
+               if (comp) {
+                       if (isSpyreDevice(comp)) {
+                               spyreDb->store(comp);
+                       }
+                       delete comp;
+               }
+       }
+}
+
+/**
+ * @brief Initializes spyre database access.
+ * @return 0 on success, -1 on failure
+ */
+int __spyreDbInit()
+{
+       string spyreFullPath = env + "/" + SPYRE_DB_FILENAME;
+       __spyreDbFini();
+
+       if (access(spyreFullPath.c_str(), F_OK) == 0) {
+               unlink(spyreFullPath.c_str());
+       }
+
+       spyreDbLock = new VpdDbEnv::UpdateLock(env, SPYRE_DB_FILENAME, false);
+
+       spyreDb = new VpdDbEnv(*spyreDbLock);
+       if (spyreDb == NULL)
+               return -1;
+       else
+               return 0;
+}
+
+/**
  * Method does the initial population of the vpd db, this should only
  * be done once at boot time or any time that a user wishes to start with
- * a new db.
+ * a new db. And, handles spyre.db population with spyre devices.
  */
 int initializeDB( bool limitSCSI )
 {
@@ -334,6 +455,19 @@ int initializeDB( bool limitSCSI )
 		return -1;
 
 	string fullPath = env + "/" + file;
+	string spyreFullPath = env + "/" + SPYRE_DB_FILENAME;
+
+	if (__spyreDbInit() != 0) {
+		Logger l;
+		l.log("Failed to initialize spyre database.", LOG_ERR);
+		return -1;
+	}
+
+	if (access(fullPath.c_str(), F_OK) == 0) {
+		Logger l;
+		l.log("Extracting Spyre data from existing vpd.db", LOG_NOTICE);
+		extractSpyreData();
+	}
 
 	lock = new VpdDbEnv::UpdateLock(env, file, false);
 	removeOldArchiveDB( );
@@ -348,6 +482,7 @@ int initializeDB( bool limitSCSI )
 	if ( ret != 0 ) {
 		Logger l;
 		l.log( "Could not allocate memory for the VPD database.", LOG_ERR);
+		__spyreDbFini();
 		return ret;
 	}
 
