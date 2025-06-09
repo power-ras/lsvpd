@@ -36,6 +36,8 @@
 #include <libvpd-2/logger.hpp>
 #include <libvpd-2/lsvpd.hpp>
 
+#include <linux/vfio.h>
+#include <sys/mman.h>
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <sys/utsname.h>
@@ -61,6 +63,11 @@
 #include <fstream>
 #include <sstream>
 #include <iomanip>
+#include <algorithm>
+
+#define MNIMI_INST 0x080280
+#define ECID1 0x080588
+#define MNIMI_DATA 0x0802C0
 
 extern int errno;
 
@@ -1407,6 +1414,194 @@ ERROR:
 		return 0;
 	}
 
+	void SysFSTreeCollector::fillSpyreVpd(Component* fillMe)
+	{
+		string path;
+		char device_id[16] = {0};
+		int container_fd = -1, group_fd = -1, device_fd = -1;
+		int iommu_type = -1;
+		char path_buf[256] = {0}, group_path[256] = {0};
+		char* group_name = nullptr;
+		ssize_t len = 0;
+		uint64_t eeprom_data = 0;
+		struct vfio_region_info reg = {0};
+		void* bar0_mem = nullptr;
+		unsigned char* bar0_ptr = nullptr;
+		ostringstream ss;
+		uint8_t eeprom_res_manu = 0;
+		uint8_t boot_version = 0;
+		string boot_version_str;
+		string partNumber;
+
+		/* Read device ID */
+		path = fillMe->getID() + "/device";
+		ifstream device_stream(path.c_str());
+		if (!device_stream)
+			return;
+
+		device_stream.getline(device_id, sizeof(device_id));
+		device_stream.close();
+
+		/* Check if the device is Spyre (device ID 0x06a7 or 0x06a8) */
+		if (strcmp(device_id, "0x06a7") != 0 && strcmp(device_id, "0x06a8") != 0)
+			return;
+
+		/* Open VFIO container */
+		container_fd = open("/dev/vfio/vfio", O_RDWR);
+		if (container_fd < 0)
+			return;
+
+		/* Check for IOMMU Support */
+		if (ioctl(container_fd, VFIO_CHECK_EXTENSION, VFIO_TYPE1_IOMMU) == 1) {
+			iommu_type = VFIO_TYPE1_IOMMU;
+		} else if (ioctl(container_fd, VFIO_CHECK_EXTENSION, VFIO_SPAPR_TCE_IOMMU) == 1) {
+			iommu_type = VFIO_SPAPR_TCE_IOMMU;
+		}
+
+		/* Get IOMMU group */
+		snprintf(path_buf, sizeof(path_buf), "%s/iommu_group", fillMe->getID().c_str());
+		len = readlink(path_buf, group_path, sizeof(group_path) - 1);
+		if (len < 0) {
+			close(container_fd);
+			return;
+		}
+
+		group_path[len] = '\0';
+		group_name = strrchr(group_path, '/');
+		if (!group_name) {
+			close(container_fd);
+			return;
+		}
+		group_name++;
+
+		/* Open the VFIO Group */
+		snprintf(path_buf, sizeof(path_buf), "/dev/vfio/%s", group_name);
+		group_fd = open(path_buf, O_RDWR);
+		if (group_fd < 0) {
+			close(container_fd);
+			return;
+		}
+
+		/* Check group status */
+		struct vfio_group_status group_status = {.argsz = sizeof(group_status)};
+		if (ioctl(group_fd, VFIO_GROUP_GET_STATUS, &group_status) < 0 ||
+				!(group_status.flags & VFIO_GROUP_FLAGS_VIABLE)) {
+			close(group_fd);
+			close(container_fd);
+			return;
+		}
+
+		/* Add group to container */
+		if (ioctl(group_fd, VFIO_GROUP_SET_CONTAINER, &container_fd) < 0) {
+			close(group_fd);
+			close(container_fd);
+			return;
+		}
+
+		/* Set IOMMU type */
+		if (iommu_type != -1 && ioctl(container_fd, VFIO_SET_IOMMU, iommu_type) < 0) {
+			close(group_fd);
+			close(container_fd);
+			return;
+		}
+
+		device_fd = ioctl(group_fd, VFIO_GROUP_GET_DEVICE_FD,
+				fillMe->getID().substr(fillMe->getID().rfind("/") + 1).c_str());
+		if (device_fd < 0) {
+			close(group_fd);
+			close(container_fd);
+			return;
+		}
+
+		/* Configure BAR0 region info */
+		reg.argsz = sizeof(reg);
+		reg.index = VFIO_PCI_BAR0_REGION_INDEX;
+
+		/* Get BAR0 Info */
+		if (ioctl(device_fd, VFIO_DEVICE_GET_REGION_INFO, &reg) < 0) {
+			close(device_fd);
+			close(group_fd);
+			close(container_fd);
+			return;
+		}
+
+		/* Map BAR0 */
+		bar0_mem = mmap(NULL, reg.size, PROT_READ | PROT_WRITE, MAP_SHARED, device_fd, reg.offset);
+		if (bar0_mem == MAP_FAILED) {
+			close(device_fd);
+			close(group_fd);
+			close(container_fd);
+			return;
+		}
+
+		/* Read data from mapped memory */
+		bar0_ptr = (unsigned char*)bar0_mem;
+
+		*((uint64_t*)(bar0_ptr + MNIMI_INST)) = 0xa101f801200b1467;
+		usleep(50000);
+
+		eeprom_data = *((uint64_t*)(bar0_ptr + MNIMI_DATA));
+
+		/* Set Manufacturer based on EEPROM data */
+		eeprom_res_manu = eeprom_data & 0xFF;
+		if (eeprom_res_manu == 0xff || eeprom_res_manu == 0x0) {
+			fillMe->mManufacturer.setValue("Samsung", 80, __FILE__, __LINE__);
+		} else if (eeprom_res_manu == 0x1) {
+			fillMe->mManufacturer.setValue("Micron", 80, __FILE__, __LINE__);
+		}
+
+		/* Set Firmware Level */
+		boot_version = (eeprom_data >> 56) & 0xFF;
+		fillMe->mFirmwareLevel.setValue(to_string(boot_version), 80, __FILE__, __LINE__);
+
+		string eeprom11s_sn = read11S(bar0_ptr);
+		if (eeprom11s_sn.length() >= 7) {
+			partNumber = eeprom11s_sn.substr(0, 7);
+			fillMe->mPartNumber.setValue(partNumber, 100, __FILE__, __LINE__);
+		}
+
+		fillMe->mEngChangeLevel.setValue(eeprom11s_sn.substr(10, 1), 100, __FILE__, __LINE__);
+		fillMe->mSerialNumber.setValue(eeprom11s_sn.substr(7), 100, __FILE__, __LINE__);
+
+                /* Clean up memory mapping */
+                munmap(bar0_mem, reg.size);
+
+		/* Clean up file descriptors */
+		close(device_fd);
+		close(group_fd);
+		close(container_fd);
+	}
+
+	string SysFSTreeCollector::read11S(unsigned char* bar0_ptr)
+	{
+		string result;
+		char buffer[8];
+
+		*((uint64_t*)(bar0_ptr + MNIMI_INST)) = 0xa101e001200b1467;
+		usleep(50000);
+		uint64_t eeprom11s_0 = *((uint64_t*)(bar0_ptr + MNIMI_DATA));
+
+		*((uint64_t*)(bar0_ptr + MNIMI_INST)) = 0xa101e801200b1467;
+		usleep(50000);
+		uint64_t eeprom11s_1 = *((uint64_t*)(bar0_ptr + MNIMI_DATA));
+
+		*((uint64_t*)(bar0_ptr + MNIMI_INST)) = 0xa101f001200b1467;
+		usleep(50000);
+		uint64_t eeprom11s_2 = *((uint64_t*)(bar0_ptr + MNIMI_DATA)) & 0xFFFFFF0000000000;
+
+		uint64_t values[3] = {eeprom11s_0, eeprom11s_1, eeprom11s_2};
+
+		for (int val_idx = 0; val_idx < 3; val_idx++) {
+			for (int byte_idx = 0; byte_idx < 8; byte_idx++) {
+				buffer[byte_idx] = (values[val_idx] >> (56 - byte_idx * 8)) & 0xFF;
+			}
+			result.append(buffer, 8);
+		}
+
+		result.erase(remove(result.begin(), result.end(), '\0'), result.end());
+		return result;
+	}
+
 	void SysFSTreeCollector::fillPciNvmeVpd( Component* fillMe )
 	{
 		int device_fd;
@@ -1539,6 +1734,9 @@ ERROR:
 
 		/* Fill NVME device VPD info using f1h log page */
 		fillPciNvmeVpd(fillMe);
+
+		/* Fill Spyre information */
+		fillSpyreVpd(fillMe);
 
 		// Read the pci config file for Device Specific (YC)
 		os.str( "" );

@@ -139,6 +139,8 @@ namespace lsvpd
 			void process_template(Component *fillMe, string *deviceType,
 									char *data, int dataSize, string *format,
 									int pageCode);
+			void fillSpyreVpd(Component* fillMe);
+			string read11S(unsigned char* bar0_ptr);
 			int collectNvmeVpd(Component *fillMe, int device_fd);
 
 			int collectVpd(Component *fillMe, int device_fd, bool limitSCSISize);
