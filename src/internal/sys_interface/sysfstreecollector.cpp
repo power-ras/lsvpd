@@ -1423,6 +1423,7 @@ ERROR:
 	void SysFSTreeCollector::fillSpyreVpd(Component* fillMe)
 	{
 		string path;
+		Logger l;
 		char device_id[16] = {0};
 		int container_fd = -1, group_fd = -1, device_fd = -1;
 		int iommu_type = -1;
@@ -1452,22 +1453,37 @@ ERROR:
 		if (strcmp(device_id, "0x06a7") != 0 && strcmp(device_id, "0x06a8") != 0)
 			return;
 
+		l.log("Confirmed Spyre device " + fillMe->getID() + " with ID: " + string(device_id), LOG_INFO);
+
 		/* Open VFIO container */
 		container_fd = open("/dev/vfio/vfio", O_RDWR);
-		if (container_fd < 0)
+		if (container_fd < 0) {
+			l.log("Failed to open VFIO container /dev/vfio/vfio for " + fillMe->getID() +
+					", errno: " + to_string(errno) + " (" + strerror(errno) + ")", LOG_ERR);
 			return;
+		}
+		l.log("Successfully opened VFIO container for " + fillMe->getID(), LOG_DEBUG);
 
 		/* Check for IOMMU Support */
 		if (ioctl(container_fd, VFIO_CHECK_EXTENSION, VFIO_TYPE1_IOMMU) == 1) {
 			iommu_type = VFIO_TYPE1_IOMMU;
+			l.log("Using VFIO_TYPE1_IOMMU for " + fillMe->getID(), LOG_DEBUG);
 		} else if (ioctl(container_fd, VFIO_CHECK_EXTENSION, VFIO_SPAPR_TCE_IOMMU) == 1) {
 			iommu_type = VFIO_SPAPR_TCE_IOMMU;
+			l.log("Using VFIO_SPAPR_TCE_IOMMU for " + fillMe->getID(), LOG_DEBUG);
+		}
+		else {
+			l.log("No supported IOMMU type found for " + fillMe->getID(), LOG_ERR);
+			close(container_fd);
+			return;
 		}
 
 		/* Get IOMMU group */
 		snprintf(path_buf, sizeof(path_buf), "%s/iommu_group", fillMe->getID().c_str());
 		len = readlink(path_buf, group_path, sizeof(group_path) - 1);
 		if (len < 0) {
+			l.log("Failed to read IOMMU group symlink " + string(path_buf) + " for " + fillMe->getID() +
+					", errno: " + to_string(errno) + " (" + strerror(errno) + ")", LOG_ERR);
 			close(container_fd);
 			return;
 		}
@@ -1475,10 +1491,13 @@ ERROR:
 		group_path[len] = '\0';
 		group_name = strrchr(group_path, '/');
 		if (!group_name) {
+			l.log("Failed to extract group name from path: " + string(group_path) + " for " + fillMe->getID(), LOG_ERR);
 			close(container_fd);
 			return;
 		}
 		group_name++;
+
+		l.log("Found IOMMU group: " + string(group_name) + " for " + fillMe->getID(), LOG_DEBUG);
 
 		/* Open the VFIO Group */
 		snprintf(path_buf, sizeof(path_buf), "/dev/vfio/%s", group_name);
@@ -1488,13 +1507,16 @@ ERROR:
 		if (group_fd < 0) {
 
 			Logger l;
-			l.log("Failed to open VFIO group " + string(path_buf) + " for " + fillMe->getID(), LOG_NOTICE);
+			l.log("Failed to open VFIO group " + string(path_buf) + " for " + fillMe->getID(), LOG_ERR);
 			g_deviceAccessible[fillMe->getID()] = false;
 
 			if (spyreDb != nullptr) {
+				l.log("Attempting to use cached data from spyreDb for " + fillMe->getID(), LOG_INFO);
 
 				Component* spyreComp = spyreDb->fetch(fillMe->getID());
 				if (spyreComp != nullptr) {
+					l.log("Found cached component data for " + fillMe->getID(), LOG_DEBUG);
+
 					if (!spyreComp->mManufacturer.dataValue.empty()) {
 						fillMe->mManufacturer.setValue(spyreComp->mManufacturer.getValue(), 80, __FILE__, __LINE__);
 					}
@@ -1524,6 +1546,9 @@ ERROR:
 					}
 
 				delete spyreComp;
+				l.log("Successfully populated component data from cache for " + fillMe->getID(), LOG_INFO);
+				} else {
+					l.log("No cached component data found in spyreDb for " + fillMe->getID(), LOG_WARNING);
 				}
 			}
 
@@ -1536,6 +1561,8 @@ ERROR:
 		struct vfio_group_status group_status = {.argsz = sizeof(group_status)};
 		if (ioctl(group_fd, VFIO_GROUP_GET_STATUS, &group_status) < 0 ||
 				!(group_status.flags & VFIO_GROUP_FLAGS_VIABLE)) {
+			l.log("Failed to get VFIO group status for " + fillMe->getID() +
+					", errno: " + to_string(errno) + " (" + strerror(errno) + ")", LOG_ERR);
 			close(group_fd);
 			close(container_fd);
 			return;
@@ -1543,26 +1570,37 @@ ERROR:
 
 		/* Add group to container */
 		if (ioctl(group_fd, VFIO_GROUP_SET_CONTAINER, &container_fd) < 0) {
+			l.log("Failed to add VFIO group to container for " + fillMe->getID() +
+					", errno: " + to_string(errno) + " (" + strerror(errno) + ")", LOG_ERR);
+			close(group_fd);
+			close(container_fd);
+			return;
+		}
+		l.log("Successfully added VFIO group to container for " + fillMe->getID(), LOG_DEBUG);
+
+		/* Set IOMMU type */
+		if (iommu_type != -1 && ioctl(container_fd, VFIO_SET_IOMMU, iommu_type) < 0) {
+			l.log("Failed to set IOMMU type " + to_string(iommu_type) + " for " + fillMe->getID() +
+					", errno: " + to_string(errno) + " (" + strerror(errno) + ")", LOG_ERR);
 			close(group_fd);
 			close(container_fd);
 			return;
 		}
 
-		/* Set IOMMU type */
-		if (iommu_type != -1 && ioctl(container_fd, VFIO_SET_IOMMU, iommu_type) < 0) {
-			close(group_fd);
-			close(container_fd);
-			return;
-		}
+		l.log("Successfully set IOMMU type for " + fillMe->getID(), LOG_DEBUG);
 
 		device_fd = ioctl(group_fd, VFIO_GROUP_GET_DEVICE_FD,
 				fillMe->getID().substr(fillMe->getID().rfind("/") + 1).c_str());
 
 		if (device_fd < 0) {
+			l.log("Failed to get device FD for " + fillMe->getID() +
+					", errno: " + to_string(errno) + " (" + strerror(errno) + ")", LOG_ERR);
 			close(group_fd);
 			close(container_fd);
 			return;
 		}
+
+		l.log("Successfully obtained device FD for " + fillMe->getID(), LOG_DEBUG);
 
 		/* Configure BAR0 region info */
 		reg.argsz = sizeof(reg);
@@ -1570,6 +1608,8 @@ ERROR:
 
 		/* Get BAR0 Info */
 		if (ioctl(device_fd, VFIO_DEVICE_GET_REGION_INFO, &reg) < 0) {
+			l.log("Failed to get BAR0 region info for " + fillMe->getID() +
+					", errno: " + to_string(errno) + " (" + strerror(errno) + ")", LOG_ERR);
 			close(device_fd);
 			close(group_fd);
 			close(container_fd);
@@ -1579,11 +1619,15 @@ ERROR:
 		/* Map BAR0 */
 		bar0_mem = mmap(NULL, reg.size, PROT_READ | PROT_WRITE, MAP_SHARED, device_fd, reg.offset);
 		if (bar0_mem == MAP_FAILED) {
+			l.log("Failed to map BAR0 memory for " + fillMe->getID() +
+					", errno: " + to_string(errno) + " (" + strerror(errno) + ")", LOG_ERR);
 			close(device_fd);
 			close(group_fd);
 			close(container_fd);
 			return;
 		}
+
+		l.log("Successfully mapped BAR0 memory for " + fillMe->getID(), LOG_DEBUG);
 
 		/* Read data from mapped memory */
 		bar0_ptr = (unsigned char*)bar0_mem;
@@ -1615,12 +1659,19 @@ ERROR:
 		fillMe->mSerialNumber.setValue(eeprom11s_sn.substr(7), 100, __FILE__, __LINE__);
 
                 /* Clean up memory mapping */
-                munmap(bar0_mem, reg.size);
+                if (munmap(bar0_mem, reg.size) < 0) {
+			l.log("Warning: Failed to unmap BAR0 memory for " + fillMe->getID() +
+					", errno: " + to_string(errno) + " (" + strerror(errno) + ")", LOG_WARNING);
+		} else {
+			l.log("Successfully unmapped BAR0 memory for " + fillMe->getID(), LOG_DEBUG);
+		}
 
 		/* Clean up file descriptors */
 		close(device_fd);
 		close(group_fd);
 		close(container_fd);
+
+		l.log("Successfully completed fillSpyreVpd for " + fillMe->getID(), LOG_INFO);
 	}
 
 	string SysFSTreeCollector::read11S(unsigned char* bar0_ptr)
