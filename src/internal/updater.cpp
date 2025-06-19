@@ -44,6 +44,7 @@
 #include <fcntl.h>
 #include <zlib.h>
 #include <cstdlib>
+#include <syslog.h>
 
 #include <libvpd-2/component.hpp>
 #include <libvpd-2/system.hpp>
@@ -116,6 +117,53 @@ void cleanupSpyreFiles(const string& env)
         if (access(spyreLockPath.c_str(), F_OK) == 0) {
                 unlink(spyreLockPath.c_str());
         }
+}
+
+/**
+ * @brief Print process hierarchy
+ */
+void logProcessHierarchy() {
+
+	pid_t current_pid = getpid();
+	string proc_path, process_name;
+	vector<string> hierarchy;
+	string hierarchy_str;
+
+	while (true) {
+		proc_path = "/proc/" + to_string(current_pid) + "/status";
+		ifstream status_file(proc_path);
+		string line, process_name;
+		pid_t parent_pid = -1;
+
+		if (status_file.is_open()) {
+			while (getline(status_file, line)) {
+				if (line.rfind("Name:", 0) == 0)
+					process_name = line.substr(6);
+				else if (line.rfind("PPid:", 0) == 0) {
+					parent_pid = stoi(line.substr(5));
+					break;
+				}
+			}
+			status_file.close();
+		}
+
+		hierarchy.push_back(process_name);
+
+		if (parent_pid <= 0 || parent_pid == current_pid)
+			break;
+
+		current_pid = parent_pid;
+	}
+
+	for (auto it = hierarchy.rbegin(); it != hierarchy.rend(); ++it) {
+		if (!hierarchy_str.empty()) {
+			hierarchy_str += " -> ";
+		}
+		hierarchy_str += *it;
+	}
+
+	syslog(LOG_INFO, "Process Hierarchy: %s", hierarchy_str.c_str());
+
 }
 
 int main( int argc, char** argv )
@@ -194,6 +242,7 @@ int main( int argc, char** argv )
 	Logger l;
 
 	l.log( "vpdupdate: Constructing full devices database", LOG_NOTICE );
+	logProcessHierarchy();
 	rc = initializeDB( limitSCSISize );
 
 	__lsvpdFini();
