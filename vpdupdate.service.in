@@ -1,0 +1,21 @@
+[Unit]
+Description=Vpdupdate Service
+# Run early but after basic system is ready
+After=sysinit.target
+After=systemd-modules-load.service
+# Run before containers can start
+Before=podman.service
+Before=docker.service
+Before=rtas_errd.service
+
+[Service]
+Type=oneshot
+# Log when service is triggered
+ExecStartPre=/bin/echo "vpdupdate.service triggered."
+ExecStart=/usr/sbin/vpdupdate
+ExecStartPost=/bin/echo "vpdupdate.service completed."
+RemainAfterExit=yes
+TimeoutStartSec=60
+
+[Install]
+WantedBy=basic.target

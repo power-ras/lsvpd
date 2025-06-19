@@ -70,5 +70,5 @@ AC_FUNC_STAT
 AC_CHECK_FUNCS([memmove memset mkdir socket strdup strerror strtol uname strchr strndup])
 
 #finished
-AC_CONFIG_FILES([Makefile lsvpd.spec])
+AC_CONFIG_FILES([Makefile lsvpd.spec vpdupdate.service])
 AC_OUTPUT

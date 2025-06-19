@@ -60,6 +60,10 @@ man8_MANS = man/lscfg.8 \
 	man/lsvpd.8 \
 	man/vpdupdate.8
 
+# Systemd service file
+systemdunitdir = $(prefix)/lib/systemd/system
+systemdunit_DATA = vpdupdate.service
+
 vpdupdate_LDADD = -lz -lstdc++ -lvpd_cxx
 if SGUTIL1
 vpdupdate_LDADD += -lsgutils
@@ -90,4 +94,4 @@ install-exec-hook:
 		${DESTDIR}/etc/lsvpd/cpu_mod_conv.conf
 
 EXTRA_DIST = $(man8_MANS) bootstrap.sh scsi_templates.conf cpu_mod_conv.conf \
-	     nvme_templates.conf
+	     nvme_templates.conf vpdupdate.service.in

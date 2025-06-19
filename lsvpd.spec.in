@@ -26,6 +26,8 @@ BuildRequires:	zlib-devel
 BuildRequires:	sg3_utils-devel
 BuildRequires:	automake
 BuildRequires:	libtool
+BuildRequires:  systemd-rpm-macros
+Requires:       systemd
 
 Recommends:     hwdata
 
@@ -55,9 +57,19 @@ systems.
 %{__make} install DESTDIR=$RPM_BUILD_ROOT
 
 %post
+# Post-install script for vpdupdate
+# Always enable the service
+systemctl -q enable vpdupdate.service >/dev/null 2>&1 || :
+systemctl daemon-reload >/dev/null 2>&1 || :
+
 %{_sbindir}/vpdupdate &
 # Ignore the vpdupdate failures and enforce a success
 exit 0
+
+%preun
+# Pre-uninstall script for vpdupdate
+systemctl -q disable vpdupdate.service >/dev/null 2>&1 || :
+systemctl daemon-reload >/dev/null 2>&1 || :
 
 %files
 %defattr(-,root,root,-)
@@ -76,6 +88,7 @@ exit 0
 %config %{_sysconfdir}/lsvpd/nvme_templates.conf
 %config %{_sysconfdir}/lsvpd/cpu_mod_conv.conf
 %dir %{_sysconfdir}/lsvpd
+%{_unitdir}/vpdupdate.service
 
 
 %changelog
