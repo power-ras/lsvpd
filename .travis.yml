@@ -8,7 +8,7 @@ services: docker
 env:
     matrix:
     - RUN_ON_CONTAINER=fedora-37
-    - RUN_ON_CONTAINER=ubuntu-23.04
+    - RUN_ON_CONTAINER=ubuntu-24.04
 
 install:
     - docker build --pull -t ${RUN_ON_CONTAINER} -f lsvpd-ci/Dockerfile-${RUN_ON_CONTAINER} .
