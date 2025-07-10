@@ -1,6 +1,6 @@
 FROM fedora:37
 
 RUN dnf -y install gcc-g++ make sg3_utils-devel zlib-devel iprutils
-RUN dnf -y install libvpd-devel librtas-devel libtool automake rpm-build git
+RUN dnf -y install libvpd-devel librtas-devel libtool automake rpm-build git systemd-rpm-macros
 COPY . /build/
 WORKDIR /build
