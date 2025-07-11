@@ -1,3 +1,11 @@
+1.7.16: Mahesh Salgaonkar <mahesh@linux.ibm.com> - Fri Jul 11 2025
+- Add support for Spyre device VPD data collection and retention
+- Enhance lsvpd to use IPS output for serial numbers and machine type/model
+- Add systemd service support for vpdupdate
+- Improve SCSI page code detection and fix comparison logic
+- Add device information display in tuple format
+- Update CI infrastructure (Ubuntu 24.04, fix Fedora 37 builds)
+
 1.7.15: Mahesh Salgaonkar <mahesh@linux.ibm.com> - Mon Sep 25 2023
 - Display additional VPD information for NVMe devices
 - Report correct microcode information for I/O devices
