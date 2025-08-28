@@ -399,6 +399,10 @@ void printVPD( Component* root )
 					printField( root->getSerialNumberHN( ),
 						    root->getSerialNumber( ) );
 
+                if( root->getFeatureCode( ) != "" )
+                    printField( root->getFeatureCodeHN( ),
+                            root->getFeatureCode( ) );
+
 				if( root->getFirmwareVersion( ) != "" )
 					printField( root->getFirmwareVersionHN( ),
 						    root->getFirmwareVersion( ) );
