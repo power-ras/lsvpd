@@ -1720,6 +1720,71 @@ ERROR:
 		return;
 	}
 
+	void SysFSTreeCollector::setCustomVPDFields(Component* fillMe,
+			int vendorId, int deviceId,
+			int subVendorId, int subDeviceId)
+	{
+		int sysPciId = (vendorId << 16) | deviceId;
+		int subSysPciId = (subVendorId << 16) | subDeviceId;
+
+		switch(sysPciId) {
+			case 0x15b31021: // Nvidia ConnectX-7 PF
+				switch (subSysPciId) {
+					case 0x15b30030:  // CX7 Fractal PF
+						fillMe->mPartNumber.setValue("03JP126", 95, __FILE__, __LINE__);
+						fillMe->mEngChangeLevel.setValue("P45996", 95, __FILE__, __LINE__);
+						fillMe->mFRU.setValue("03JP128", 95, __FILE__, __LINE__);
+						fillMe->mFeatureCode.setValue("EAPC / EAPD", 95, __FILE__, __LINE__);
+						fillMe->addDeviceSpecific("CE", "CCIN Extension", "EC26", 95);
+                        fillMe->mDescription.setValue(fillMe->mDescription.getValue() +
+                            " PCIe4 4-Port 25Gb/10Gb RoCE SFP28 Adapter", 95, __FILE__, __LINE__);
+						break;
+
+					case 0x15b30022:  // CX7 Onion Creek PF
+						fillMe->mPartNumber.setValue("03JP134", 95, __FILE__, __LINE__);
+						fillMe->mEngChangeLevel.setValue("P45997", 95, __FILE__, __LINE__);
+						fillMe->mFRU.setValue("03JP136", 95, __FILE__, __LINE__);
+						fillMe->mFeatureCode.setValue("EAPE / EAPF", 95, __FILE__, __LINE__);
+						fillMe->addDeviceSpecific("CE", "CCIN Extension", "EC2E", 95);
+                        fillMe->mDescription.setValue(fillMe->mDescription.getValue() +
+                            " PCIe5 2-Port 100GbE RoCE QSFP56 Adapter", 95, __FILE__, __LINE__);
+						break;
+
+					default:
+						break;
+				}
+				break;
+
+			case 0x15b3101e:  // NVIDIA ConnectX-7 SR-IOV (Vendor: 15b3, Device: 101e)
+				switch (subSysPciId) {
+					case 0x15b30030:  // CX7 Fractal SR-IOV
+						fillMe->mPartNumber.setValue("03JP126", 95, __FILE__, __LINE__);
+						fillMe->mEngChangeLevel.setValue("P45996", 95, __FILE__, __LINE__);
+						fillMe->mFRU.setValue("03JP128", 95, __FILE__, __LINE__);
+						fillMe->mFeatureCode.setValue("EAPC / EAPD", 95, __FILE__, __LINE__);
+						fillMe->addDeviceSpecific("CE", "CCIN Extension", "EC26", 95);
+                        fillMe->mDescription.setValue(fillMe->mDescription.getValue() +
+                            " PCIe4 4-Port 25Gb/10Gb RoCE SFP28 Adapter", 95, __FILE__, __LINE__);
+						break;
+
+					case 0x15b30022:  // CX7 Onion Creek SR-IOV
+						fillMe->mPartNumber.setValue("03JP134", 95, __FILE__, __LINE__);
+						fillMe->mEngChangeLevel.setValue("P45997", 95, __FILE__, __LINE__);
+						fillMe->mFRU.setValue("03JP136", 95, __FILE__, __LINE__);
+						fillMe->mFeatureCode.setValue("EAPE / EAPF", 95, __FILE__, __LINE__);
+						fillMe->addDeviceSpecific("CE", "CCIN Extension", "EC2E", 95);
+                        fillMe->mDescription.setValue(fillMe->mDescription.getValue() +
+                            " PCIe5 2-Port 100GbE RoCE QSFP56 Adapter", 95, __FILE__, __LINE__);
+						break;
+
+					default:
+						break;
+				}
+				break;
+			}
+	}
+
+
 	/* Parse VPD file */
 	void SysFSTreeCollector::fillPciDevVpd( Component* fillMe )
 	{
@@ -1833,6 +1898,9 @@ ERROR:
 
 		/* Fill PCI device VPD info */
 		fillPciDevVpd(fillMe);
+
+		/* Set custom VPD fields for specific devices */
+		setCustomVPDFields(fillMe, manID, devID, subMan, subID);
 
 		/* Fill NVME device VPD info using f1h log page */
 		fillPciNvmeVpd(fillMe);

@@ -206,6 +206,17 @@ namespace lsvpd
 			 */
 			void fillPCIDev( Component* fillMe, const string& sysDir );
 
+			/** Set custom VPD fields for specific devices based on
+			 * device/vendor IDs.
+			 * @param fillMe: Component to populate with custom VPD data
+			 * @param vendorId: PCI vendor ID
+			 * @param deviceId: PCI device ID
+			 * @param subVendorId: PCI subsystem vendor ID
+			 * @param subDeviceId: PCI subsystem device ID
+			 */
+			void setCustomVPDFields(Component* fillMe, int vendorId, int deviceId,
+					int subVendorId, int subDeviceId);
+
 			/**
 			 * Fill the Manufacturer name and Product description if the
 			 * vendor and product ids are available under /sys.
