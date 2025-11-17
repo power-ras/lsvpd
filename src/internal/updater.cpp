@@ -106,12 +106,13 @@ void __spyreDbFini()
  */
 void cleanupSpyreFiles(const string& env)
 {
-        __spyreDbFini();
 
         string spyreDbPath = env + "/" + SPYRE_DB_FILENAME;
         if (access(spyreDbPath.c_str(), F_OK) == 0) {
                 unlink(spyreDbPath.c_str());
         }
+
+        __spyreDbFini();
 
         string spyreLockPath = env + "/" + SPYRE_DB_FILENAME + "-updatelock";
         if (access(spyreLockPath.c_str(), F_OK) == 0) {
@@ -476,11 +477,11 @@ int __spyreDbInit()
        string spyreFullPath = env + "/" + SPYRE_DB_FILENAME;
        __spyreDbFini();
 
+       spyreDbLock = new VpdDbEnv::UpdateLock(env, SPYRE_DB_FILENAME, false);
+
        if (access(spyreFullPath.c_str(), F_OK) == 0) {
                unlink(spyreFullPath.c_str());
        }
-
-       spyreDbLock = new VpdDbEnv::UpdateLock(env, SPYRE_DB_FILENAME, false);
 
        spyreDb = new VpdDbEnv(*spyreDbLock);
        if (spyreDb == NULL)
