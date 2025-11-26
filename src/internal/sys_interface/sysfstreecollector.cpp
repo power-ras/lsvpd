@@ -1728,6 +1728,11 @@ ERROR:
 		int subSysPciId = (subVendorId << 16) | subDeviceId;
 
 		switch(sysPciId) {
+			case 0x101406A7:
+			case 0x101406A8:
+				fillMe->mFeatureCode.setValue("ECSE", 95, __FILE__, __LINE__);
+				fillMe->addDeviceSpecific( "CC", "Customer Card ID Number", "2E1F", 95);
+				break;
 			case 0x15b31021: // Nvidia ConnectX-7 PF
 				switch (subSysPciId) {
 					case 0x15b30030:  // CX7 Fractal PF
