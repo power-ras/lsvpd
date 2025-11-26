@@ -1105,6 +1105,100 @@ namespace lsvpd
 		return 0;
 	}
 
+
+int SysFSTreeCollector::interpretNVMEMiLog(Component *fillMe, char *data)
+{
+	string val;
+	val = strdupTrim(data + 4, 40);
+	if (val.length() > 0)
+		setVPDField(fillMe, "ID", val, __FILE__, __LINE__);
+
+	val = strdupTrim(data + 44, 12);
+	if (val.length() > 0)
+		setVPDField(fillMe, "PN", val, __FILE__, __LINE__);
+
+	val = strdupTrim(data + 56, 10);
+	if (val.length() > 0)
+		setVPDField(fillMe, "EC", val, __FILE__, __LINE__);
+
+	val = strdupTrim(data + 66, 12);
+	if (val.length() > 0)
+		setVPDField(fillMe, "FN", val, __FILE__, __LINE__);
+
+	val = strdupTrim(data + 78, 12);
+	if (val.length() > 0)
+		setVPDField(fillMe, "AN", val, __FILE__, __LINE__);
+
+	val = strdupTrim(data + 90, 4);
+	if (val.length() > 0)
+		setVPDField(fillMe, "FC", val, __FILE__, __LINE__);
+
+	val = strdupTrim(data + 94, 4);
+	if (val.length() > 0)
+		setVPDField(fillMe, "CC", val, __FILE__, __LINE__);
+
+	val = strdupTrim(data + 98, 8);
+	if (val.length() > 0)
+		setVPDField(fillMe, "SN", val, __FILE__, __LINE__);
+
+	val = strdupTrim(data + 106, 8);
+	if (val.length() > 0)
+		setVPDField(fillMe, "Z0", val, __FILE__, __LINE__);
+
+	val = strdupTrim(data + 114, 4);
+	if (val.length() > 0)
+		setVPDField(fillMe, "Z1", val, __FILE__, __LINE__);
+
+	val = strdupTrim(data + 118, 10);
+	if (val.length() > 0)
+		setVPDField(fillMe, "Z2", val, __FILE__, __LINE__);
+
+	val = strdupTrim(data + 128, 12);
+	if (val.length() > 0)
+		setVPDField(fillMe, "Z3", val, __FILE__, __LINE__);
+
+	val = strdupTrim(data + 140, 1);
+	if (val.length() > 0)
+		setVPDField(fillMe, "Z4", val, __FILE__, __LINE__);
+
+	val = strdupTrim(data + 141, 2);
+	if (val.length() > 0)
+		setVPDField(fillMe, "Z5", val, __FILE__, __LINE__);
+
+	val = strdupTrim(data + 143, 8);
+	if (val.length() > 0)
+		setVPDField(fillMe, "Z6", val, __FILE__, __LINE__);
+
+	val = strdupTrim(data + 151, 3);
+	if (val.length() > 0)
+		setVPDField(fillMe, "Z7", val, __FILE__, __LINE__);
+
+	val = strdupTrim(data + 154, 5);
+	if (val.length() > 0)
+		setVPDField(fillMe, "Z8", val, __FILE__, __LINE__);
+
+	val = strdupTrim(data + 159, 2);
+	if (val.length() > 0)
+		setVPDField(fillMe, "Z9", val, __FILE__, __LINE__);
+
+	val = strdupTrim(data + 161, 4);
+	if (val.length() > 0)
+		setVPDField(fillMe, "ZA", val, __FILE__, __LINE__);
+
+	val = strdupTrim(data + 165, 4);
+	if (val.length() > 0)
+		setVPDField(fillMe, "ZB", val, __FILE__, __LINE__);
+
+	val = strdupTrim(data + 169, 2);
+	if (val.length() > 0)
+		setVPDField(fillMe, "ZC", val, __FILE__, __LINE__);
+
+	val = strdupTrim(data + 171, 20);
+	if (val.length() > 0)
+		setVPDField(fillMe, "MN", val, __FILE__, __LINE__);
+	return 0;
+}
+
         int SysFSTreeCollector::interpretNVMEf1hLogPage(Component *fillMe, char *data)
 	{
 		int eof[50]; // version 0001 has 24 ',' separated fields, more for future
@@ -1193,6 +1287,27 @@ namespace lsvpd
 	}
 
 
+int nvme_read_mi_vpd(int device_fd, void *buf)
+{
+	struct nvme_admin_cmd cmd = {0};
+
+	cmd.opcode = NVME_MI_CMD_RECEIVE;
+	cmd.nsid = 0;
+	cmd.addr = (__u64)(uintptr_t) buf;
+	cmd.data_len = NVME_MI_VPD_DATA_LEN;
+
+	cmd.cdw10 = 0x804;
+	cmd.cdw11 = 0x5;
+	cmd.cdw13 = NVME_MI_VPD_DATA_LEN;
+
+	int rc = ioctl(device_fd, NVME_IOCTL_ADMIN_CMD, &cmd);
+
+	if (rc == 0)
+		return 0;
+
+	return -1;
+}
+
         int nvme_read_vpd(int device_fd, void *buf)
 	{
 		int rc, ret = -1;
@@ -1232,14 +1347,19 @@ namespace lsvpd
 	{
 		int rc;
 		char data[NVME_VPD_INFO_SIZE];
+		char mi_data[NVME_MI_VPD_DATA_LEN];
 
 		rc = nvme_read_vpd(device_fd, data);
-		if (rc)
+		if (rc == 0) {
+			rc = interpretNVMEf1hLogPage(fillMe, data);
 			return rc;
+		}
 
-		rc = interpretNVMEf1hLogPage(fillMe, data);
-		if (rc)
+		rc = nvme_read_mi_vpd(device_fd, mi_data);
+		if (rc == 0) {
+			rc = interpretNVMEMiLog(fillMe, mi_data);
 			return rc;
+		}
 
 		return 0;
 	}

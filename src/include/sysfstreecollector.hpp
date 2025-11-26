@@ -67,6 +67,10 @@ namespace lsvpd
 	/* NVME f1h log page VPD size */
 	#define NVME_VPD_INFO_SIZE		1024
 
+	/* NVMe-MI Receive Opcode */
+	#define NVME_MI_CMD_RECEIVE     0x1E
+	#define NVME_MI_VPD_DATA_LEN    256
+
 	/**
 	 * SysFSTreeCollector contains the logic for device discovery and VPD
 	 * retrieval from /sys and sg_utils.
@@ -125,6 +129,7 @@ namespace lsvpd
 			// nvme specific
 		        int load_nvme_templates(const string& filename);
 			int interpretNVMEf1hLogPage(Component *fillMe, char *data);
+			int interpretNVMEMiLog(Component *fillMe, char *data);
 
 			// scsi specific
 			int load_scsi_templates(const string&);
