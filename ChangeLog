@@ -1,3 +1,11 @@
+1.7.17: Sathvika Vasireddy <sv@linux.ibm.com> - Tue Dec 2 2025
+- Add NVME-MI support for VPD data collection from NVMe devices.
+- Enhance tools to display custom VPD for Nvidia-specific adapters.
+- Enhance tools to display FC, CCIN VPD information for Spyre cards.
+- Enhance lscfg verbose output to include Feature Code field display.
+- Resolve critical race conditions that could cause SQLite logic errors
+under concurrent access.
+
 1.7.16: Mahesh Salgaonkar <mahesh@linux.ibm.com> - Fri Jul 11 2025
 - Add support for Spyre device VPD data collection and retention
 - Enhance lsvpd to use IPS output for serial numbers and machine type/model
