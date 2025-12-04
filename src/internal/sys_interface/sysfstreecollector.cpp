@@ -1731,6 +1731,7 @@ ERROR:
 			case 0x101406A7:
 			case 0x101406A8:
 				fillMe->mFeatureCode.setValue("ECSE", 95, __FILE__, __LINE__);
+				fillMe->mFRU.setValue("03PN188", 100, __FILE__, __LINE__);
 				fillMe->addDeviceSpecific( "CC", "Customer Card ID Number", "2E1F", 95);
 				break;
 			case 0x15b31021: // Nvidia ConnectX-7 PF
