@@ -1742,8 +1742,8 @@ ERROR:
 						fillMe->mFRU.setValue("03JP128", 95, __FILE__, __LINE__);
 						fillMe->mFeatureCode.setValue("EAPC / EAPD", 95, __FILE__, __LINE__);
 						fillMe->addDeviceSpecific("CE", "CCIN Extension", "EC26", 95);
-                        fillMe->mDescription.setValue(fillMe->mDescription.getValue() +
-                            " PCIe4 4-Port 25Gb/10Gb RoCE SFP28 Adapter", 95, __FILE__, __LINE__);
+						fillMe->mDescription.setValue(fillMe->mDescription.getValue() +
+								" PCIe4 4-Port 25Gb/10Gb/1Gb RoCE SFP28 Adapter", 95, __FILE__, __LINE__);
 						break;
 
 					case 0x15b30022:  // CX7 Onion Creek PF
@@ -1752,8 +1752,8 @@ ERROR:
 						fillMe->mFRU.setValue("03JP136", 95, __FILE__, __LINE__);
 						fillMe->mFeatureCode.setValue("EAPE / EAPF", 95, __FILE__, __LINE__);
 						fillMe->addDeviceSpecific("CE", "CCIN Extension", "EC2E", 95);
-                        fillMe->mDescription.setValue(fillMe->mDescription.getValue() +
-                            " PCIe5 2-Port 100GbE RoCE QSFP56 Adapter", 95, __FILE__, __LINE__);
+						fillMe->mDescription.setValue(fillMe->mDescription.getValue() +
+								" PCIe5 2-Port 200GbE RoCE QSFP56 Adapter", 95, __FILE__, __LINE__);
 						break;
 
 					default:
@@ -1769,8 +1769,8 @@ ERROR:
 						fillMe->mFRU.setValue("03JP128", 95, __FILE__, __LINE__);
 						fillMe->mFeatureCode.setValue("EAPC / EAPD", 95, __FILE__, __LINE__);
 						fillMe->addDeviceSpecific("CE", "CCIN Extension", "EC26", 95);
-                        fillMe->mDescription.setValue(fillMe->mDescription.getValue() +
-                            " PCIe4 4-Port 25Gb/10Gb RoCE SFP28 Adapter", 95, __FILE__, __LINE__);
+						fillMe->mDescription.setValue(fillMe->mDescription.getValue() +
+								" PCIe4 4-Port 25Gb/10Gb/1Gb RoCE SFP28 Adapter", 95, __FILE__, __LINE__);
 						break;
 
 					case 0x15b30022:  // CX7 Onion Creek SR-IOV
@@ -1779,8 +1779,8 @@ ERROR:
 						fillMe->mFRU.setValue("03JP136", 95, __FILE__, __LINE__);
 						fillMe->mFeatureCode.setValue("EAPE / EAPF", 95, __FILE__, __LINE__);
 						fillMe->addDeviceSpecific("CE", "CCIN Extension", "EC2E", 95);
-                        fillMe->mDescription.setValue(fillMe->mDescription.getValue() +
-                            " PCIe5 2-Port 100GbE RoCE QSFP56 Adapter", 95, __FILE__, __LINE__);
+						fillMe->mDescription.setValue(fillMe->mDescription.getValue() +
+								" PCIe5 2-Port 200GbE RoCE QSFP56 Adapter", 95, __FILE__, __LINE__);
 						break;
 
 					default:
