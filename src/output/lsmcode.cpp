@@ -60,6 +60,7 @@
 
 using namespace std;
 using namespace lsvpd;
+static Logger logger("lsmcode");
 
 extern char *optarg;
 extern int optind, opterr, optopt;
@@ -118,7 +119,7 @@ static string get_ipmitool_path(void)
 	ostringstream err;
 	err << "ipmitool command not found. "
 		"Please install ipmitool and retry.";
-	Logger().log( err.str(), LOG_NOTICE);
+	logger.log( err.str(), LOG_NOTICE );
 	cout << err.str() << endl;
 
 	return string();
@@ -131,27 +132,36 @@ static string bmc_get_fw_fru_info(string ipmitool, string interface)
 	string fruData, fwData;
 	size_t start, end;
 
-	if (HelperFunctions::execCmd(cmd.c_str(), fruData))
+	if (HelperFunctions::execCmd(cmd.c_str(), fruData)) {
+		logger.log( "ipmitool command failed: " + cmd, LOG_ERR );
 		return string();
+	}
 
 	start = fruData.find("System Firmware");
-	if (start == string::npos)
-		goto parse_err;
+	if (start == string::npos) {
+		logger.log("'System Firmware' section not found in ipmitool fru output"
+			   " (interface: " + interface + ")", LOG_WARNING);
+		return string();
+	}
 
 	/* Discard header */
 	start = fruData.find("\n", start);
-	if (start == string::npos)
-		goto parse_err;
+	if (start == string::npos) {
+		logger.log("failed to find newline after 'System Firmware' header"
+			   " (interface: " + interface + ")", LOG_WARNING);
+		return string();
+	}
 
 	end = fruData.find("FRU Device Description", start);
-	if (end == string::npos)
-		goto parse_err;
+	if (end == string::npos) {
+		logger.log("failed to find 'FRU Device Description' boundary"
+			   " while parsing ipmitool output"
+			   " (interface: " + interface + ")", LOG_WARNING);
+		return string();
+	}
 
 	fwData = fruData.substr(start, end - start - 1);
 	return fwData;
-
-parse_err:
-	return string();
 }
 
 static string read_dt_property(const string& path, const string& attrName)
@@ -168,7 +178,7 @@ static string read_dt_property(const string& path, const string& attrName)
 		ostringstream os;
 		if (errno != ENOENT) {
 			os << "Error statting " << fullPath << ", errno: " << errno;
-			Logger().log( os.str( ), LOG_ERR );
+			logger.log( os.str( ), LOG_ERR );
 		}
 		return ret;
 	}
@@ -181,7 +191,7 @@ static string read_dt_property(const string& path, const string& attrName)
 	catch (std::ifstream::failure &e) {
 		ostringstream os;
 		os << "Error opening " << fullPath;
-		Logger().log(os.str( ), LOG_WARNING);
+		logger.log(os.str( ), LOG_WARNING);
 		return ret;
 	}
 
@@ -219,9 +229,11 @@ static string bmc_get_fw_dt_info(void)
 
 	pDBdir = opendir(FW_VERSION_DT_NODE);
 	if (pDBdir == NULL) {
+		int saved_errno = errno;
 		stringstream os;
-		os << "Error opening directory " << FW_VERSION_DT_NODE << endl;
-		Logger().log(os.str( ), LOG_ERR);
+		os << "lsmcode: error opening firmware DT directory "
+		   << FW_VERSION_DT_NODE << ": " << strerror(saved_errno);
+		logger.log(os.str( ), LOG_ERR);
 		return string("");
 	}
 
@@ -316,10 +328,21 @@ bool printSystem( const vector<Component*>& leaves )
 	if (PlatformCollector::isBMCBasedSystem()) {
 		string fwData;
 		if (!access(FW_VERSION_DT_NODE, F_OK | R_OK)) {
+			if (debug)
+				logger.log("reading firmware info from DT node: "
+					   + string(FW_VERSION_DT_NODE), LOG_INFO);
 			fwData = bmc_get_fw_dt_info();
-			if (fwData.empty())
+			if (fwData.empty()) {
+				logger.log("bmc_get_fw_dt_info returned no data"
+					   " from " + string(FW_VERSION_DT_NODE), LOG_ERR);
 				return false;
+			}
 		} else {
+			int saved_errno = errno;
+			if (debug)
+				logger.log("DT node " + string(FW_VERSION_DT_NODE) +
+					   " not accessible (" + strerror(saved_errno) +
+					   "), falling back to ipmitool", LOG_INFO);
 			string ipmitool = get_ipmitool_path();
 			if (ipmitool.empty())
 				return false;
@@ -330,10 +353,14 @@ bool printSystem( const vector<Component*>& leaves )
 			 */
 			fwData = bmc_get_fw_fru_info(ipmitool, string(" -I usb fru"));
 			if (fwData.empty()) {
+				if (debug)
+					logger.log("USB ipmitool interface failed,"
+						   " retrying with in-band interface", LOG_INFO);
 				fwData = bmc_get_fw_fru_info(ipmitool, string(" fru"));
 				if (fwData.empty()) {
-					cerr << "Failed to get System Firmware \
-						information" << endl;
+					logger.log("all ipmitool interfaces failed,"
+						   " cannot retrieve system firmware info", LOG_ERR);
+					cerr << "Failed to get System Firmware information" << endl;
 					return false;
 				}
 			}
@@ -574,6 +601,7 @@ int main( int argc, char** argv )
 	VpdRetriever* vpd = NULL;
 	int index, first = 1;
 	int rc = 1;
+
 	string platform = PlatformCollector::get_platform_name();
 
 	switch (PlatformCollector::platform_type) {
@@ -581,8 +609,8 @@ int main( int argc, char** argv )
 		rc = 0;
 	case PF_NULL:	/* Fall through */
 	case PF_ERROR:
-		cout<< "lsmcode is not supported on the "
-			<< platform << " platform" << endl;
+		logger.log("unsupported platform detected: " + platform, LOG_ERR);
+		cout << "lsmcode is not supported on the " << platform << " platform" << endl;
 		return rc;
 	default:
 		;
@@ -601,6 +629,7 @@ int main( int argc, char** argv )
 	};
 
 	if (geteuid() != 0) {
+		logger.log("must be run as root (euid=" + to_string(geteuid()) + ")", LOG_ERR);
 		cout << "Must be run as root!" << endl;
 		return -1;
 	}
@@ -672,11 +701,16 @@ int main( int argc, char** argv )
 		string env, db;
 		int index;
 
+		if( debug )
+			logger.log("using " + string(compressed ? "compressed " : "") + "DB path: " + path, LOG_INFO);
+
 		if( compressed )
 		{
 			gzFile gzf = gzopen( path.c_str( ), "rb" );
 			if( gzf == NULL )
 			{
+				int saved_errno = errno;
+				logger.log("gzopen failed for " + path + ": " + strerror(saved_errno), LOG_ERR);
 				cout << "Failed to open database archive " << path << endl;
 				return 1;
 			}
@@ -687,9 +721,10 @@ int main( int argc, char** argv )
 				       S_IRGRP | S_IWUSR | S_IRUSR | S_IROTH );
 			if( fd < 0 )
 			{
+				int saved_errno = errno;
 				gzclose( gzf );
-				cout << "Failed to open file for uncompressed database archive"
-					<< endl;
+				logger.log("open failed for decompressed DB " + path + ": " + strerror(saved_errno), LOG_ERR);
+				cout << "Failed to open file for uncompressed database archive" << endl;
 				return 1;
 			}
 
@@ -710,8 +745,9 @@ int main( int argc, char** argv )
 			if( gzclose( gzf ) != 0 )
 			{
 				int err;
-				cout << "Error reading archive " << path << ".gz: " <<
-					gzerror( gzf, &err ) << endl;
+				const char *gzerr = gzerror( gzf, &err );
+				logger.log("gzclose/read error on " + path + ".gz: " + string(gzerr), LOG_ERR);
+				cout << "Error reading archive " << path << ".gz: " << gzerr << endl;
 				return 1;
 			}
 		}
@@ -723,12 +759,17 @@ int main( int argc, char** argv )
 			env = path.substr( 0, index + 1 );
 
 		db = path.substr( index + 1 );
+
+		if( debug )
+			logger.log("opening DB env=" + env + " db=" + db, LOG_INFO);
+
 		try
 		{
 			vpd = new VpdRetriever( env, db );
 		}
 		catch( exception& e )
 		{
+			logger.log("failed to open VPD DB " + path + ": " + string(e.what()), LOG_ERR);
 			cout << "Unable to process vpd DB " << path << ". Possibly corrupted DB" << endl;
 			cout << "Please run vpdupdate command, before running lsmcode." << endl;
 			return 1;
@@ -736,6 +777,9 @@ int main( int argc, char** argv )
 	}
 	else
 	{
+		if( debug )
+			logger.log("using default VPD DB path", LOG_INFO);
+
 		try
 		{
 			vpd = new VpdRetriever( );
@@ -743,6 +787,7 @@ int main( int argc, char** argv )
 		catch( exception& e )
 		{
 			string prefix( DEST_DIR );
+			logger.log("failed to open default VPD DB: " + string(e.what()), LOG_ERR);
 			cout << "Please run " << prefix;
 			if( prefix[ prefix.length( ) - 1 ] != '/' )
 			{
@@ -761,6 +806,7 @@ int main( int argc, char** argv )
 		}
 		catch( VpdException& ve )
 		{
+			logger.log("getComponentTree failed: " + string(ve.what()), LOG_ERR);
 			cout << "Error reading VPD DB: " << ve.what( ) << endl;
 			cout << "Please run vpdupdate command, before running lsmcode." << endl;
 			delete vpd;
@@ -772,6 +818,8 @@ int main( int argc, char** argv )
 
 	if( root != NULL )
 	{
+		if( debug )
+			logger.log("component tree loaded successfully", LOG_INFO);
 		printVPD( root );
 		delete root;
 	}
