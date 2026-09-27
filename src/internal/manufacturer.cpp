@@ -113,6 +113,8 @@ namespace lsvpd
 	{
 		if( mID == UNKNOWN_ID )
 		{
+			Logger logger;
+			logger.log( "Unknown manufacturer ID", LOG_DEBUG );
 			return &Device::DEFAULT_DEV;
 		}
 
