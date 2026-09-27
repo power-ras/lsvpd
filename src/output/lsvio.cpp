@@ -27,6 +27,7 @@
 #include <libvpd-2/dataitem.hpp>
 #include <libvpd-2/system.hpp>
 #include <libvpd-2/debug.hpp>
+#include <libvpd-2/logger.hpp>
 #include <platformcollector.hpp>
 
 #include <iostream>
@@ -49,6 +50,13 @@
 
 using namespace std;
 using namespace lsvpd;
+static Logger logger("lsvio");
+
+#define LOG_AND_PRINT(msg, level) \
+	do { \
+		logger.log((msg), (level)); \
+		cout << (msg) << endl; \
+	} while(0)
 
 extern char *optarg;
 extern int optind, opterr, optopt;
@@ -223,10 +231,11 @@ int main( int argc, char** argv )
 	case PF_OPAL:		/* Fall through */
 		rc = 0;
 	case PF_NULL:	/* Fall through */
-	case PF_ERROR:
-		cout<< "lsvio is not supported on the "
-			<< platform << " platform" << endl;
+	case PF_ERROR: {
+		string msg = "lsvio is not supported on the " + platform + " platform";
+		LOG_AND_PRINT(msg, LOG_ERR);
 		return rc;
+	}
 	default:
 		;
 	}
@@ -245,7 +254,7 @@ int main( int argc, char** argv )
 	};
 
 	if (geteuid() != 0) {
-		cout << "Must be run as root!" << endl;
+		LOG_AND_PRINT("Must be run as root!", LOG_ERR);
 		return -1;
 	}
 
@@ -320,7 +329,7 @@ int main( int argc, char** argv )
 			gzFile gzf = gzopen( path.c_str( ), "rb" );
 			if( gzf == NULL )
 			{
-				cout << "Failed to open database archive " << path << endl;
+				LOG_AND_PRINT("Failed to open database archive " + path, LOG_ERR);
 				return 1;
 			}
 
@@ -331,8 +340,7 @@ int main( int argc, char** argv )
 			if( fd < 0 )
 			{
 				gzclose( gzf );
-				cout << "Failed to open file for uncompressed database archive"
-					<< endl;
+				LOG_AND_PRINT("Failed to open file for uncompressed database archive", LOG_ERR);
 				return 1;
 			}
 
@@ -353,8 +361,7 @@ int main( int argc, char** argv )
 			if( gzclose( gzf ) != 0 )
 			{
 				int err;
-				cout << "Error reading archive " << path << ".gz: " <<
-					gzerror( gzf, &err ) << endl;
+				LOG_AND_PRINT("Error reading archive " + path + ".gz: " + gzerror( gzf, &err ), LOG_ERR);
 				return 1;
 			}
 		}
@@ -382,6 +389,7 @@ int main( int argc, char** argv )
 				cout << "/";
 			}
 			cout << "sbin/vpdupdate before running lsvio." << endl;
+			logger.log("failed to get VPD data: " + db, LOG_ERR);
 			return 1;
 		}
 	}
@@ -400,6 +408,7 @@ int main( int argc, char** argv )
 				cout << "/";
 			}
 			cout << "sbin/vpdupdate before running lsvio." << endl;
+			logger.log("Failed to instantiate VPD", LOG_ERR);
 			return 1;
 		}
 	}
@@ -412,7 +421,7 @@ int main( int argc, char** argv )
 		}
 		catch( VpdException& ve )
 		{
-			cout << "Error reading VPD DB: " << ve.what( ) << endl;
+			LOG_AND_PRINT("Error reading VPD DB: " + string(ve.what( )), LOG_ERR);
 			cout << "Please run vpdupdate command, before running lsvio." << endl;
 			delete vpd;
 			return 1;
@@ -425,7 +434,7 @@ int main( int argc, char** argv )
 	{
 		if( root->getDevTreeNode( ) == "" )
 		{
-			cout << "lsvio is only implemented on systems that support virtual IO." << endl;
+			LOG_AND_PRINT("lsvio is only implemented on systems that support virtual IO.", LOG_ERR);
 			delete root;
 			return 0;
 		}
