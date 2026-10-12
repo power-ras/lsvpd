@@ -92,6 +92,10 @@ systemctl daemon-reload >/dev/null 2>&1 || :
 
 
 %changelog
+* Mon Oct 12 2026 - Sourabh Jain <sourabhjain@linux.ibm.com> - 1.7.18
+- FRU number reporting for Spyre cards
+- Update Nvidia adapter descriptions for Fractal and Onion Creek cards
+
 * Tue Dec 2 2025 - Sathvika Vasireddy <sv@linux.ibm.com> - 1.7.17
 - Add NVME-MI support for VPD data collection from NVMe devices.
 - Enhance tools to display custom VPD for Nvidia-specific adapters.
