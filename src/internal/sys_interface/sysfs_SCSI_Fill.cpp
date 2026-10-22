@@ -306,8 +306,7 @@ namespace lsvpd
 		    || (type ==  "raid")) {
 			// Check for SCSI *Multimedia* CD-ROM Drive.
 			if (subtype == 5) {
-				cdtype = ((NULL != data) &&
-					  (34 <= strlen(data))) ?
+				cdtype = ((NULL != data) && (34 <= dataSize)) ?
 					(int) data[33] : 0;
 
 				// Find CDROM type string
@@ -322,7 +321,8 @@ namespace lsvpd
 
 			}
 			else {
-				if (subtype == 0 && (81 == data[34])) {
+				if ((subtype == 0) && (NULL != data) &&
+				    (35 <= dataSize) && (81 == data[34])) {
 					subtypeDS = "LVD " + ds;
 					//                    label = ((0 == subtype) && (NULL != data)
 					//                        && (7 == data[34])) ?
