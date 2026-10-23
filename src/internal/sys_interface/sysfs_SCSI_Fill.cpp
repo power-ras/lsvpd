@@ -657,14 +657,16 @@ namespace lsvpd
 		int beg, end;
 		string result;
 		char *tmp;
+		if (buf == NULL)
+			return "";
 
 		beg = 0;
 		while	(beg < maxLen &&
-			 (buf[beg] == 32 || buf[beg] == '\n'))
+			 (buf[beg] == ' ' || buf[beg] == '\n'))
 			beg++;
 
-		end = beg + maxLen;
-		while	(end > beg && buf[end] == 32)
+		end = maxLen;
+		while	(end > beg && buf[end-1] == ' ')
 			end--;
 
 		tmp = strndup(buf + beg, end - beg);
