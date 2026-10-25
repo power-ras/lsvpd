@@ -358,6 +358,13 @@ int main( int argc, char** argv )
 				return 1;
 			}
 		}
+		path.erase(0, path.find_first_not_of(" "));
+		path.erase(path.find_last_not_of(" ") + 1);
+		if (path.empty() || path[0] != '/' || path.back() == '/')
+		{
+			cerr << "Error: database path must be an absolute path including a filename." << endl;
+			return 1;
+		}
 
 		index = path.rfind( "/" );
 		env = path.substr( 0, index + 1 );
