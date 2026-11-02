@@ -46,7 +46,9 @@
 #include <cstdlib>
 #include <cstring>
 #include <cerrno>
+#include <climits>
 #include <sstream>
+#include <cctype>
 
 using namespace std;
 
@@ -829,8 +831,24 @@ ERROR:
 		if (strlen(portNum) == 0)
 			return string("");
 
-		maxChild  = atoi(string(getAttrValue
-				( gGGParent->sysFsNode.dataValue.c_str(), "/maxchild")).c_str());
+		string maxChildStr = getAttrValue(
+		        gGGParent->sysFsNode.dataValue.c_str(), "/maxchild");
+
+		char *end = NULL;
+		errno = 0;
+		long parsedMaxChild = strtol(maxChildStr.c_str(), &end, 10);
+		bool conversionFailed = (end == maxChildStr.c_str());
+
+		while (isspace(static_cast<unsigned char>(*end))) {
+		    ++end;
+		}
+
+		if (conversionFailed || errno == ERANGE || *end != '\0' ||
+	            parsedMaxChild < 0 || parsedMaxChild > INT_MAX) {
+		    return string("");
+		}
+
+		maxChild = static_cast<int>(parsedMaxChild);
 
 		i = atoi(busNum);
 		if ( i > 1 ) {
