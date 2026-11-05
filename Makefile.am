@@ -8,6 +8,7 @@ update_h_files = src/include/device.hpp \
 		src/include/platformcollector.hpp \
 		src/include/devicetreecollector.hpp \
 		src/include/subdevice.hpp \
+		src/include/spyre_utils.hpp \
 		src/include/rtascollector.hpp \
 		src/include/sysfstreecollector.hpp
 

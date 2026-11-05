@@ -30,6 +30,7 @@
 #define _XOPEN_SOURCE 500 // For pread
 
 #include <sysfstreecollector.hpp>
+#include <spyre_utils.hpp>
 
 #include <libvpd-2/helper_functions.hpp>
 #include <libvpd-2/debug.hpp>
@@ -1449,8 +1450,8 @@ ERROR:
 		device_stream.getline(device_id, sizeof(device_id));
 		device_stream.close();
 
-		/* Check if the device is Spyre (device ID 0x06a7 or 0x06a8) */
-		if (strcmp(device_id, "0x06a7") != 0 && strcmp(device_id, "0x06a8") != 0)
+		/* Check if the device is Spyre */
+		if (!isSpyreDeviceId(string(device_id)))
 			return;
 
 		l.log("Confirmed Spyre device " + fillMe->getID() + " with ID: " + string(device_id), LOG_INFO);

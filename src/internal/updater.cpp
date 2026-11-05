@@ -53,6 +53,7 @@
 #include <libvpd-2/logger.hpp>
 #include <libvpd-2/vpddbenv.hpp>
 #include <gatherer.hpp>
+#include <spyre_utils.hpp>
 #include <devicetreecollector.hpp>
 #include <platformcollector.hpp>
 
@@ -426,7 +427,7 @@ bool isSpyreDevice(Component* comp)
                getline(deviceStream, deviceId);
                deviceStream.close();
 
-               if (deviceId == "0x06a7" || deviceId == "0x06a8") {
+               if (lsvpd::isSpyreDeviceId(deviceId)) {
                        Logger l;
                        l.log("Found Spyre device at: " + id, LOG_NOTICE);
                        return true;
