@@ -267,6 +267,7 @@ namespace lsvpd
 		for( cur = kids.begin( ); cur != kids.end(); ++cur )
 		{
 			next = NULL;
+			ret = false;
 			for( i = devs.begin( ); i != devs.end(); ++i )
 				if( (*i)->idNode.dataValue == (*cur) )
 				{
@@ -321,6 +322,7 @@ namespace lsvpd
 		for( cur = kids.begin( ); cur != kids.end(); ++cur )
 		{
 			next = NULL;
+			ret = false;
 			for( i = devs.begin( ), end = devs.end( ); i != end; ++i )
 			{
 				if( (*i)->idNode.dataValue == (*cur) )
