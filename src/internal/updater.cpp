@@ -59,6 +59,13 @@
 
 using namespace lsvpd;
 using namespace std;
+static Logger logger("vpdupdate: ");
+
+#define LOG_AND_PRINT(msg, level) \
+	do { \
+		logger.log((msg), (level)); \
+		cout << (msg) << endl; \
+	} while(0)
 
 int initializeDB( bool limitSCSI );
 int storeComponents( System* root, VpdDbEnv& db );
@@ -87,6 +94,7 @@ VpdDbEnv::UpdateLock *dblock;
 string env = DB_DIR, file = DB_FILENAME;
 
 extern std::map<std::string, bool> g_deviceAccessible;
+
 
 /**
  * @brief Cleans up resources allocated by __spyreDbInit()
@@ -164,7 +172,7 @@ void logProcessHierarchy() {
 		hierarchy_str += *it;
 	}
 
-	syslog(LOG_INFO, "Process Hierarchy: %s", hierarchy_str.c_str());
+	logger.log("Process Hierarchy: " + hierarchy_str, LOG_INFO);
 
 }
 
@@ -175,17 +183,21 @@ int main( int argc, char** argv )
 	int index = 0, rc = 1;
 	bool limitSCSISize = false;
 	VpdDbEnv::UpdateLock *lock;
+
+	logger.log( "Starting vpdupdate command", LOG_DEBUG );
+
 	string platform = PlatformCollector::get_platform_name();
+	logger.log( "Detected platform: " + platform, LOG_DEBUG );
 
 	switch (PlatformCollector::platform_type) {
 	case PF_PSERIES_KVM_GUEST: /* Fall through */
 		rc = 0;
 	case PF_NULL:	/* Fall through */
 	case PF_ERROR:
-		cout<< "vpdupdate is not supported on the " <<
-			platform << " platform" << endl;
+		LOG_AND_PRINT( "vpdupdate is not supported on the " + platform + " platform", LOG_WARNING );
 		return rc;
 	default:
+		logger.log( "Platform supported, continuing", LOG_NOTICE );
 		;
 	}
 
@@ -237,18 +249,20 @@ int main( int argc, char** argv )
 
 	/* Test to see if running as root: */
 	if (!isRoot()) {
-		cout << "vpdupdate must be run as root" << endl;
+		LOG_AND_PRINT( "vpdupdate must be run as root", LOG_WARNING );
 		return -1;
 	}
 
-	Logger l;
-
-	l.log( "vpdupdate: Constructing full devices database", LOG_NOTICE );
+	logger.log( "Constructing full devices database", LOG_NOTICE );
 	logProcessHierarchy();
 	rc = initializeDB( limitSCSISize );
 
+	logger.log( "Database initialization returned: " + to_string(rc), LOG_NOTICE );
+
 	__lsvpdFini();
 	cleanupSpyreFiles(env);
+
+	logger.log( "Command completed", LOG_NOTICE );
 	return rc;
 }
 
@@ -264,7 +278,6 @@ void removeOldArchiveDB(void)
 {
 	int n, fp;
 	struct dirent **namelist;
-	Logger logger;
 
 	n = scandir(env.c_str(), &namelist, NULL, alphasort);
 	if (n <= 0) {
@@ -303,7 +316,6 @@ void removeOldArchiveDB(void)
 void archiveDB( const string& fullPath )
 {
 	DIR * pDBdir = NULL;
-	Logger logger;
 	struct stat st;
 
 	if( stat( fullPath.c_str( ), &st ) == 0 )
@@ -348,8 +360,7 @@ void archiveDB( const string& fullPath )
 		}
 
 		if (link( fullPath.c_str( ), os.str( ).c_str( ) ) != 0) {
-			cout << "Creating link of " <<  fullPath.c_str(  ) <<
-			" to " <<os.str(  ).c_str(  ) << " failed" << endl;
+			LOG_AND_PRINT( "Creating link of " + fullPath + "to " + os.str(  ) + " failed.\n", LOG_ERR );
 			return;
 		}
 		unlink( fullPath.c_str( ) );
@@ -361,7 +372,7 @@ void archiveDB( const string& fullPath )
 			int tot = 0, in = 0, fd = -1;
 			if( buffer == NULL )
 			{
-				cout << "Out of memory." << endl;
+				LOG_AND_PRINT( "Out of memory.", LOG_ERR);
 				goto ZDONE;
 			}
 
@@ -370,8 +381,7 @@ void archiveDB( const string& fullPath )
 			if( fd < 0 )
 			{
 				delete [] buffer;
-				cout << "Failed to open db file " << os.str( ) <<
-					" for reading. " << endl;
+				LOG_AND_PRINT( "Failed to open db file " + os.str( ) + " for reading.\n", LOG_ERR );
 				goto ZDONE;
 			}
 
@@ -387,8 +397,7 @@ void archiveDB( const string& fullPath )
 			if( gzf == NULL )
 			{
 				delete [] buffer;
-				cout << "Error opening archive file " << os.str( ) <<
-					" for writing." << endl;
+				LOG_AND_PRINT( "Error opening archive file " + os.str( ) + " for writing.", LOG_ERR );
 				goto ZDONE;
 			}
 
@@ -402,8 +411,7 @@ void archiveDB( const string& fullPath )
 
 			if( gzclose( gzf ) != 0 )
 			{
-				cout << "Failed to write compressed database, error = '" <<
-					gzerror( gzf, &in ) << "'" << endl;
+				LOG_AND_PRINT( string("Failed to write compressed database, error = '") + gzerror( gzf, &in ) + "'\n", LOG_ERR );
 				goto ZDONE;
 			}
 ZDONE:;
@@ -428,8 +436,7 @@ bool isSpyreDevice(Component* comp)
                deviceStream.close();
 
                if (lsvpd::isSpyreDeviceId(deviceId)) {
-                       Logger l;
-                       l.log("Found Spyre device at: " + id, LOG_NOTICE);
+                       logger.log("Found Spyre device at: " + id, LOG_NOTICE);
                        return true;
                }
        }
@@ -442,11 +449,13 @@ bool isSpyreDevice(Component* comp)
 void extractSpyreData()
 {
        if (spyreDb == NULL) {
+	       logger.log("spyreDB is not initialized\n", LOG_ERR);
                return;
        }
 
        string vpdDbPath = env + "/" + file;
        if (access(vpdDbPath.c_str(), F_OK) != 0) {
+	       logger.log("failed to access vpd database file: " + vpdDbPath, LOG_ERR);
                return;
        }
 
@@ -485,10 +494,12 @@ int __spyreDbInit()
        }
 
        spyreDb = new VpdDbEnv(*spyreDbLock);
-       if (spyreDb == NULL)
+       if (spyreDb == NULL) {
+	       logger.log("Failed instantiate spyre DB\n", LOG_ERR);
                return -1;
-       else
-               return 0;
+	}
+
+       return 0;
 }
 
 /**
@@ -502,57 +513,67 @@ int initializeDB( bool limitSCSI )
 	System * root;
 	int ret;
 
-	if( ensureEnv( env, file ) != 0 )
+	logger.log( "initializeDB() starting", LOG_DEBUG );
+
+	if( ensureEnv( env, file ) != 0 ) {
+		logger.log( "ensureEnv() failed", LOG_ERR );
 		return -1;
+	}
+	logger.log( "Database environment verified", LOG_DEBUG );
 
 	string fullPath = env + "/" + file;
 	string spyreFullPath = env + "/" + SPYRE_DB_FILENAME;
 
 	if (__spyreDbInit() != 0) {
-		Logger l;
-		l.log("Failed to initialize spyre database.", LOG_ERR);
+		logger.log("Failed to initialize spyre database.", LOG_ERR);
 		return -1;
 	}
+	logger.log( "Spyre database initialized", LOG_DEBUG );
 
 	if (access(fullPath.c_str(), F_OK) == 0) {
-		Logger l;
-		l.log("Extracting Spyre data from existing vpd.db", LOG_NOTICE);
+		logger.log("Extracting Spyre data from existing vpd.db", LOG_NOTICE);
 		extractSpyreData();
+		logger.log( "Spyre data extraction completed", LOG_DEBUG );
 	}
 
+	logger.log( "Acquiring database lock", LOG_DEBUG );
 	lock = new VpdDbEnv::UpdateLock(env, file, false);
+
+	logger.log( "Removing old archive databases", LOG_DEBUG );
 	removeOldArchiveDB( );
+
+	logger.log( "Archiving current database", LOG_DEBUG );
 	archiveDB( fullPath );
-	/* The db is now archived so when signal handler runs it should remove
-	 * any db it finds */
 	dblock = lock;
 
+	logger.log( "Creating Gatherer for device collection", LOG_DEBUG );
 	Gatherer info( limitSCSI );
+
+	logger.log( "Initializing VPD database environment", LOG_DEBUG );
 	ret = __lsvpdInit(lock);
 
 	if ( ret != 0 ) {
-		Logger l;
-		l.log( "Could not allocate memory for the VPD database.", LOG_ERR);
+		logger.log( "Could not allocate memory for the VPD database.", LOG_ERR);
 		__spyreDbFini();
 		return ret;
 	}
+	logger.log( "VPD database environment initialized", LOG_DEBUG );
 
+	logger.log( "Gathering component tree from system", LOG_DEBUG );
 	root = info.getComponentTree( );
+	logger.log( "Component tree gathered successfully", LOG_DEBUG );
 
-	/*
-	   coutd << "After Merge: " << endl;
-	   info.diplayInheritanceTree(root);
-	   */
-
+	logger.log( "Storing components to database", LOG_DEBUG );
 	ret = storeComponents( root, *db );
 
-	if( ret != 0 )
-	{
-		Logger l;
-		l.log( "Saving components to database failed.", LOG_ERR );
+	if( ret != 0 ) {
+		logger.log( "Saving components to database failed.", LOG_ERR );
+	} else {
+		logger.log( "Components stored successfully", LOG_DEBUG );
 	}
 
 	delete root;
+	logger.log( "initializeDB() completed", LOG_DEBUG );
 	return ret;
 }
 
@@ -604,7 +625,6 @@ int ensureEnv( const string& env, const string& file )
 {
 	struct stat info;
 	int ret = -1;
-	Logger logger;
 
 	if( stat( env.c_str( ), &info ) == 0 )
 	{
@@ -667,10 +687,12 @@ int __lsvpdInit( VpdDbEnv::UpdateLock *lock )
 	sigaction(SIGTERM, &sigact, NULL);
 
 	db = new VpdDbEnv( *lock );
-	if ( db == NULL )
+	if ( db == NULL ) {
+		logger.log("Failed to instantiate DB\n", LOG_ERR);
 		return -1;
-	else
-		return 0;
+	}
+
+	return 0;
 }
 
 /** __lsvpdFini

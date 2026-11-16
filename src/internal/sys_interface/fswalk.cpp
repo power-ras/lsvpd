@@ -165,8 +165,11 @@ int FSWalk::fs_getDirContents(string path_t, char type,
 	string file_path;
 	struct dirent *dirent = NULL;
 
-	if (!fs_isDir(path_t))
+	if (!fs_isDir(path_t)) {
+		string msg = "directory not found path: " + path_t;
+		l.log(msg, LOG_ERR);
 		return -DIRECTORY_NOT_FOUND;
+	}
 
 	dir = opendir(path_t.c_str());
 	if (dir == NULL) {

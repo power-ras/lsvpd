@@ -46,8 +46,10 @@ namespace lsvpd
 		DIR *dir;
 		struct dirent *entry;
 
-		if ((dir = opendir(path.c_str())) == NULL)
+		if ((dir = opendir(path.c_str())) == NULL) {
+			Logger().log("Failed to open directory: '" + path, LOG_DEBUG);
 			return "";
+		}
 
 		while ((entry = readdir(dir)) != NULL) {
 			if (entry->d_type == DT_DIR) {

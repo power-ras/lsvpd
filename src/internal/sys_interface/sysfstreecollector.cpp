@@ -448,8 +448,12 @@ namespace lsvpd
 					parent->addChild(dev->idNode.getValue());
 				}
 				else {
-					cout << "Error: Failed to find parent: '" << dev->mParent.getValue()
-						<< "' For dev device: '" << dev->sysFsNode.getValue() << "'" << endl;
+					string msg = "Error: Failed to find parent: '" +
+						     dev->mParent.getValue() +
+						     "' For dev device: '" +
+						     dev->sysFsNode.getValue() + "'";
+					cout << msg << endl;
+					Logger().log(msg, LOG_ERR);
 				}
 			}
 
