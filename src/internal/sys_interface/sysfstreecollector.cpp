@@ -1656,9 +1656,13 @@ ERROR:
 			fillMe->mPartNumber.setValue(partNumber, 100, __FILE__, __LINE__);
 		}
 
-		fillMe->mEngChangeLevel.setValue(eeprom11s_sn.substr(10, 1), 100, __FILE__, __LINE__);
-		fillMe->mSerialNumber.setValue(eeprom11s_sn.substr(7), 100, __FILE__, __LINE__);
+		if (eeprom11s_sn.length() > 10) {
+			fillMe->mEngChangeLevel.setValue(eeprom11s_sn.substr(10, 1), 100, __FILE__, __LINE__);
+		}
 
+		if (eeprom11s_sn.length() > 7) {
+			fillMe->mSerialNumber.setValue(eeprom11s_sn.substr(7), 100, __FILE__, __LINE__);
+		}
                 /* Clean up memory mapping */
                 if (munmap(bar0_mem, reg.size) < 0) {
 			l.log("Warning: Failed to unmap BAR0 memory for " + fillMe->getID() +
