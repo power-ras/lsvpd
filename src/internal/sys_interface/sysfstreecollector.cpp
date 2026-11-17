@@ -1351,6 +1351,10 @@ esc_subsystem_info:
 		 *  ----------------------------------------------------------
 		 */
 
+		/* tag(1) + data length(2) */
+		if (size < 3)
+			return 0;
+
 		if (*buf != 0x82)
 			return 0;
 
@@ -1360,11 +1364,9 @@ esc_subsystem_info:
 		 * Name length
 		 */
 		buf++;
-		if (buf >= end)
-			return 0;
 
 		/* Data length is 2 bytes (byte 1 LSB, byte 2 MSB) */
-		len = *buf | (buf[1] << 8);
+		len = (unsigned char)buf[0] | ((unsigned char)buf[1] << 8);
 
 		/* Increment buffer to point to read Product Name */
 		buf += 2;
