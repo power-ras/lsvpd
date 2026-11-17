@@ -1433,6 +1433,7 @@ ERROR:
 		ssize_t len = 0;
 		uint64_t eeprom_data = 0;
 		struct vfio_region_info reg = {0};
+		struct vfio_group_status group_status = {.argsz = sizeof(group_status)};
 		void* bar0_mem = nullptr;
 		unsigned char* bar0_ptr = nullptr;
 		ostringstream ss;
@@ -1440,6 +1441,7 @@ ERROR:
 		uint8_t boot_version = 0;
 		string boot_version_str;
 		string partNumber;
+		string eeprom11s_sn;
 
 		/* Read device ID */
 		path = fillMe->getID() + "/device";
@@ -1475,8 +1477,7 @@ ERROR:
 		}
 		else {
 			l.log("No supported IOMMU type found for " + fillMe->getID(), LOG_ERR);
-			close(container_fd);
-			return;
+			goto out;
 		}
 
 		/* Get IOMMU group */
@@ -1485,16 +1486,14 @@ ERROR:
 		if (len < 0) {
 			l.log("Failed to read IOMMU group symlink " + string(path_buf) + " for " + fillMe->getID() +
 					", errno: " + to_string(errno) + " (" + strerror(errno) + ")", LOG_ERR);
-			close(container_fd);
-			return;
+			goto out;
 		}
 
 		group_path[len] = '\0';
 		group_name = strrchr(group_path, '/');
 		if (!group_name) {
 			l.log("Failed to extract group name from path: " + string(group_path) + " for " + fillMe->getID(), LOG_ERR);
-			close(container_fd);
-			return;
+			goto out;
 		}
 		group_name++;
 
@@ -1553,29 +1552,22 @@ ERROR:
 				}
 			}
 
-			close(group_fd);
-			close(container_fd);
-			return;
+			goto out;
 		}
 
 		/* Check group status */
-		struct vfio_group_status group_status = {.argsz = sizeof(group_status)};
 		if (ioctl(group_fd, VFIO_GROUP_GET_STATUS, &group_status) < 0 ||
 				!(group_status.flags & VFIO_GROUP_FLAGS_VIABLE)) {
 			l.log("Failed to get VFIO group status for " + fillMe->getID() +
 					", errno: " + to_string(errno) + " (" + strerror(errno) + ")", LOG_ERR);
-			close(group_fd);
-			close(container_fd);
-			return;
+			goto out;
 		}
 
 		/* Add group to container */
 		if (ioctl(group_fd, VFIO_GROUP_SET_CONTAINER, &container_fd) < 0) {
 			l.log("Failed to add VFIO group to container for " + fillMe->getID() +
 					", errno: " + to_string(errno) + " (" + strerror(errno) + ")", LOG_ERR);
-			close(group_fd);
-			close(container_fd);
-			return;
+			goto out;
 		}
 		l.log("Successfully added VFIO group to container for " + fillMe->getID(), LOG_DEBUG);
 
@@ -1583,9 +1575,7 @@ ERROR:
 		if (iommu_type != -1 && ioctl(container_fd, VFIO_SET_IOMMU, iommu_type) < 0) {
 			l.log("Failed to set IOMMU type " + to_string(iommu_type) + " for " + fillMe->getID() +
 					", errno: " + to_string(errno) + " (" + strerror(errno) + ")", LOG_ERR);
-			close(group_fd);
-			close(container_fd);
-			return;
+			goto out;
 		}
 
 		l.log("Successfully set IOMMU type for " + fillMe->getID(), LOG_DEBUG);
@@ -1596,9 +1586,7 @@ ERROR:
 		if (device_fd < 0) {
 			l.log("Failed to get device FD for " + fillMe->getID() +
 					", errno: " + to_string(errno) + " (" + strerror(errno) + ")", LOG_ERR);
-			close(group_fd);
-			close(container_fd);
-			return;
+			goto out;
 		}
 
 		l.log("Successfully obtained device FD for " + fillMe->getID(), LOG_DEBUG);
@@ -1611,10 +1599,7 @@ ERROR:
 		if (ioctl(device_fd, VFIO_DEVICE_GET_REGION_INFO, &reg) < 0) {
 			l.log("Failed to get BAR0 region info for " + fillMe->getID() +
 					", errno: " + to_string(errno) + " (" + strerror(errno) + ")", LOG_ERR);
-			close(device_fd);
-			close(group_fd);
-			close(container_fd);
-			return;
+			goto out;
 		}
 
 		/* Map BAR0 */
@@ -1622,10 +1607,7 @@ ERROR:
 		if (bar0_mem == MAP_FAILED) {
 			l.log("Failed to map BAR0 memory for " + fillMe->getID() +
 					", errno: " + to_string(errno) + " (" + strerror(errno) + ")", LOG_ERR);
-			close(device_fd);
-			close(group_fd);
-			close(container_fd);
-			return;
+			goto out;
 		}
 
 		l.log("Successfully mapped BAR0 memory for " + fillMe->getID(), LOG_DEBUG);
@@ -1650,7 +1632,7 @@ ERROR:
 		boot_version = (eeprom_data >> 56) & 0xFF;
 		fillMe->mFirmwareLevel.setValue(to_string(boot_version), 80, __FILE__, __LINE__);
 
-		string eeprom11s_sn = read11S(bar0_ptr);
+		eeprom11s_sn = read11S(bar0_ptr);
 		if (eeprom11s_sn.length() >= 7) {
 			partNumber = eeprom11s_sn.substr(0, 7);
 			fillMe->mPartNumber.setValue(partNumber, 100, __FILE__, __LINE__);
@@ -1671,12 +1653,15 @@ ERROR:
 			l.log("Successfully unmapped BAR0 memory for " + fillMe->getID(), LOG_DEBUG);
 		}
 
-		/* Clean up file descriptors */
-		close(device_fd);
-		close(group_fd);
-		close(container_fd);
-
 		l.log("Successfully completed fillSpyreVpd for " + fillMe->getID(), LOG_INFO);
+
+	out:
+		if (device_fd >= 0)
+			close(device_fd);
+		if (group_fd >= 0)
+			close(group_fd);
+		if (container_fd >= 0)
+			close(container_fd);
 	}
 
 	string SysFSTreeCollector::read11S(unsigned char* bar0_ptr)
