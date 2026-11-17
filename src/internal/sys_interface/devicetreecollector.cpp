@@ -343,8 +343,9 @@ namespace lsvpd
 		unsigned dlen;
 
 		ptr = buf;
-		size = be32toh(*(u32 *)ptr);
-		ptr += sizeof(u32);
+		memcpy(&size, ptr, sizeof(size));
+		size = be32toh(size);
+		ptr += sizeof(size);
 		dataEnd = ptr + size;
 
 		type = *(ptr++);
