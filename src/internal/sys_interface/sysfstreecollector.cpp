@@ -1392,7 +1392,7 @@ esc_subsystem_info:
 			memset( key, '\0', 3 );
 			memset( val, '\0', 256 );
 
-			if( buf + 3 >= end )
+			if( end - buf <= 3 )
 			{
 				goto ERROR;
 			}
@@ -1402,7 +1402,7 @@ esc_subsystem_info:
 			length = buf[ 2 ];
 			buf += 3;
 
-			if( buf + length >= end )
+			if( length == 0 || end - buf < length )
 			{
 				goto ERROR;
 			}
