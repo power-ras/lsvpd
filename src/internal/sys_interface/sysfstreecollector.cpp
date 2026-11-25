@@ -1021,8 +1021,9 @@ esc_subsystem_info:
 			return string("");
 		}
 
-		if (buf2[strlen(buf2) - 1] == '\n')
-			buf2[strlen(buf2) - 1] = '\0';
+		size_t blen = strlen(buf2);
+		if (blen > 0 && buf2[blen - 1] == '\n')
+			buf2[blen - 1] = '\0';
 
 		fclose(fi);
 		// cleanup
