@@ -670,8 +670,10 @@ namespace lsvpd
 			end--;
 
 		tmp = strndup(buf + beg, end - beg);
-		if (!tmp)
+		if (!tmp) {
+			Logger().log("string trip duplication failed: NOMEM");
 			return NULL;
+		}
 
 		result = string(tmp);
 		free(tmp);
@@ -1401,6 +1403,7 @@ int nvme_read_mi_vpd(int device_fd, void *buf)
 		int rc;
 		char vendor[32], model[32], firmware[32];
 		std::vector<int> byteValues;
+		Logger logger;
 
 		if ((fillMe->devBus.getValue()).empty()) {
 			if ((fillMe->getDevClass() == "nvme")) {
@@ -1429,14 +1432,17 @@ int nvme_read_mi_vpd(int device_fd, void *buf)
 			if (rc != 0)
 				return rc;
 
-			if (scsi_template_count == 0)
+			if (scsi_template_count == 0) {
+				logger.log("Failed to load scsi templates", LOG_ERR);
 				return -SCSI_FILL_TEMPLATE_LOADING;
+			}
 		}
 
 		/* Check for scsi devices */
 		if (fillMe->devBus.getValue() == "scsi") {
 			res = ioctl(device_fd, SG_GET_SCSI_ID, &sg_dat);
 			if (res < 0) {
+				logger.log("scsi: ioctl called failed, device_fd: " + to_string(device_fd), LOG_ERR);
 				return -SGUTILS_IOCTL_FAILED;
 			}
 		}
@@ -1518,6 +1524,10 @@ int nvme_read_mi_vpd(int device_fd, void *buf)
 			 * this logical unit, then don't bother proceeding.
 			 */
 			if ((len < 32) || (0x7F == buffer[0])) {
+
+				string msg = "scsi: invalid inquiry data: len=" + to_string(len) +
+					     ", buffer[0]=0x" + to_string(buffer[0]);
+				logger.log(msg, LOG_ERR);
 				return -SG_DATA_INVALID;
 			}
 
@@ -1538,11 +1548,13 @@ int nvme_read_mi_vpd(int device_fd, void *buf)
 							    fillMe->mModel.getValue());
 				/* No template - unknown device */
 				if (devTemplate == NULL) {
+					logger.log("No template found for unknown device", LOG_ERR);
 					return -1;
 				}
 			}
 			else {
 				// Need device manufacturer to query
+				logger.log("Device manufacturer is required to query", LOG_ERR);
 				return -1;
 			}
 			/* Loop through all pages defined by template, grabbing data

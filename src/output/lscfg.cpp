@@ -26,6 +26,7 @@
 #include <libvpd-2/dataitem.hpp>
 #include <libvpd-2/system.hpp>
 #include <libvpd-2/helper_functions.hpp>
+#include <libvpd-2/logger.hpp>
 #include <platformcollector.hpp>
 
 #include <iostream>
@@ -51,6 +52,7 @@
 
 using namespace std;
 using namespace lsvpd;
+static Logger logger("lscfg");
 
 #define MAX_AIX_NAMES 64
 #define IBM_CPU_MODEL_LIST     "/etc/lsvpd/cpu_mod_conv.conf"
@@ -560,6 +562,10 @@ int initCPUModelList(const string& filename)
 	ifstream fin(filename.c_str());
 
 	if (fin.fail()) {
+		int saved_errno = errno;
+		string msg = "lscfg: error opening CPU model conversion file " +
+			     filename + ": " + strerror(saved_errno);
+		logger.log(msg, LOG_ERR);
 		cerr << "Error opening model conversion file at: "
 			<< filename
 			<< ";  Details: lsvpd not installed?" << endl;
@@ -760,14 +766,15 @@ int main( int argc, char** argv )
 		rc = 0;
 	case PF_NULL:	/* Fall through */
 	case PF_ERROR:
-		cout<< argv[0] << " is not supported on the "
-			<< platform << " platform" << endl;
+		logger.log("unsupported platform detected: " + platform, LOG_ERR);
+		cout<< argv[0] << " is not supported on the " << platform << " platform" << endl;
 		return rc;
 	default:
 		;
 	}
 
 	if (geteuid() != 0) {
+		logger.log("must be run as root (euid=" + to_string(geteuid()) + ")", LOG_ERR);
 		cout << "Must be run as root!" << endl;
 		return -1;
 	}
@@ -837,11 +844,16 @@ int main( int argc, char** argv )
 		string env, db;
 		int index;
 
+		if( debug )
+			logger.log("using " + string(compressed ? "compressed " : "") + "DB path: " + path, LOG_INFO);
+
 		if( compressed )
 		{
 			gzFile gzf = gzopen( path.c_str( ), "rb" );
 			if( gzf == NULL )
 			{
+				int saved_errno = errno;
+				logger.log("gzopen failed for " + path + ": " + strerror(saved_errno), LOG_ERR);
 				cout << "Failed to open database archive " << path << endl;
 				return 1;
 			}
@@ -852,9 +864,11 @@ int main( int argc, char** argv )
 				       S_IRGRP | S_IWUSR | S_IRUSR | S_IROTH );
 			if( fd < 0 )
 			{
+				int saved_errno = errno;
 				gzclose( gzf );
-				cout << "Failed to open file for uncompressed database archive"
-					<< endl;
+				logger.log("open failed for decompressed DB " + path +
+					     ": " + strerror(saved_errno), LOG_ERR);
+				cout << "Failed to open file for uncompressed database archive" << endl;
 				return 1;
 			}
 
@@ -875,8 +889,9 @@ int main( int argc, char** argv )
 			if( gzclose( gzf ) != 0 )
 			{
 				int err;
-				cout << "Error reading archive " << path << ".gz: " <<
-					gzerror( gzf, &err ) << endl;
+				const char *gzerr = gzerror( gzf, &err );
+				logger.log("gzclose/read error on " + path + ".gz: " + string(gzerr), LOG_ERR);
+				cout << "Error reading archive " << path << ".gz: " << gzerr << endl;
 				return 1;
 			}
 		}
@@ -891,12 +906,18 @@ int main( int argc, char** argv )
 			env = path.substr( 0, index + 1 );
 		}
 		db = path.substr( index + 1 );
+
+		if( debug )
+			logger.log("opening DB env=" + env + " db=" + db, LOG_INFO);
+
 		try
 		{
 			vpd = new VpdRetriever( env, db );
 		}
 		catch( exception& e )
 		{
+			logger.log("failed to open VPD DB " + path +
+				     ": " + string(e.what()), LOG_ERR);
 			cout << "Unable to process vpd DB " << path << ". Possibly corrupted DB" <<endl;
 			cout << "Please run vpdupdate command, before running lscfg." << endl;
 			return 1;
@@ -904,6 +925,9 @@ int main( int argc, char** argv )
 	}
 	else
 	{
+		if( debug )
+			logger.log("using default VPD DB path", LOG_INFO);
+
 		try
 		{
 			vpd = new VpdRetriever( );
@@ -911,6 +935,7 @@ int main( int argc, char** argv )
 		catch( exception& e )
 		{
 			string prefix( DEST_DIR );
+			logger.log("lscfg: failed to open default VPD DB: " + string(e.what()), LOG_ERR);
 			cout << "Please run " << prefix;
 			if( prefix[ prefix.length( ) - 1 ] != '/' )
 			{
@@ -929,6 +954,7 @@ int main( int argc, char** argv )
 		}
 		catch( VpdException& ve )
 		{
+			logger.log("getComponentTree failed: " + string(ve.what()), LOG_ERR);
 			cout << "Error reading VPD DB: " << ve.what( ) << endl;
 			cout << "Please run vpdupdate command, before running lscfg." << endl;
 			delete vpd;
@@ -940,8 +966,12 @@ int main( int argc, char** argv )
 
 	if( root != NULL )
 	{
+		if( debug )
+			logger.log("component tree loaded successfully", LOG_INFO);
 		printVPD( root );
 		if (!devFound) {
+			if( devName != "" )
+				logger.log("device not found: " + devName, LOG_WARNING);
 			cout << "Device " << devName << " not found." << endl;
 			delete root;
 			return 1;

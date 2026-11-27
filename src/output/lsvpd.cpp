@@ -26,6 +26,7 @@
 #include <libvpd-2/dataitem.hpp>
 #include <libvpd-2/system.hpp>
 #include <libvpd-2/vpdexception.hpp>
+#include <libvpd-2/logger.hpp>
 #include <platformcollector.hpp>
 
 #include <iostream>
@@ -48,6 +49,7 @@
 
 using namespace std;
 using namespace lsvpd;
+static Logger logger("lsvpd");
 
 extern char *optarg;
 extern int optind, opterr, optopt;
@@ -392,6 +394,7 @@ int main( int argc, char** argv )
 		rc = 0;
 	case PF_NULL:	/* Fall through */
 	case PF_ERROR:
+		logger.log("unsupported platform detected: " + platform, LOG_ERR);
 		cout<< "lsvpd is not supported on the " << platform << " platform" << endl;
 		return rc;
 	default:
@@ -413,6 +416,7 @@ int main( int argc, char** argv )
 	};
 
 	if (geteuid() != 0) {
+		logger.log("must be run as root (euid=" + to_string(geteuid()) + ")", LOG_ERR);
 		cout << "Must be run as root!" << endl;
 		return -1;
 	}
@@ -481,11 +485,16 @@ int main( int argc, char** argv )
 		string env, db;
 		int index;
 
+		if( debug )
+			logger.log("using " + string(compressed ? "compressed " : "") + "DB path: " + path, LOG_INFO);
+
 		if( compressed )
 		{
 			gzFile gzf = gzopen( path.c_str( ), "rb" );
 			if( gzf == NULL )
 			{
+				int saved_errno = errno;
+				logger.log("gzopen failed for " + path + ": " + strerror(saved_errno), LOG_ERR);
 				cout << "Failed to open database archive " << path << endl;
 				return 1;
 			}
@@ -496,9 +505,10 @@ int main( int argc, char** argv )
 				       S_IRGRP | S_IWUSR | S_IRUSR | S_IROTH );
 			if( fd < 0 )
 			{
+				int saved_errno = errno;
 				gzclose( gzf );
-				cout << "Failed to open file for uncompressed database archive"
-					<< endl;
+				logger.log("open failed for decompressed DB " + path + ": " + strerror(saved_errno), LOG_ERR);
+				cout << "Failed to open file for uncompressed database archive" << endl;
 				return 1;
 			}
 
@@ -519,8 +529,9 @@ int main( int argc, char** argv )
 			if( gzclose( gzf ) != 0 )
 			{
 				int err;
-				cout << "Error reading archive " << path << ".gz: " <<
-					gzerror( gzf, &err ) << endl;
+				const char *gzerr = gzerror( gzf, &err );
+				logger.log("gzclose/read error on " + path + ".gz: " + string(gzerr), LOG_ERR);
+				cout << "Error reading archive " << path << ".gz: " << gzerr << endl;
 				return 1;
 			}
 		}
@@ -536,19 +547,26 @@ int main( int argc, char** argv )
 		}
 		db = path.substr( index + 1 );
 
+		if( debug )
+			logger.log("opening DB env=" + env + " db=" + db, LOG_INFO);
+
 		try
 		{
 			vpd = new VpdRetriever( env, db );
 		}
 		catch( exception& e )
 		{
-			cout << "Unable to process vpd DB " << path << ". Possibly corrupted DB" <<endl;
+			logger.log("failed to open VPD DB " + path + ": " + string(e.what()), LOG_ERR);
+			cout << "Unable to process vpd DB " << path << ". Possibly corrupted DB" << endl;
 			cout << "Please run vpdupdate command, before running lsvpd." << endl;
 			return 1;
 		}
 	}
 	else
 	{
+		if( debug )
+			logger.log("using default VPD DB path", LOG_INFO);
+
 		try
 		{
 			vpd = new VpdRetriever( );
@@ -556,6 +574,7 @@ int main( int argc, char** argv )
 		catch( exception& e )
 		{
 			string prefix( DEST_DIR );
+			logger.log("failed to open default VPD DB: " + string(e.what()), LOG_ERR);
 			cout << "Please run " << prefix;
 			if( prefix[ prefix.length( ) - 1 ] != '/' )
 			{
@@ -575,6 +594,7 @@ int main( int argc, char** argv )
 		catch( VpdException& ve )
 		{
 			const char *expection = "Failed to fetch VPD DB, it may be corrupt";
+			logger.log("getComponentTree failed: " + string(ve.what()), LOG_ERR);
 			cout << "Error reading VPD DB: " << ve.what( ) << endl;
 			if (strncmp(expection, ve.what(),strlen(expection)) == 0) {
 				string prefix( DEST_DIR );
@@ -594,6 +614,8 @@ int main( int argc, char** argv )
 
 	if( root != NULL )
 	{
+		if( debug )
+			logger.log("component tree loaded successfully", LOG_INFO);
 		printVPD( root );
 		delete root;
 	}
@@ -602,6 +624,7 @@ int main( int argc, char** argv )
 	{
 		unlink( path.c_str( ) );
 	}
+
 
 	return 0;
 }
